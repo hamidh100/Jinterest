@@ -24,7 +24,10 @@ public class Album {
     /* getter setter end */
 
     public int totalLikes(){
-        // TODO
-        return 0;
+        int totalLikes = 0;
+        for (Photo photo : photos){
+            totalLikes += photo.getLikedCount();
+        }
+        return totalLikes;
     }
 }
