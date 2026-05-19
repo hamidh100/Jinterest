@@ -1,12 +1,15 @@
 import java.util.List;
+import java.util.UUID;
 
 public class Album {
     private User owner;
     private List<Photo> photos;
+    private UUID uuid;
 
     public Album(User owner, List<Photo> photos){
         this.owner = owner;
         this.photos = photos;
+        uuid = null; // TODO
     }
     
     /* getter setter begin */
@@ -22,13 +25,8 @@ public class Album {
     public void setOwner(User owner) {
         this.owner = owner;
     }
-    /* getter setter end */
-
-    public int totalLikes(){
-        int totalLikes = 0;
-        for (Photo photo : photos){
-            totalLikes += photo.getLikedCount();
-        }
-        return totalLikes;
+    public UUID getUuid() {
+        return uuid;
     }
+    /* getter setter end */
 }

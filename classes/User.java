@@ -35,7 +35,6 @@ public class User {
         photos.add(photo);
         photosCount++;
     }
-// .
 
 
     /* getter setter begin */
