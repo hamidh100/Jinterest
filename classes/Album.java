@@ -3,6 +3,7 @@ import java.util.List;
 public class Album {
     private User owner;
     private List<Photo> photos;
+
     public Album(User owner, List<Photo> photos){
         this.owner = owner;
         this.photos = photos;
