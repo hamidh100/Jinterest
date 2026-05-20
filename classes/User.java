@@ -80,4 +80,24 @@ public class User {
         return uuid;
     }
     /* getter setter end */
+
+    @Override
+    public int hashCode(){ // TODO
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((username == null) ? 0 : username.hashCode());
+        result = prime * result + ((password == null) ? 0 : password.hashCode());
+        result = prime * result + ((fullname == null) ? 0 : fullname.hashCode());
+        result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+        result = prime * result + ((albums == null) ? 0 : albums.hashCode());
+        result = prime * result + ((photos == null) ? 0 : photos.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj){
+        if (obj == null) return false;
+        User other = (User)obj;
+        return uuid.equals(other.uuid);
+    }
 }

@@ -38,4 +38,21 @@ public class Like {
         this.uuid = uuid;
     }    
     /* getter setter end */
+
+    @Override
+    public int hashCode(){ // TODO
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((user == null) ? 0 : user.hashCode());
+        result = prime * result + ((time == null) ? 0 : time.hashCode());
+        result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj){
+        if (obj == null) return false;
+        Like other = (Like)obj;
+        return uuid.equals(other.uuid);
+    }
 }

@@ -38,4 +38,22 @@ public class Photo {
         return uuid;
     }
     /* getter setter end */
+
+    @Override
+    public int hashCode(){ // TODO
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((owner == null) ? 0 : owner.hashCode());
+        result = prime * result + ((likedBy == null) ? 0 : likedBy.hashCode());
+        result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+        result = prime * result + ((path == null) ? 0 : path.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj){
+        if (obj == null) return false;
+        Photo other = (Photo)obj;
+        return uuid.equals(other.uuid);
+    }
 }
