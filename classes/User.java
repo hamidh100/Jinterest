@@ -19,6 +19,7 @@ public class User {
     public User(String username, String password) throws InvalidUsername, WeakPassword {
         setUsername(username);
         setPassword(password);
+        fullname = "";
         uuid = UUID.randomUUID();
     }
 

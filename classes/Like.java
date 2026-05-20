@@ -6,11 +6,16 @@ public class Like {
     private LocalDateTime time; // not visible publicly, but admins can see
     private UUID uuid;
 
+    public Like(User user){
+        this.user = user;
+        time = LocalDateTime.now(); // ?
+        uuid = UUID.randomUUID();
+    }
+
     public Like(User user, LocalDateTime time){
         this.user = user;
         this.time = time;
         uuid = UUID.randomUUID();
-        time = LocalDateTime.now(); // ?
     }
 
     /* getter setter begin */
