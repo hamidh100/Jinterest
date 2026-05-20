@@ -9,9 +9,6 @@ public class User {
     private LinkedList<Album> albums = new LinkedList<>();
     private LinkedList<Photo> photos = new LinkedList<>();
 
-    private int albumsCount;
-    private int photosCount;
-
     /* Patters for verification*/
     private static final String EMAIL_PATTERN = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
     private static final String PASSWORD_PATTERN = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$";
@@ -29,15 +26,7 @@ public class User {
         this.fullname = fullname;
     }
 
-    public void addAlbum(Album album) {
-        albums.add(album);
-        albumsCount++;
-    }
-
-    public void addPhoto(Photo photo){
-        photos.add(photo);
-        photosCount++;
-    }
+    
 
 
     /* getter setter begin */
@@ -56,14 +45,6 @@ public class User {
 
     public void setPhotos(LinkedList<Photo> photos) {
         this.photos = photos;
-    }
-
-    public int getAlbumsCount() {
-        return albumsCount;
-    }
-
-    public int getPhotosCount() {
-        return photosCount;
     }
 
     public String getUsername() {

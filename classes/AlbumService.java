@@ -6,4 +6,7 @@ public class AlbumService {
         }
         return totalLikes;
     }
+    public static void addAlbum(User user, Album album) {
+        user.getAlbums().add(album);
+    }
 }

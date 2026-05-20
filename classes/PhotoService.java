@@ -14,4 +14,7 @@ public class PhotoService {
         if (!isLikedBy(photo, user)) return;
         photo.getLikedBy().remove(user);
     }
+    public static void addPhoto(User user, Photo photo){
+        user.getPhotos().add(photo);
+    }
 }
