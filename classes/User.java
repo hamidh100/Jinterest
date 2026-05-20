@@ -1,4 +1,5 @@
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.List;
 
 import exceptions.InvalidUsername;
 import exceptions.WeakPassword;
@@ -6,8 +7,8 @@ import exceptions.WeakPassword;
 public class User {
     private String username, password, fullname;
 
-    private LinkedList<Album> albums = new LinkedList<>();
-    private LinkedList<Photo> photos = new LinkedList<>();
+    private List<Album> albums = new ArrayList<Album>();
+    private List<Photo> photos = new ArrayList<Photo>();
 
     /* Patters for verification*/
     private static final String EMAIL_PATTERN = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
@@ -31,19 +32,19 @@ public class User {
 
     /* getter setter begin */
 
-    public LinkedList<Album> getAlbums() {
+    public List<Album> getAlbums() {
         return albums;
     }
 
-    public void setAlbums(LinkedList<Album> albums) {
+    public void setAlbums(List<Album> albums) {
         this.albums = albums;
     }
 
-    public LinkedList<Photo> getPhotos() {
+    public List<Photo> getPhotos() {
         return photos;
     }
 
-    public void setPhotos(LinkedList<Photo> photos) {
+    public void setPhotos(List<Photo> photos) {
         this.photos = photos;
     }
 
