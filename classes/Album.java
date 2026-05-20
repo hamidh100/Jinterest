@@ -41,7 +41,7 @@ public class Album {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(Object obj){
         if (obj == null) return false;
         Album other = (Album)obj;
         return uuid.equals(other.uuid);
