@@ -2,10 +2,12 @@
 
 
 TODO:\
-equal and hashs (override)\
+map for uuid to objects (where?)\
 categories for photos\
-save\
+save photo or album\
+times\
 suggest\
+comment\
 follow\
 user type: normal admin\
-unique id for photo
+login
