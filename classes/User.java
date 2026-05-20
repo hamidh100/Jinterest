@@ -1,5 +1,8 @@
 import java.util.LinkedList;
 
+import exceptions.InvalidUsername;
+import exceptions.WeakPassword;
+
 public class User {
     private String username, password, fullname;
 
@@ -15,12 +18,12 @@ public class User {
     private static final String PHONENUMBER_PATTERN = "^(0|\\+\\d{2})?9\\d{9}$";
 
 
-    public User(String username, String password) {
+    public User(String username, String password) throws InvalidUsername, WeakPassword {
         setUsername(username);
         setPassword(password);
     }
 
-    public User(String username, String password, String fullname) {
+    public User(String username, String password, String fullname) throws InvalidUsername, WeakPassword {
         setUsername(username);
         setPassword(password);
         this.fullname = fullname;
@@ -67,22 +70,22 @@ public class User {
         return username;
     }
 
-    public void setUsername(String username) {
+    public void setUsername(String username) throws InvalidUsername {
         if (username.matches(EMAIL_PATTERN) || username.matches(PHONENUMBER_PATTERN))
             this.username = username;
         else
-            throw new IllegalArgumentException("Username must be a valid email or phone number");
+            throw new exceptions.InvalidUsername();
     }
 
     public String getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(String password) throws WeakPassword {
         if (password.matches(PASSWORD_PATTERN))
             this.password = password;
         else
-            throw new IllegalArgumentException("Password must be at least 8 characters and include uppercase, lowercase and digits");
+            throw new exceptions.WeakPassword();
     }
 
     public String getFullname() {
