@@ -10,7 +10,7 @@ public class Photo {
     public Photo(User owner, String path){
         this.owner = owner;
         this.path = path; // ?
-        this.uuid = null; // TODO
+        this.uuid = UUID.randomUUID();
         likedBy = new ArrayList<User>();
     }
 

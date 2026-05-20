@@ -1,12 +1,13 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import exceptions.InvalidUsername;
 import exceptions.WeakPassword;
 
 public class User {
     private String username, password, fullname;
-
+    private UUID uuid;
     private List<Album> albums = new ArrayList<Album>();
     private List<Photo> photos = new ArrayList<Photo>();
 
@@ -15,23 +16,20 @@ public class User {
     private static final String PASSWORD_PATTERN = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$";
     private static final String PHONENUMBER_PATTERN = "^(0|\\+\\d{2})?9\\d{9}$";
 
-
     public User(String username, String password) throws InvalidUsername, WeakPassword {
         setUsername(username);
         setPassword(password);
+        uuid = UUID.randomUUID();
     }
 
     public User(String username, String password, String fullname) throws InvalidUsername, WeakPassword {
         setUsername(username);
         setPassword(password);
         this.fullname = fullname;
+        uuid = UUID.randomUUID();
     }
 
-    
-
-
     /* getter setter begin */
-
     public List<Album> getAlbums() {
         return albums;
     }
@@ -76,6 +74,10 @@ public class User {
 
     public void setFullname(String fullname) {
         this.fullname = fullname;
+    }
+
+    public UUID getUuid() {
+        return uuid;
     }
     /* getter setter end */
 }
