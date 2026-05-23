@@ -6,7 +6,7 @@ public class Photo {
     private User owner;
     private List<User> likedBy;
     private UUID uuid;
-    private String path; // ?
+    private String path; // db???
     public Photo(User owner, String path){
         this.owner = owner;
         this.path = path; // ?

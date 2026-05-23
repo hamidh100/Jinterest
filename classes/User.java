@@ -1,4 +1,5 @@
 import java.sql.ClientInfoStatus;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -9,6 +10,7 @@ import exceptions.WeakPassword;
 public class User {
     private String username, password, fullname;
     private UUID uuid;
+    private LocalDateTime accountAge;
     private List<Album> albums = new ArrayList<Album>();
     private List<Photo> photos = new ArrayList<Photo>();
     private List<User> followers = new ArrayList<>();
@@ -24,6 +26,7 @@ public class User {
         setPassword(password);
         fullname = "";
         uuid = UUID.randomUUID();
+        accountAge = LocalDateTime.now();
     }
 
     public User(String username, String password, String fullname) throws InvalidUsername, WeakPassword {
@@ -31,9 +34,19 @@ public class User {
         setPassword(password);
         this.fullname = fullname;
         uuid = UUID.randomUUID();
+        accountAge = LocalDateTime.now();
     }
 
     /* getter setter begin */
+
+    public LocalDateTime getAccountAge() {
+        return accountAge;
+    }
+
+    public void setAccountAge(LocalDateTime accountAge) {
+        this.accountAge = accountAge;
+    }
+
     public List<User> getFollowers() {
         return followers;
     }
