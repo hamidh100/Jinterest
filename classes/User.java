@@ -12,9 +12,7 @@ public class User {
     private List<Album> albums = new ArrayList<Album>();
     private List<Photo> photos = new ArrayList<Photo>();
     private List<User> followers = new ArrayList<>();
-    private int followersCount;
     private List<User> following = new ArrayList<>();/* we have to show posts from followings to user on top of the home page */
-    private int followingCount;
 
     /* Patters for verification*/
     private static final String EMAIL_PATTERN = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
@@ -36,7 +34,6 @@ public class User {
     }
 
     /* getter setter begin */
-
     public List<User> getFollowers() {
         return followers;
     }
