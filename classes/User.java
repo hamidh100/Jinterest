@@ -10,7 +10,7 @@ import exceptions.WeakPassword;
 
 public class User {
     private String username, password, fullname;
-    private UUID uuid;
+    private final UUID uuid;
     private LocalDateTime accountAge;
     private List<Album> albums = new ArrayList<Album>();
     private List<Photo> photos = new ArrayList<Photo>();

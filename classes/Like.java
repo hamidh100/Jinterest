@@ -5,7 +5,7 @@ import java.util.UUID;
 public class Like {
     private User user;
     private LocalDateTime time; // not visible publicly, but admins can see
-    private UUID uuid;
+    private final UUID uuid;
 
     public Like(User user){
         this.user = user;
@@ -39,10 +39,6 @@ public class Like {
     public UUID getUuid(){
         return uuid;
     }
-
-    public void setUuid(UUID uuid){
-        this.uuid = uuid;
-    }    
     /* getter setter end */
 
     @Override

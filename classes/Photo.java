@@ -6,7 +6,7 @@ import java.util.UUID;
 public class Photo {
     private User owner;
     private List<User> likedBy;
-    private UUID uuid;
+    private final UUID uuid;
     private String path; // db???
     public Photo(User owner, String path){
         this.owner = owner;

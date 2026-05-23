@@ -5,7 +5,7 @@ import java.util.UUID;
 public class Album {
     private User owner;
     private List<Photo> photos;
-    private UUID uuid;
+    private final UUID uuid;
 
     public Album(User owner, List<Photo> photos){
         this.owner = owner;
@@ -28,10 +28,6 @@ public class Album {
     }
     public UUID getUuid() {
         return uuid;
-    }
-
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
     }
     /* getter setter end */
 
