@@ -5,7 +5,7 @@ TODO:\
 map for uuid to objects (where?)\
 categories for photos\
 save photo or album\
-times\ 
+times\
 suggest\
 comment\
 user type: normal admin\
