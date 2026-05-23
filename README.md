@@ -10,4 +10,5 @@ suggest\
 comment\
 follow\
 user type: normal admin\
-login
+login\
+test (Unit tests, etc.)
