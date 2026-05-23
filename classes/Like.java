@@ -46,15 +46,13 @@ public class Like {
     /* getter setter end */
 
     @Override
-    public int hashCode() {
-        return Objects.hashCode(uuid);
+    public boolean equals(Object o) {
+        if (!(o instanceof Like like)) return false;
+        return Objects.equals(uuid, like.uuid);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof Like)) return false;
-        Like other = (Like) obj;
-        return Objects.equals(uuid, other.uuid);
+    public int hashCode() {
+        return Objects.hashCode(uuid);
     }
 }

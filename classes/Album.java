@@ -29,6 +29,10 @@ public class Album {
     public UUID getUuid() {
         return uuid;
     }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
     /* getter setter end */
 
     @Override
@@ -39,8 +43,7 @@ public class Album {
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (!(obj instanceof Album)) return false;
-        Album other = (Album) obj;
+        if (!(obj instanceof Album other)) return false;
         return Objects.equals(uuid, other.uuid);
     }
 }

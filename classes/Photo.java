@@ -48,8 +48,7 @@ public class Photo {
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (!(obj instanceof Photo)) return false;
-        Photo other = (Photo) obj;
+        if (!(obj instanceof Photo other)) return false;
         return Objects.equals(uuid, other.uuid);
     }
 }
