@@ -2,6 +2,7 @@ import java.sql.ClientInfoStatus;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import exceptions.InvalidUsername;
@@ -115,22 +116,13 @@ public class User {
     /* getter setter end */
 
     @Override
-    public int hashCode(){ // TODO
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((username == null) ? 0 : username.hashCode());
-        result = prime * result + ((password == null) ? 0 : password.hashCode());
-        result = prime * result + ((fullname == null) ? 0 : fullname.hashCode());
-        result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
-        result = prime * result + ((albums == null) ? 0 : albums.hashCode());
-        result = prime * result + ((photos == null) ? 0 : photos.hashCode());
-        return result;
+    public boolean equals(Object o) {
+        if (!(o instanceof User user)) return false;
+        return Objects.equals(uuid, user.uuid);
     }
 
     @Override
-    public boolean equals(Object obj){
-        if (obj == null) return false;
-        User other = (User)obj;
-        return uuid.equals(other.uuid);
+    public int hashCode() {
+        return Objects.hashCode(uuid);
     }
 }

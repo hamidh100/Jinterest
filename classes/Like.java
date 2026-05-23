@@ -1,4 +1,5 @@
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Like {
@@ -45,19 +46,15 @@ public class Like {
     /* getter setter end */
 
     @Override
-    public int hashCode(){ // TODO
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((user == null) ? 0 : user.hashCode());
-        result = prime * result + ((time == null) ? 0 : time.hashCode());
-        result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
-        return result;
+    public int hashCode() {
+        return Objects.hashCode(uuid);
     }
 
     @Override
-    public boolean equals(Object obj){
-        if (obj == null) return false;
-        Like other = (Like)obj;
-        return uuid.equals(other.uuid);
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Like)) return false;
+        Like other = (Like) obj;
+        return Objects.equals(uuid, other.uuid);
     }
 }

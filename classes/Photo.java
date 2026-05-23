@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Photo {
@@ -40,20 +41,15 @@ public class Photo {
     /* getter setter end */
 
     @Override
-    public int hashCode(){ // TODO
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((owner == null) ? 0 : owner.hashCode());
-        result = prime * result + ((likedBy == null) ? 0 : likedBy.hashCode());
-        result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
-        result = prime * result + ((path == null) ? 0 : path.hashCode());
-        return result;
+    public int hashCode() {
+        return Objects.hashCode(uuid);
     }
 
     @Override
-    public boolean equals(Object obj){
-        if (obj == null) return false;
-        Photo other = (Photo)obj;
-        return uuid.equals(other.uuid);
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Photo)) return false;
+        Photo other = (Photo) obj;
+        return Objects.equals(uuid, other.uuid);
     }
 }

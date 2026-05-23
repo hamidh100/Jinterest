@@ -1,4 +1,5 @@
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Album {
@@ -31,19 +32,15 @@ public class Album {
     /* getter setter end */
 
     @Override
-    public int hashCode(){ // TODO
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((owner == null) ? 0 : owner.hashCode());
-        result = prime * result + ((photos == null) ? 0 : photos.hashCode());
-        result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
-        return result;
+    public int hashCode() {
+        return Objects.hashCode(uuid);
     }
 
     @Override
-    public boolean equals(Object obj){
-        if (obj == null) return false;
-        Album other = (Album)obj;
-        return uuid.equals(other.uuid);
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Album)) return false;
+        Album other = (Album) obj;
+        return Objects.equals(uuid, other.uuid);
     }
 }
