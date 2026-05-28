@@ -2,7 +2,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class Objects {
+public class OurObjects {
     // is hashmap ok?
     public static Map<UUID, User> users = new HashMap<>();
     public static Map<UUID, Photo> photos = new HashMap<>();
