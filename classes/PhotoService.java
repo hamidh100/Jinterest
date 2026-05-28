@@ -15,7 +15,7 @@ public class PhotoService {
         photo.getLikeIDs().add(like.getUuid());
     }
     public static void removeLike(Photo photo, Like like){
-        if (isLikedBy(photo, OurObjects.users.get(like.getUserID()))) return;
+        if (!isLikedBy(photo, OurObjects.users.get(like.getUserID()))) return;
         photo.getLikeIDs().remove(like.getUuid());
     }
     public static void addPhoto(User user, Photo photo){
