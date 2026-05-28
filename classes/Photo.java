@@ -12,6 +12,7 @@ public class Photo {
         this.owner = owner;
         this.path = path; // ?
         this.uuid = UUID.randomUUID();
+        OurObjects.photos.put(uuid, this);
         likedBy = new ArrayList<User>();
     }
 

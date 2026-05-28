@@ -27,6 +27,7 @@ public class User {
         setPassword(password);
         fullname = "";
         uuid = UUID.randomUUID();
+        OurObjects.users.put(uuid, this);
         accountAge = LocalDateTime.now();
     }
 
@@ -35,6 +36,7 @@ public class User {
         setPassword(password);
         this.fullname = fullname;
         uuid = UUID.randomUUID();
+        OurObjects.users.put(uuid, this);
         accountAge = LocalDateTime.now();
     }
 

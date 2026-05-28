@@ -11,6 +11,7 @@ public class Album {
         this.owner = owner;
         this.photos = photos;
         uuid = UUID.randomUUID();
+        OurObjects.albums.put(uuid, this);
     }
     
     /* getter setter begin */

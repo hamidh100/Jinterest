@@ -11,12 +11,14 @@ public class Like {
         this.user = user;
         time = LocalDateTime.now(); // ?
         uuid = UUID.randomUUID();
+        OurObjects.likes.put(uuid, this);
     }
 
     public Like(User user, LocalDateTime time){
         this.user = user;
         this.time = time;
         uuid = UUID.randomUUID();
+        OurObjects.likes.put(uuid, this);
     }
 
     /* getter setter begin */
