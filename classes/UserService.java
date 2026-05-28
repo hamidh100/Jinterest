@@ -26,4 +26,12 @@ public class UserService {
     public static int followingCount(User user) {
         return user.getFollowingIDs().size();
     }
+
+    public static void signup(User user){ // user as input? add to map after signup
+
+    }
+
+    public static void login(User user){ // with throws
+
+    }
 }
