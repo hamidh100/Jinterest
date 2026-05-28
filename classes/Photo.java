@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public class Photo {
     private UUID ownerID;
-    private List<UUID> likedByID;
+    private List<UUID> likeIDs;
     private final UUID uuid;
     private String path; // db???
     public Photo(UUID ownerID, String path){
@@ -13,7 +13,7 @@ public class Photo {
         this.path = path; // ?
         this.uuid = UUID.randomUUID();
         OurObjects.photos.put(uuid, this);
-        likedByID = new ArrayList<UUID>();
+        likeIDs = new ArrayList<UUID>();
     }
     
     /* getter setter begin */
@@ -23,11 +23,11 @@ public class Photo {
     public void setOwnerID(UUID ownerID) {
         this.ownerID = ownerID;
     }
-    public List<UUID> getLikedByID() {
-        return likedByID;
+    public List<UUID> getLikeIDs() {
+        return likeIDs;
     }
-    public void setLikedByID(List<UUID> likedByID) {
-        this.likedByID = likedByID;
+    public void setLikeIDs(List<UUID> likeIDs) {
+        this.likeIDs = likeIDs;
     }
     public String getPath() {
         return path;
