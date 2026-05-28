@@ -11,10 +11,10 @@ public class User {
     private String username, password, fullname;
     private final UUID uuid;
     private LocalDateTime accountAge;
-    private List<Album> albums = new ArrayList<Album>();
-    private List<Photo> photos = new ArrayList<Photo>();
-    private List<User> followers = new ArrayList<>();
-    private List<User> following = new ArrayList<>();/* we have to show posts from followings to user on top of the home page */
+    private List<UUID> albumIDs = new ArrayList<UUID>();
+    private List<UUID> photoIDs = new ArrayList<UUID>();
+    private List<UUID> followerIDs = new ArrayList<UUID>();
+    private List<UUID> followingIDs = new ArrayList<UUID>();/* we have to show posts from followings to user on top of the home page */
 
     /* Patters for verification*/
     private static final String EMAIL_PATTERN = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
@@ -29,7 +29,7 @@ public class User {
         OurObjects.users.put(uuid, this);
         accountAge = LocalDateTime.now();
     }
-
+    
     public User(String username, String password, String fullname) throws InvalidUsername, WeakPassword {
         setUsername(username);
         setPassword(password);
@@ -38,9 +38,9 @@ public class User {
         OurObjects.users.put(uuid, this);
         accountAge = LocalDateTime.now();
     }
-
+    
     /* getter setter begin */
-
+    
     public LocalDateTime getAccountAge() {
         return accountAge;
     }
@@ -49,38 +49,38 @@ public class User {
         this.accountAge = accountAge;
     }
 
-    public List<User> getFollowers() {
-        return followers;
+    public List<UUID> getAlbumIDs() {
+        return albumIDs;
     }
 
-    public void setFollowers(List<User> followers) {
-        this.followers = followers;
+    public void setAlbumIDs(List<UUID> albumIDs) {
+        this.albumIDs = albumIDs;
     }
 
-    public List<User> getFollowing() {
-        return following;
+    public List<UUID> getPhotoIDs() {
+        return photoIDs;
     }
 
-    public void setFollowing(List<User> following) {
-        this.following = following;
+    public void setPhotoIDs(List<UUID> photoIDs) {
+        this.photoIDs = photoIDs;
     }
 
-    public List<Album> getAlbums() {
-        return albums;
+    public List<UUID> getFollowerIDs() {
+        return followerIDs;
     }
 
-    public void setAlbums(List<Album> albums) {
-        this.albums = albums;
+    public void setFollowerIDs(List<UUID> followerIDs) {
+        this.followerIDs = followerIDs;
     }
 
-    public List<Photo> getPhotos() {
-        return photos;
+    public List<UUID> getFollowingIDs() {
+        return followingIDs;
     }
 
-    public void setPhotos(List<Photo> photos) {
-        this.photos = photos;
+    public void setFollowingIDs(List<UUID> followingIDs) {
+        this.followingIDs = followingIDs;
     }
-
+    
     public String getUsername() {
         return username;
     }
