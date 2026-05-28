@@ -4,31 +4,30 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class Photo {
-    private User owner;
-    private List<User> likedBy;
+    private UUID ownerID;
+    private List<UUID> likedByID;
     private final UUID uuid;
     private String path; // db???
-    public Photo(User owner, String path){
-        this.owner = owner;
+    public Photo(UUID ownerID, String path){
+        this.ownerID = ownerID;
         this.path = path; // ?
         this.uuid = UUID.randomUUID();
         OurObjects.photos.put(uuid, this);
-        likedBy = new ArrayList<User>();
+        likedByID = new ArrayList<UUID>();
     }
-
-
+    
     /* getter setter begin */
-    public List<User> getLikedBy() {
-        return likedBy;
+    public UUID getOwnerID() {
+        return ownerID;
     }
-    public void setLikedBy(List<User> likedBy) {
-        this.likedBy = likedBy;
+    public void setOwnerID(UUID ownerID) {
+        this.ownerID = ownerID;
     }
-    public User getOwner() {
-        return owner;
+    public List<UUID> getLikedByID() {
+        return likedByID;
     }
-    public void setOwner(User owner) {
-        this.owner = owner;
+    public void setLikedByID(List<UUID> likedByID) {
+        this.likedByID = likedByID;
     }
     public String getPath() {
         return path;

@@ -5,7 +5,7 @@ public class AlbumService {
         int totalLikes = 0;
         for (UUID photoID : album.getPhotoIDs()){
             Photo photo = OurObjects.photos.get(photoID);
-            totalLikes += (photo.getLikedBy() == null ? 0 : photo.getLikedBy().size());
+            totalLikes += (photo.getLikedByID() == null ? 0 : photo.getLikedByID().size());
         }
         return totalLikes;
     }
