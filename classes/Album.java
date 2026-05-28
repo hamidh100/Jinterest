@@ -3,29 +3,29 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class Album {
-    private User owner;
-    private List<Photo> photos;
+    private UUID ownerID;
+    private List<UUID> photoIDs;
     private final UUID uuid;
 
-    public Album(User owner, List<Photo> photos){
-        this.owner = owner;
-        this.photos = photos;
+    public Album(UUID ownerID, List<UUID> photoIDs){
+        this.ownerID = ownerID;
+        this.photoIDs = photoIDs;
         uuid = UUID.randomUUID();
         OurObjects.albums.put(uuid, this);
     }
     
     /* getter setter begin */
-    public List<Photo> getPhotos() {
-        return photos;
+    public UUID getOwnerID() {
+        return ownerID;
     }
-    public void setPhotos(List<Photo> photos) {
-        this.photos = photos;
+    public void setOwnerID(UUID ownerID) {
+        this.ownerID = ownerID;
     }
-    public User getOwner() {
-        return owner;
+    public List<UUID> getPhotoIDs() {
+        return photoIDs;
     }
-    public void setOwner(User owner) {
-        this.owner = owner;
+    public void setPhotoIDs(List<UUID> photoIDs) {
+        this.photoIDs = photoIDs;
     }
     public UUID getUuid() {
         return uuid;
