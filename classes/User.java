@@ -20,6 +20,7 @@ public class User {
     private static final String EMAIL_PATTERN = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
     private static final String PASSWORD_PATTERN = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$";
     private static final String PHONENUMBER_PATTERN = "^(0|\\+\\d{2})?9\\d{9}$";
+    private static final String USERNAME_PATTERN = "^[a-zA-Z0-9][a-zA-Z0-9_]+[a-zA-Z0-9]$";
 
     public User(String username, String password) throws InvalidUsername, WeakPassword {
         setUsername(username);
@@ -86,10 +87,10 @@ public class User {
     }
 
     public void setUsername(String username) throws InvalidUsername {
-        if (username.matches(EMAIL_PATTERN) || username.matches(PHONENUMBER_PATTERN))
-            this.username = username;
-        else
-            throw new exceptions.InvalidUsername();
+        if (username == null || username.length() < 3) throw new exceptions.InvalidUsername(exceptions.InvalidUsernameTypes.TOOSHORT);
+        if (username.length() > 20) throw new exceptions.InvalidUsername(exceptions.InvalidUsernameTypes.TOOLONG);
+        if (!username.matches(USERNAME_PATTERN)) throw new exceptions.InvalidUsername(exceptions.InvalidUsernameTypes.PATTERNMISMATCH);
+        this.username = username;
     }
 
     public String getPassword() {
