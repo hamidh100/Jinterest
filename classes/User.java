@@ -39,6 +39,15 @@ public class User {
         OurObjects.users.put(uuid, this);
         accountAge = LocalDateTime.now();
     }
+
+    public User(String username, String password, String fullname, UUID uuid, LocalDateTime accountAge) { // made after original user
+        this.username = username;
+        this.password = password;
+        this.fullname = fullname;
+        this.uuid = uuid;
+        OurObjects.usersLowercase.put(uuid, this); // for uniqueness (idk20 = iDK20)
+        this.accountAge = accountAge;
+    }
     
     /* getter setter begin */
     
