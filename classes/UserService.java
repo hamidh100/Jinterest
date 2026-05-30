@@ -1,3 +1,6 @@
+import exceptions.InvalidUsername;
+import exceptions.WeakPassword;
+
 public class UserService {
     public static void follow(User follower, User followed) {
         if (follower == null || followed == null) return;
@@ -27,8 +30,23 @@ public class UserService {
         return user.getFollowingIDs().size();
     }
 
-    public static void signup(User user){ // user as input? add to map after signup
+    public void checkUsername(String username) throws InvalidUsername {
+        if (username == null || username.length() < 3) throw new exceptions.InvalidUsername(exceptions.InvalidUsernameTypes.TOOSHORT);
+        if (username.length() > 20) throw new exceptions.InvalidUsername(exceptions.InvalidUsernameTypes.TOOLONG);
+        if (!username.matches(User.USERNAME_PATTERN)) throw new exceptions.InvalidUsername(exceptions.InvalidUsernameTypes.PATTERNMISMATCH);
+    }
 
+    public void checkPassword(User user) throws WeakPassword {
+        String username = user.getUsername();
+        String password = user.getPassword();
+        if (password.matches(User.PASSWORD_PATTERN))
+            user.setPassword(password);
+        else
+            throw new exceptions.WeakPassword();
+    }
+
+    public static void signup(User user){ // user as input? add to map after signup
+        
     }
 
     public static void login(User user){ // with throws

@@ -114,7 +114,7 @@ public class User {
         return username;
     }
 
-    public void setUsername(String username) throws InvalidUsername {
+    public void setUsername(String username) {
         this.username = username;
     }
 
@@ -122,11 +122,8 @@ public class User {
         return password;
     }
 
-    public void setPassword(String password) throws WeakPassword {
-        if (password.matches(PASSWORD_PATTERN))
-            this.password = password;
-        else
-            throw new exceptions.WeakPassword();
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getFullname() {
