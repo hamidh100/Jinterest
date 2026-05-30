@@ -3,7 +3,9 @@
 
 TODO:\
 test (Unit tests, etc.)\
-login\
+login + signup\
+api\
+database\
 categories for photos\
 save photo or album\
 times\
