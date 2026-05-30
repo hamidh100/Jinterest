@@ -37,11 +37,18 @@ public class UserService {
         if (!username.matches(User.USERNAME_PATTERN)) throw new exceptions.InvalidUsername(exceptions.InvalidUsernameTypes.PATTERNMISMATCH);
     }
 
+    public String getEmailName(User user){
+        String email = user.getEmail();
+        if (user == null || email == null || !email.matches(User.EMAIL_PATTERN)) return null;
+        return email.split("@")[0];
+    }
+
     public void checkPassword(User user) throws WeakPassword {
         String username = user.getUsername();
         String password = user.getPassword();
         if (password == null || password.length() < 8) throw new exceptions.WeakPassword(exceptions.WeakPasswordTypes.TOOSHORT);
-        if (password.contains(username)) throw new exceptions.WeakPassword(exceptions.WeakPasswordTypes.CONTAINSUSER);
+        if ((getEmailName(user) != null && password.contains(getEmailName(user))) ||
+            (username != null && password.contains(username))) throw new exceptions.WeakPassword(exceptions.WeakPasswordTypes.CONTAINSUSER);
         if (!password.matches(User.PASSWORD_PATTERN)) throw new exceptions.WeakPassword(exceptions.WeakPasswordTypes.PATTERNMISMATCH); // error priority?
     }
 
