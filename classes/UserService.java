@@ -30,7 +30,8 @@ public class UserService {
         return user.getFollowingIDs().size();
     }
 
-    public void checkUsername(String username) throws InvalidUsername {
+    public void checkUsername(User user) throws InvalidUsername {
+        String username = user.getUsername();
         if (username == null || username.length() < 3) throw new exceptions.InvalidUsername(exceptions.InvalidUsernameTypes.TOOSHORT);
         if (username.length() > 20) throw new exceptions.InvalidUsername(exceptions.InvalidUsernameTypes.TOOLONG);
         if (!username.matches(User.USERNAME_PATTERN)) throw new exceptions.InvalidUsername(exceptions.InvalidUsernameTypes.PATTERNMISMATCH);
@@ -39,10 +40,9 @@ public class UserService {
     public void checkPassword(User user) throws WeakPassword {
         String username = user.getUsername();
         String password = user.getPassword();
-        if (password.matches(User.PASSWORD_PATTERN))
-            user.setPassword(password);
-        else
-            throw new exceptions.WeakPassword();
+        if (password == null || password.length() < 8) throw new exceptions.WeakPassword(exceptions.WeakPasswordTypes.TOOSHORT);
+        if (password.contains(username)) throw new exceptions.WeakPassword(exceptions.WeakPasswordTypes.CONTAINSUSER);
+        if (!password.matches(User.PASSWORD_PATTERN)) throw new exceptions.WeakPassword(exceptions.WeakPasswordTypes.PATTERNMISMATCH); // error priority?
     }
 
     public static void signup(User user){ // user as input? add to map after signup
