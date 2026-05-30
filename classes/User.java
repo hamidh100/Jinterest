@@ -4,9 +4,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import exceptions.InvalidUsername;
-import exceptions.WeakPassword;
-
 public class User {
     private String phone, email, username, password, fullname;
     private final UUID uuid;
