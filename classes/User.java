@@ -17,10 +17,10 @@ public class User {
     private List<UUID> followingIDs = new ArrayList<UUID>();/* we have to show posts from followings to user on top of the home page */
 
     /* Patters for verification*/
-    private static final String USERNAME_PATTERN = "^[a-zA-Z0-9][a-zA-Z0-9_]+[a-zA-Z0-9]$";
-    private static final String EMAIL_PATTERN = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
-    private static final String PHONENUMBER_PATTERN = "^(0|\\+\\d{2})?9\\d{9}$";
-    private static final String PASSWORD_PATTERN = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$";
+    public static final String USERNAME_PATTERN = "^[a-zA-Z0-9][a-zA-Z0-9_]+[a-zA-Z0-9]$";
+    public static final String EMAIL_PATTERN = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+    public static final String PHONENUMBER_PATTERN = "^(0|\\+\\d{2})?9\\d{9}$";
+    public static final String PASSWORD_PATTERN = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$";
 
     private void setIdentity(String identifier){
         this.phone = this.email = this.username = null;
@@ -115,9 +115,6 @@ public class User {
     }
 
     public void setUsername(String username) throws InvalidUsername {
-        if (username == null || username.length() < 3) throw new exceptions.InvalidUsername(exceptions.InvalidUsernameTypes.TOOSHORT);
-        if (username.length() > 20) throw new exceptions.InvalidUsername(exceptions.InvalidUsernameTypes.TOOLONG);
-        if (!username.matches(USERNAME_PATTERN)) throw new exceptions.InvalidUsername(exceptions.InvalidUsernameTypes.PATTERNMISMATCH);
         this.username = username;
     }
 
