@@ -8,7 +8,7 @@ import exceptions.InvalidUsername;
 import exceptions.WeakPassword;
 
 public class User {
-    private String username, password, fullname;
+    private String phone, email, username, password, fullname;
     private final UUID uuid;
     private LocalDateTime accountAge;
     private List<UUID> albumIDs = new ArrayList<UUID>();
@@ -17,39 +17,58 @@ public class User {
     private List<UUID> followingIDs = new ArrayList<UUID>();/* we have to show posts from followings to user on top of the home page */
 
     /* Patters for verification*/
-    private static final String EMAIL_PATTERN = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
-    private static final String PASSWORD_PATTERN = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$";
-    private static final String PHONENUMBER_PATTERN = "^(0|\\+\\d{2})?9\\d{9}$";
     private static final String USERNAME_PATTERN = "^[a-zA-Z0-9][a-zA-Z0-9_]+[a-zA-Z0-9]$";
+    private static final String EMAIL_PATTERN = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+    private static final String PHONENUMBER_PATTERN = "^(0|\\+\\d{2})?9\\d{9}$";
+    private static final String PASSWORD_PATTERN = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$";
 
-    public User(String username, String password) throws InvalidUsername, WeakPassword {
-        setUsername(username);
-        setPassword(password);
+    private void setIdentity(String identifier){
+        this.phone = this.email = this.username = null;
+        if (identifier != null){
+            if (identifier.matches(USERNAME_PATTERN)) this.username = identifier;
+            if (identifier.matches(EMAIL_PATTERN)) this.email = identifier;
+            if (identifier.matches(PHONENUMBER_PATTERN)) this.phone = identifier;
+        }
+    }
+
+    public User(String identifier, String password) {
+        setIdentity(identifier);
+        this.password = password;
         fullname = "";
         uuid = UUID.randomUUID();
-        OurObjects.users.put(uuid, this);
-        accountAge = LocalDateTime.now();
     }
     
-    public User(String username, String password, String fullname) throws InvalidUsername, WeakPassword {
-        setUsername(username);
-        setPassword(password);
+    public User(String identifier, String password, String fullname) {
+        setIdentity(identifier);
+        this.password = password;
         this.fullname = fullname;
         uuid = UUID.randomUUID();
-        OurObjects.users.put(uuid, this);
-        accountAge = LocalDateTime.now();
     }
 
-    public User(String username, String password, String fullname, UUID uuid, LocalDateTime accountAge) { // made after original user
-        this.username = username;
+    public User(String identifier, String password, String fullname, UUID uuid, LocalDateTime accountAge) { // made after original user
+        setIdentity(identifier);
         this.password = password;
         this.fullname = fullname;
         this.uuid = uuid;
-        OurObjects.usersLowercase.put(uuid, this); // for uniqueness (idk20 = iDK20)
         this.accountAge = accountAge;
     }
     
     /* getter setter begin */
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
     
     public LocalDateTime getAccountAge() {
         return accountAge;
