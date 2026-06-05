@@ -74,7 +74,7 @@ public class UserService {
         return OurObjects.usersLowercase.containsKey(result) ? generateRandUniqUsername() : result;
     }
 
-    public static void signup(User user) throws InvalidSignupMethod, UserAlreadyExists, WeakPassword { // user as input? add to map after signup
+    public static void signup(User user) throws InvalidSignupMethod, UserAlreadyExists, WeakPassword {
         if (user.getEmail() == null && user.getPhone() == null) throw new exceptions.InvalidSignupMethod();
         if (user.getEmail() != null && user.getPhone() != null) throw new exceptions.InvalidSignupMethod(); // only one?
         if (user.getUsername() != null) throw new exceptions.InvalidSignupMethod(); // pointless ig
@@ -88,7 +88,24 @@ public class UserService {
         if (user.getPhone() != null) OurObjects.phoneToUserID.put(user.getPhone(), user.getUuid());
     }
 
-    public static void login(User user){ // with throws
-
+    public static void login(User user) throws InvalidLoginMethod, UserDoesNotExist, IncorrectPassword {
+        int identifierCount = (user.getEmail() == null ? 0 : 1) + (user.getPhone() == null ? 0 : 1) + (user.getUsername() == null ? 0 : 1);
+        if (identifierCount != 1) throw new exceptions.InvalidLoginMethod();
+        if (user.getEmail() != null){
+            if (!OurObjects.emailToUserID.containsKey(user.getEmail())) throw new exceptions.UserDoesNotExist(user.getEmail());
+            String realPassword = OurObjects.users.get(OurObjects.emailToUserID.get(user.getEmail())).getPassword();
+            if (!realPassword.equals(user.getPassword())) throw new exceptions.IncorrectPassword();
+        }
+        if (user.getPhone() != null){
+            if (!OurObjects.phoneToUserID.containsKey(user.getPhone())) throw new exceptions.UserDoesNotExist(user.getPhone());
+            String realPassword = OurObjects.users.get(OurObjects.phoneToUserID.get(user.getPhone())).getPassword();
+            if (!realPassword.equals(user.getPassword())) throw new exceptions.IncorrectPassword();
+        }
+        if (user.getUsername() != null){
+            // lower upper
+            if (!OurObjects.usersLowercase.containsKey(user.getUsername())) throw new exceptions.UserDoesNotExist(user.getUsername());
+            String realPassword = OurObjects.users.get(OurObjects.usersLowercase.get(user.getUsername())).getPassword();
+            if (!realPassword.equals(user.getPassword())) throw new exceptions.IncorrectPassword();
+        }
     }
 }
