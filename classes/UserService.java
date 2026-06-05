@@ -30,6 +30,14 @@ public class UserService {
         return user.getFollowingIDs().size();
     }
 
+    public static void saveAlbum(User user, Album album) {
+        user.getSavedAlbums().add(album.getUuid());
+    }
+
+    public static void savePhoto(User user, Photo photo) {
+        user.getSavedPhotoIDs().add(photo.getUuid());
+    }
+
     public void checkUsername(User user) throws InvalidUsername {
         String username = user.getUsername();
         if (username == null || username.length() < 3) throw new exceptions.InvalidUsername(exceptions.InvalidUsernameTypes.TOOSHORT);
