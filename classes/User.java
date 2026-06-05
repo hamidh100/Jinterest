@@ -44,14 +44,6 @@ public class User {
         uuid = UUID.randomUUID();
     }
 
-    public User(String identifier, String password, String fullname, UUID uuid, LocalDateTime accountAge) { // made after original user
-        setIdentity(identifier);
-        this.password = password;
-        this.fullname = fullname;
-        this.uuid = uuid;
-        this.accountAge = accountAge;
-    }
-
     /* getter setter begin */
     public String getPhone() {
         return phone;
