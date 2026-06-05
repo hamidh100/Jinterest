@@ -4,18 +4,40 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class Photo {
+    public enum Category {
+        NATURE,
+        PORTRAIT,
+        LANDSCAPE,
+        STREET,
+        TRAVEL,
+        FOOD,
+        FASHION,
+        SPORTS,
+        WILDLIFE,
+        ARCHITECTURE,
+        OTHERS
+    }
+
     private UUID ownerID;
     private List<UUID> likeIDs;
     private final UUID uuid;
     private String path; // db???
-    public Photo(UUID ownerID, String path){
+    private Category category;
+
+    public Photo(UUID ownerID, String path) {
         this.ownerID = ownerID;
         this.path = path; // ?
+        this.category = Category.OTHERS;// it should be selectable when they are posting sth.
         this.uuid = UUID.randomUUID();
         OurObjects.photos.put(uuid, this);
         likeIDs = new ArrayList<UUID>();
     }
-    
+
+    public Photo(UUID ownerID, String path, Category category) {
+        this(ownerID, path);
+        this.category = category;// it should be selectable when they are posting sth.
+    }
+
     /* getter setter begin */
     public UUID getOwnerID() {
         return ownerID;
@@ -35,6 +57,8 @@ public class Photo {
     public void setPath(String path) {
         this.path = path;
     }
+    public Category getCategory() {return category;}
+    public void setCategory(Category category) {this.category = category;}
     public UUID getUuid() {
         return uuid;
     }
