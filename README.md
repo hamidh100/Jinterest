@@ -2,7 +2,6 @@
 
 
 TODO:\
-test (Unit tests, etc.)\
 login + signup\
 api\
 database\
