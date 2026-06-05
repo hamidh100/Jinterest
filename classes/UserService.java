@@ -1,5 +1,3 @@
-import java.util.Random;
-
 import exceptions.*;
 
 public class UserService {
@@ -61,19 +59,6 @@ public class UserService {
         if (!password.matches(User.PASSWORD_PATTERN)) throw new exceptions.WeakPassword(exceptions.WeakPasswordTypes.PATTERNMISMATCH); // error priority?
     }
 
-    public static String generateRandUniqUsername(){
-        String result = "user#";
-        Random random = new Random();
-        int charPref = 0;
-        for (int it = 0; it < 8; it++){
-            int r = (charPref == 2 ? random.nextInt(10) : random.nextInt(36));
-            charPref++;
-            if (r < 10) charPref = 0;
-            result += (char)(r < 10 ? '0' + r : 'a' + r - 10);
-        }
-        return OurObjects.usersLowercase.containsKey(result) ? generateRandUniqUsername() : result;
-    }
-
     public static void signup(User user) throws InvalidSignupMethod, UserAlreadyExists, WeakPassword {
         if (user.getEmail() == null && user.getPhone() == null) throw new exceptions.InvalidSignupMethod();
         if (user.getEmail() != null && user.getPhone() != null) throw new exceptions.InvalidSignupMethod(); // only one?
@@ -81,7 +66,7 @@ public class UserService {
         if (user.getEmail() != null && OurObjects.emailToUserID.containsKey(user.getEmail())) throw new exceptions.UserAlreadyExists(user.getEmail());
         if (user.getPhone() != null && OurObjects.phoneToUserID.containsKey(user.getPhone())) throw new exceptions.UserAlreadyExists(user.getPhone());
         checkPassword(user);
-        user.setUsername(generateRandUniqUsername());
+        user.setUsername(Helper.generateRandUniqUsername());
         OurObjects.users.put(user.getUuid(), user);
         OurObjects.usersLowercase.put(user.getUsername(), user.getUuid());
         if (user.getEmail() != null) OurObjects.emailToUserID.put(user.getEmail(), user.getUuid());

@@ -1,0 +1,16 @@
+import java.util.Random;
+
+public class Helper {
+    public static String generateRandUniqUsername(){
+        String result = "user#";
+        Random random = new Random();
+        int charPref = 0;
+        for (int it = 0; it < 8; it++){
+            int r = (charPref == 2 ? random.nextInt(10) : random.nextInt(36));
+            charPref++;
+            if (r < 10) charPref = 0;
+            result += (char)(r < 10 ? '0' + r : 'a' + r - 10);
+        }
+        return OurObjects.usersLowercase.containsKey(result) ? generateRandUniqUsername() : result;
+    }
+}
