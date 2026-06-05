@@ -17,6 +17,7 @@ public class User {
 
     /* Patters for verification*/
     public static final String USERNAME_PATTERN = "^[a-zA-Z0-9][a-zA-Z0-9_]+[a-zA-Z0-9]$";
+    public static final String USERNAME_DEFAULT_PATTERN = "^user#[a-z0-9]{8}$";
     public static final String EMAIL_PATTERN = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
     public static final String PHONENUMBER_PATTERN = "^(0|\\+\\d{2})?9\\d{9}$";
     public static final String PASSWORD_PATTERN = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$";
@@ -24,7 +25,7 @@ public class User {
     private void setIdentity(String identifier) {
         this.phone = this.email = this.username = null;
         if (identifier != null) {
-            if (identifier.matches(USERNAME_PATTERN)) this.username = identifier;
+            if (identifier.matches(USERNAME_PATTERN) || identifier.matches(USERNAME_DEFAULT_PATTERN)) this.username = identifier;
             if (identifier.matches(EMAIL_PATTERN)) this.email = identifier;
             if (identifier.matches(PHONENUMBER_PATTERN)) this.phone = identifier;
         }
