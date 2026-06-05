@@ -10,6 +10,8 @@ public class User {
     private LocalDateTime accountAge;
     private List<UUID> albumIDs = new ArrayList<UUID>();
     private List<UUID> photoIDs = new ArrayList<UUID>();
+    private List<UUID> savedAlbums = new ArrayList<UUID>();
+    private List<UUID> savedPhotos = new ArrayList<UUID>();
     private List<UUID> followerIDs = new ArrayList<UUID>();
     private List<UUID> followingIDs = new ArrayList<UUID>();/* we have to show posts from followings to user on top of the home page */
 
@@ -19,9 +21,9 @@ public class User {
     public static final String PHONENUMBER_PATTERN = "^(0|\\+\\d{2})?9\\d{9}$";
     public static final String PASSWORD_PATTERN = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$";
 
-    private void setIdentity(String identifier){
+    private void setIdentity(String identifier) {
         this.phone = this.email = this.username = null;
-        if (identifier != null){
+        if (identifier != null) {
             if (identifier.matches(USERNAME_PATTERN)) this.username = identifier;
             if (identifier.matches(EMAIL_PATTERN)) this.email = identifier;
             if (identifier.matches(PHONENUMBER_PATTERN)) this.phone = identifier;
@@ -34,7 +36,7 @@ public class User {
         fullname = "";
         uuid = UUID.randomUUID();
     }
-    
+
     public User(String identifier, String password, String fullname) {
         setIdentity(identifier);
         this.password = password;
@@ -49,7 +51,7 @@ public class User {
         this.uuid = uuid;
         this.accountAge = accountAge;
     }
-    
+
     /* getter setter begin */
     public String getPhone() {
         return phone;
@@ -66,7 +68,7 @@ public class User {
     public void setEmail(String email) {
         this.email = email;
     }
-    
+
     public LocalDateTime getAccountAge() {
         return accountAge;
     }
@@ -91,6 +93,22 @@ public class User {
         this.photoIDs = photoIDs;
     }
 
+    public List<UUID> getSavedAlbums() {
+        return savedAlbums;
+    }
+
+    public void setSavedAlbums(List<UUID> savedAlbums) {
+        this.savedAlbums = savedAlbums;
+    }
+
+    public List<UUID> getSavedPhotoIDs() {
+        return savedPhotos;
+    }
+
+    public void setSavedPhotoIDs(List<UUID> savedPhotos) {
+        this.savedPhotos = savedPhotos;
+    }
+
     public List<UUID> getFollowerIDs() {
         return followerIDs;
     }
@@ -106,7 +124,7 @@ public class User {
     public void setFollowingIDs(List<UUID> followingIDs) {
         this.followingIDs = followingIDs;
     }
-    
+
     public String getUsername() {
         return username;
     }
