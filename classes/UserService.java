@@ -92,4 +92,12 @@ public class UserService {
             if (!realPassword.equals(user.getPassword())) throw new exceptions.IncorrectPassword();
         }
     }
+
+    public static void changeUsername(User user, String newUsername){ // and validate pass not containing it?
+        
+    }
+
+    public static void changePassword(User user, String newPassword){
+
+    }
 }

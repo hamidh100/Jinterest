@@ -6,6 +6,8 @@ TODO:
 Part 1:\
 login + signup\
 comment\
+changeUsername\
+changePassword\
 user type: normal admin
 
 Part 2:\
