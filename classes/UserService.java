@@ -87,8 +87,7 @@ public class UserService {
             if (!realPassword.equals(user.getPassword())) throw new exceptions.IncorrectPassword();
         }
         if (user.getUsername() != null){
-            // lower upper
-            if (!OurObjects.usersLowercase.containsKey(user.getUsername())) throw new exceptions.UserDoesNotExist(user.getUsername());
+            if (!OurObjects.usersLowercase.containsKey(Helper.toLower(user.getUsername()))) throw new exceptions.UserDoesNotExist(user.getUsername());
             String realPassword = OurObjects.users.get(OurObjects.usersLowercase.get(user.getUsername())).getPassword();
             if (!realPassword.equals(user.getPassword())) throw new exceptions.IncorrectPassword();
         }

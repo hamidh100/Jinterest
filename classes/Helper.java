@@ -13,4 +13,14 @@ public class Helper {
         }
         return OurObjects.usersLowercase.containsKey(result) ? generateRandUniqUsername() : result;
     }
+
+    public static String toLower(String str){
+        String res = "";
+        for (int i = 0; i < str.length(); i++){
+            char c = str.charAt(i);
+            if (c >= 'A' && c <= 'Z') c = (char)(c - 'A' + 'a');
+            res += c;
+        }
+        return res;
+    }
 }
