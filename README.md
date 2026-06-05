@@ -4,8 +4,8 @@
 TODO:
 
 Part 1:\
-login + signup\
 comment\
+caption\
 changeUsername\
 changePassword\
 user type: normal admin
@@ -13,7 +13,8 @@ user type: normal admin
 Part 2:\
 api\
 database\
+suggest\
 times (server logs?)
 
 TODON'T:\
-suggest 
+AI based photo finding
