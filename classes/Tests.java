@@ -1,26 +1,69 @@
 import org.junit.*;
+import org.junit.jupiter.api.BeforeEach;
+import java.util.ArrayList;
+import static org.junit.Assert.*;
 
 public class Tests {
-    @Before
-    public void init (){}
-
-    @Test
-    public void userSignUpAndLogin(){
-
+    @BeforeEach
+    public void init() {
+        OurObjects.users.clear();
+        OurObjects.usersLowercase.clear();
+        OurObjects.photos.clear();
+        OurObjects.albums.clear();
+        OurObjects.likes.clear();
+        OurObjects.comments.clear();
     }
 
     @Test
-    public void addPhoto(){
+    public void userSignUpAndLogin() {
+        User user = new User("09111111111", "Qwer1234");
+        try {
+            UserService.signup(user);
+            UserService.login(user);
+        } catch (Exception e) {
+            fail();
+        }
 
+        assertNotNull(user.getUuid());
+        assertEquals("09111111111", user.getPhone());
     }
 
     @Test
-    public void addAlbum(){
+    public void addPhoto() {
+        User user = new User("09111111111", "Qwer1234");
+        Photo photo = new Photo(user.getUuid(), "/Photos/tree.jpg");
 
+        PhotoService.addPhoto(user, photo);
+
+        assertTrue(user.getPhotoIDs().contains(photo.getUuid()));
+        assertEquals(1, user.getPhotoIDs().size());
     }
 
     @Test
-    public void addAndRemoveLike(){
-        
+    public void addAlbum() {
+        User user = new User("09111111111", "Qwer1234");
+        Album album = new Album(user.getUuid(), new ArrayList<>());
+
+        AlbumService.addAlbum(user, album);
+
+        assertEquals(user.getUuid(), album.getOwnerID());
+        assertTrue(user.getAlbumIDs().contains(album.getUuid()));
+        assertEquals(1, user.getAlbumIDs().size());
+    }
+
+    @Test
+    public void addAndRemoveLike() {
+        User user = new User("09111111111", "Qwer1234");
+        OurObjects.users.put(user.getUuid(), user);
+        Photo photo = new Photo(user.getUuid(), "/Photos/tree.jpg");
+        Like like = new Like(user.getUuid());
+
+        PhotoService.addLike(photo, like);
+        assertTrue(PhotoService.isLikedBy(photo, user));
+        assertEquals(1, photo.getLikeIDs().size());
+
+        PhotoService.removeLike(photo, like);
+        assertFalse(PhotoService.isLikedBy(photo, user));
+        assertEquals(0, photo.getLikeIDs().size());
     }
 }
