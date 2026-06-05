@@ -11,7 +11,7 @@ user type: normal admin
 Part 2:\
 api\
 database\
-times (server logs?)\
+times (server logs?)
 
 TODON'T:\
 suggest 
