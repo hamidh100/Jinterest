@@ -4,19 +4,6 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class Photo {
-    public enum Category {
-        NATURE,
-        PORTRAIT,
-        LANDSCAPE,
-        STREET,
-        TRAVEL,
-        FOOD,
-        FASHION,
-        SPORTS,
-        WILDLIFE,
-        ARCHITECTURE,
-        OTHERS
-    }
 
     private UUID ownerID;
     private List<UUID> likeIDs;
