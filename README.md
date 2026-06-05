@@ -5,7 +5,7 @@ TODO:\
 login + signup\
 api\
 database\
-times\
+times\ (server logs?)
 suggest\
 comment\
 user type: normal admin
