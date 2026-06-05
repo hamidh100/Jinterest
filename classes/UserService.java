@@ -1,5 +1,4 @@
-import exceptions.InvalidUsername;
-import exceptions.WeakPassword;
+import exceptions.*;
 
 public class UserService {
     public static void follow(User follower, User followed) {
