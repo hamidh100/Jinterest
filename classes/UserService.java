@@ -1,3 +1,5 @@
+import java.util.Random;
+
 import exceptions.*;
 
 public class UserService {
@@ -37,20 +39,20 @@ public class UserService {
         user.getSavedPhotoIDs().add(photo.getUuid());
     }
 
-    public void checkUsername(User user) throws InvalidUsername {
+    public static void checkUsername(User user) throws InvalidUsername {
         String username = user.getUsername();
         if (username == null || username.length() < 3) throw new exceptions.InvalidUsername(exceptions.InvalidUsernameTypes.TOOSHORT);
         if (username.length() > 20) throw new exceptions.InvalidUsername(exceptions.InvalidUsernameTypes.TOOLONG);
         if (!username.matches(User.USERNAME_PATTERN)) throw new exceptions.InvalidUsername(exceptions.InvalidUsernameTypes.PATTERNMISMATCH);
     }
 
-    public String getEmailName(User user){
+    public static String getEmailName(User user){
         String email = user.getEmail();
         if (user == null || email == null || !email.matches(User.EMAIL_PATTERN)) return null;
         return email.split("@")[0];
     }
 
-    public void checkPassword(User user) throws WeakPassword {
+    public static void checkPassword(User user) throws WeakPassword {
         String username = user.getUsername();
         String password = user.getPassword();
         if (password == null || password.length() < 8) throw new exceptions.WeakPassword(exceptions.WeakPasswordTypes.TOOSHORT);
@@ -59,8 +61,31 @@ public class UserService {
         if (!password.matches(User.PASSWORD_PATTERN)) throw new exceptions.WeakPassword(exceptions.WeakPasswordTypes.PATTERNMISMATCH); // error priority?
     }
 
-    public static void signup(User user){ // user as input? add to map after signup
-        
+    public static String generateRandUniqUsername(){
+        String result = "user#";
+        Random random = new Random();
+        int charPref = 0;
+        for (int it = 0; it < 8; it++){
+            int r = (charPref == 2 ? random.nextInt(10) : random.nextInt(36));
+            charPref++;
+            if (r < 10) charPref = 0;
+            result += (char)(r < 10 ? '0' + r : 'a' + r - 10);
+        }
+        return OurObjects.usersLowercase.containsKey(result) ? generateRandUniqUsername() : result;
+    }
+
+    public static void signup(User user) throws InvalidSignupMethod, UserAlreadyExists, WeakPassword { // user as input? add to map after signup
+        if (user.getEmail() == null && user.getPhone() == null) throw new exceptions.InvalidSignupMethod();
+        if (user.getEmail() != null && user.getPhone() != null) throw new exceptions.InvalidSignupMethod(); // only one?
+        if (user.getUsername() != null) throw new exceptions.InvalidSignupMethod(); // pointless ig
+        if (user.getEmail() != null && OurObjects.emailToUserID.containsKey(user.getEmail())) throw new exceptions.UserAlreadyExists(user.getEmail());
+        if (user.getPhone() != null && OurObjects.phoneToUserID.containsKey(user.getPhone())) throw new exceptions.UserAlreadyExists(user.getPhone());
+        checkPassword(user);
+        user.setUsername(generateRandUniqUsername());
+        OurObjects.users.put(user.getUuid(), user);
+        OurObjects.usersLowercase.put(user.getUsername(), user.getUuid());
+        if (user.getEmail() != null) OurObjects.emailToUserID.put(user.getEmail(), user.getUuid());
+        if (user.getPhone() != null) OurObjects.phoneToUserID.put(user.getPhone(), user.getUuid());
     }
 
     public static void login(User user){ // with throws
