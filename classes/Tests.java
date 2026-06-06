@@ -1,13 +1,14 @@
-import org.junit.*;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.*;
 import java.util.ArrayList;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class Tests {
     @BeforeEach
     public void init() {
         OurObjects.users.clear();
         OurObjects.usersLowercase.clear();
+        OurObjects.emailToUserID.clear();
+        OurObjects.phoneToUserID.clear();
         OurObjects.photos.clear();
         OurObjects.albums.clear();
         OurObjects.likes.clear();
