@@ -9,7 +9,7 @@ public class Photo {
     private List<UUID> likeIDs;
     private final UUID uuid;
     private String path; // db???
-    private Category category;
+    private List<Category> categoryList = new ArrayList<>();
     private UUID captionID;
     private final String name;
     private List<UUID> commentIDs;
@@ -18,7 +18,7 @@ public class Photo {
     public Photo(UUID ownerID, String path) {
         this.ownerID = ownerID;
         this.path = path; // ?
-        this.category = Category.OTHERS;// it should be selectable when they are posting sth.
+        this.categoryList.add(Category.OTHERS);// it should be selectable when they are posting sth.
         this.uuid = UUID.randomUUID();
         OurObjects.photos.put(uuid, this);
         likeIDs = new ArrayList<UUID>();
@@ -28,9 +28,9 @@ public class Photo {
         commentIDs = new ArrayList<>();
     }
 
-    public Photo(UUID ownerID, String path, Category category) {
+    public Photo(UUID ownerID, String path, List<Category> categoryList) {
         this(ownerID, path);
-        this.category = category;// it should be selectable when they are posting sth.
+        this.categoryList = categoryList;// it should be selectable when they are posting sth.
     }
 
     /* getter setter begin */
@@ -52,11 +52,11 @@ public class Photo {
     public void setPath(String path) {
         this.path = path;
     }
-    public Category getCategory() {
-        return category;
+    public List<Category> getCategoryList() {
+        return categoryList;
     }
-    public void setCategory(Category category) {
-        this.category = category;
+    public void setCategory(List<Category> categoryList) {
+        this.categoryList = categoryList;
     }
     public UUID getCaptionID() {
         return captionID;

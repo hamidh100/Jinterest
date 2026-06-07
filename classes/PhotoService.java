@@ -50,4 +50,12 @@ public class PhotoService {
         photo.getCommentIDs().remove(comment.getUuid());
         OurObjects.comments.remove(comment.getUserID());
     }
+    public static void addCategory(Photo photo, Category category){
+        if (photo.getCategoryList().contains(category)) return;
+        photo.getCategoryList().add(category);
+    }
+    public static void removeCategory(Photo photo, Category category){
+        if (!photo.getCategoryList().contains(category)) return;
+        photo.getCategoryList().remove(category);
+    }
 }
