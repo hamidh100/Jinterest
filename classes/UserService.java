@@ -81,7 +81,8 @@ public class UserService {
         if (user.getPhone() != null) OurObjects.phoneToUserID.put(user.getPhone(), user.getUuid());
     }
 
-    public static void login(User user) throws InvalidLoginMethod, UserDoesNotExist, IncorrectPassword, UserBanned {
+    public static void login(String identifier, String password) throws InvalidLoginMethod, UserDoesNotExist, IncorrectPassword, UserBanned {
+        User user = new User(identifier, password);
         int identifierCount = (user.getEmail() == null ? 0 : 1) + (user.getPhone() == null ? 0 : 1) + (user.getUsername() == null ? 0 : 1);
         if (identifierCount != 1) throw new exceptions.InvalidLoginMethod();
         if (user.getEmail() != null){
