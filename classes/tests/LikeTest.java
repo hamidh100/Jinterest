@@ -12,6 +12,7 @@ public class LikeTest {
         OurObjects.albums.clear();
         OurObjects.likes.clear();
         OurObjects.comments.clear();
+        OurObjects.captions.clear();
     }
 
     @Test

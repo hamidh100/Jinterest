@@ -13,6 +13,7 @@ public class PhotoAndAlbumTest {
         OurObjects.albums.clear();
         OurObjects.likes.clear();
         OurObjects.comments.clear();
+        OurObjects.captions.clear();
     }
 
     @Test
