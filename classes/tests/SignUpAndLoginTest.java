@@ -1,6 +1,8 @@
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.UUID;
+
 public class SignUpAndLoginTest {
     @BeforeEach
     public void init() {
@@ -16,13 +18,25 @@ public class SignUpAndLoginTest {
 
     @Test
     public void simpleValidSignUp(){
-        User user = new User("09121234567", "aStrongPASS!!!#22");
+        String phone = "09121234567";
+        User user = new User(phone, "aStrongPASS!!!#22");
         try {
             UserService.signup(user);
         } catch (Exception e){
             fail();
         }
         assertTrue(OurObjects.users.containsKey(user.getUuid()));
+        UUID uuid = OurObjects.phoneToUserID.get("0912123456");
+        assertNull(uuid);
+        uuid = OurObjects.phoneToUserID.get("09121234567");
+        assertTrue(OurObjects.users.containsKey(uuid));
+        User inObjsUser = OurObjects.users.get(uuid);
+        assertNotNull(inObjsUser);
+        assertEquals(user.getPhone(), phone);
+        assertEquals(user, inObjsUser);
+        assertNotNull(inObjsUser.getUsername());
+        assertTrue(inObjsUser.getUsername().matches(User.USERNAME_DEFAULT_PATTERN));
+        assertFalse(inObjsUser.getUsername().matches(User.USERNAME_PATTERN));
     }
 
     @Test
