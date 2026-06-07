@@ -7,8 +7,7 @@ Part 1:\
 comment\
 caption\
 changeUsername\
-changePassword\
-user type: normal admin
+changePassword
 
 Part 2:\
 api\
