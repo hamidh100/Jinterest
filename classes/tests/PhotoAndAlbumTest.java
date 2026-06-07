@@ -2,20 +2,7 @@ import org.junit.jupiter.api.*;
 import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class PhotoAndAlbumTest {
-    @BeforeEach
-    public void init() {
-        OurObjects.users.clear();
-        OurObjects.usersLowercase.clear();
-        OurObjects.emailToUserID.clear();
-        OurObjects.phoneToUserID.clear();
-        OurObjects.photos.clear();
-        OurObjects.albums.clear();
-        OurObjects.likes.clear();
-        OurObjects.comments.clear();
-        OurObjects.captions.clear();
-    }
-
+public class PhotoAndAlbumTest extends initTest {
     @Test
     public void addPhoto() {
         User user = new User("09111111111", "Qwer1234");

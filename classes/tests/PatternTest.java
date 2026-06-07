@@ -1,20 +1,7 @@
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class PatternTest {
-    @BeforeEach
-    public void init() {
-        OurObjects.users.clear();
-        OurObjects.usersLowercase.clear();
-        OurObjects.emailToUserID.clear();
-        OurObjects.phoneToUserID.clear();
-        OurObjects.photos.clear();
-        OurObjects.albums.clear();
-        OurObjects.likes.clear();
-        OurObjects.comments.clear();
-        OurObjects.captions.clear();
-    }
-
+public class PatternTest extends initTest {
     @Test
     public void phonenumberTest(){
         String identifier = "09121234567";
