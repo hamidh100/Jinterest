@@ -1,4 +1,5 @@
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import exceptions.*;
 
@@ -41,6 +42,10 @@ public class UserService {
 
     public static void checkUsername(User user) throws InvalidUsername {
         String username = user.getUsername();
+        checkUsername(username);
+    }
+
+    public static void checkUsername(String username) throws InvalidUsername {
         if (username == null || username.length() < 3) throw new exceptions.InvalidUsername(exceptions.InvalidUsernameTypes.TOOSHORT);
         if (username.length() > 20) throw new exceptions.InvalidUsername(exceptions.InvalidUsernameTypes.TOOLONG);
         if (!username.matches(User.USERNAME_PATTERN)) throw new exceptions.InvalidUsername(exceptions.InvalidUsernameTypes.PATTERNMISMATCH);
@@ -102,11 +107,31 @@ public class UserService {
         }
     }
 
-    public static void changeUsername(User user, String newUsername){ // and validate pass not containing it?
-        
+    public static void changeUsername(User user, String newUsername) throws InvalidUsername, UserAlreadyExists {
+        String oldUsername = user.getUsername();
+
+        UUID existingUserID = OurObjects.usersLowercase.get(Helper.toLower(newUsername));
+        if (existingUserID != null && !existingUserID.equals(user.getUuid())) {
+            throw new exceptions.UserAlreadyExists(newUsername);
+        }
+
+        user.setUsername(newUsername);
+        try {
+            checkUsername(user);
+        } catch (InvalidUsername e) {
+            user.setUsername(oldUsername);
+            throw e;
+        }
     }
 
-    public static void changePassword(User user, String newPassword){
-
+    public static void changePassword(User user, String newPassword) throws WeakPassword {
+        String oldPassword = user.getPassword();
+        user.setPassword(newPassword);
+        try {
+            checkPassword(user);
+        } catch (WeakPassword e) {
+            user.setPassword(oldPassword);
+            throw e;
+        }
     }
 }
