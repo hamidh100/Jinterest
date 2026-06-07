@@ -95,4 +95,23 @@ public class Photo {
         if (!(obj instanceof Photo other)) return false;
         return Objects.equals(uuid, other.uuid);
     }
+
+    @Override
+    public String toString() {
+        // return "Photo [categoryList=" + categoryList + ", captionID=" + captionID + ", name=" + name + ", commentIDs=" + commentIDs + ", photoAge=" + photoAge + "]";
+        String res = "";
+        res += name + ',';
+        res += (OurObjects.captions.containsKey(captionID) ? OurObjects.captions.get(captionID).getText() : "") + ',';
+        for (Category category : categoryList) res += category.toString() + ',';
+        if (res.charAt(res.length() - 1) != ',') res += ',';
+        res += photoAge.toString() + ',';
+        for (UUID commentID : commentIDs){
+            if (!OurObjects.comments.containsKey(commentID)) continue; //?
+            res += OurObjects.comments.get(commentID).getText() + ',';
+        }
+        if (res.charAt(res.length() - 1) == ',') res = res.substring(0, res.length() - 1);
+        return res;
+    }
+
+    
 }
