@@ -8,6 +8,8 @@ public class User {
     private String phone, email, username, password, fullname;
     private final UUID uuid;
     private LocalDateTime accountAge;
+    private UserType userType = UserType.NORMAL;
+    private boolean banned = false;
     private List<UUID> albumIDs = new ArrayList<UUID>();
     private List<UUID> photoIDs = new ArrayList<UUID>();
     private List<UUID> savedAlbums = new ArrayList<UUID>();
@@ -144,6 +146,22 @@ public class User {
 
     public UUID getUuid() {
         return uuid;
+    }
+
+    public UserType getUserType() {
+        return userType;
+    }
+
+    public void setUserType(UserType userType) {
+        this.userType = userType;
+    }
+
+    public boolean isBanned() {
+        return banned;
+    }
+
+    public void setBanned(boolean banned) {
+        this.banned = banned;
     }
     /* getter setter end */
 
