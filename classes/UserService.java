@@ -52,8 +52,9 @@ public class UserService {
     }
 
     public static String getEmailName(User user){
+        if (user == null) return null;
         String email = user.getEmail();
-        if (user == null || email == null || !email.matches(User.EMAIL_PATTERN)) return null;
+        if (email == null || !email.matches(User.EMAIL_PATTERN)) return null;
         return email.split("@")[0];
     }
 
@@ -111,22 +112,23 @@ public class UserService {
     public static void changeUsername(User user, String newUsername) throws InvalidUsername, UserAlreadyExists, WeakPassword {
         String oldUsername = user.getUsername();
 
-        UUID existingUserID = OurObjects.usersLowercase.get(Helper.toLower(newUsername));
-        if (existingUserID != null && !existingUserID.equals(user.getUuid())) {
-            throw new exceptions.UserAlreadyExists(newUsername);
-        }
-
         user.setUsername(newUsername);
         try {
             checkUsername(user);
             checkPassword(user);
-        } catch (InvalidUsername e) {
-            user.setUsername(oldUsername);
-            throw e;
-        } catch (WeakPassword e) {
+        } catch (InvalidUsername | WeakPassword e) {
             user.setUsername(oldUsername);
             throw e;
         }
+
+        String newUsernameLower = Helper.toLower(newUsername);
+        UUID existingUserID = OurObjects.usersLowercase.get(newUsernameLower);
+        if (existingUserID != null && !existingUserID.equals(user.getUuid())) {
+            user.setUsername(oldUsername);
+            throw new exceptions.UserAlreadyExists(newUsername);
+        }
+        OurObjects.usersLowercase.remove(Helper.toLower(oldUsername));
+        OurObjects.usersLowercase.put(newUsernameLower, user.getUuid());
     }
 
     public static void changePassword(User user, String newPassword) throws WeakPassword {
