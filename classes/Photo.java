@@ -10,6 +10,7 @@ public class Photo {
     private String path; // db???
     private Category category;
     private UUID captionID;
+    private final String name;
 
     public Photo(UUID ownerID, String path) {
         this.ownerID = ownerID;
@@ -19,6 +20,7 @@ public class Photo {
         OurObjects.photos.put(uuid, this);
         likeIDs = new ArrayList<UUID>();
         captionID = null;
+        name = Helper.extractNameFromPath(path);
     }
 
     public Photo(UUID ownerID, String path, Category category) {

@@ -23,4 +23,20 @@ public class Helper {
         }
         return res;
     }
+
+    public static String extractNameFromPath(String str){
+        String res = "";
+        boolean flag = false;
+        for (int i = str.length() - 1; i >= 0; i--){
+            char ch = str.charAt(i);
+            if (ch == '/' || ch == '\\') break;
+            if (flag) res += ch;
+            if (ch == '.') flag = true;
+        }
+        String extractedName = "";
+        for (int i = res.length() - 1; i >= 0; i--){
+            extractedName += res.charAt(i);
+        }
+        return extractedName;
+    }
 }
