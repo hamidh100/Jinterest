@@ -7,7 +7,7 @@ public class SearchService {
         List<Photo> result = new ArrayList<>();
         for (var x : OurObjects.photos.entrySet()) {
             Photo photo = x.getValue();
-            if (photo.toString().matches(text)) {
+            if (photo.toString().contains(text)) {
                 result.add(photo);
             }
         }
@@ -17,7 +17,7 @@ public class SearchService {
         List<Photo> result = new ArrayList<>();
         for (var x : OurObjects.photos.entrySet()) {
             Photo photo = x.getValue();
-            if (photo.toString().split("|")[0].matches(text)) {
+            if (photo.toString().split("\\|")[0].contains(text)) {
                 result.add(photo);
             }
         }
@@ -27,7 +27,7 @@ public class SearchService {
         List<Photo> result = new ArrayList<>();
         for (var x : OurObjects.photos.entrySet()) {
             Photo photo = x.getValue();
-            if (photo.toString().split("|")[1].matches(text)) {
+            if (photo.toString().split("\\|")[1].contains(text)) {
                 result.add(photo);
             }
         }
@@ -37,7 +37,7 @@ public class SearchService {
         List<Photo> result = new ArrayList<>();
         for (var x : OurObjects.photos.entrySet()) {
             Photo photo = x.getValue();
-            if (photo.toString().split("|")[2].matches(text)) {
+            if (photo.toString().split("\\|")[2].contains(text)) {
                 result.add(photo);
             }
         }
@@ -47,7 +47,7 @@ public class SearchService {
         List<Photo> result = new ArrayList<>();
         for (var x : OurObjects.photos.entrySet()) {
             Photo photo = x.getValue();
-            if (photo.toString().split("|")[3].matches(text)) {
+            if (photo.toString().split("\\|")[3].contains(text)) {
                 result.add(photo);
             }
         }
@@ -57,7 +57,7 @@ public class SearchService {
         List<Photo> result = new ArrayList<>();
         for (var x : OurObjects.photos.entrySet()) {
             Photo photo = x.getValue();
-            if (photo.toString().split("|")[4].matches(text)) {
+            if (photo.toString().split("\\|")[4].contains(text)) {
                 result.add(photo);
             }
         }
