@@ -9,7 +9,7 @@ public class SearchService {
         List<Photo> result = new ArrayList<>();
 
         for (Photo photo : OurObjects.photos.values()) {
-            if (matches(photo, text)) {
+            if (matches(String.valueOf(photo), text)) {
                 result.add(photo);
             }
         }
