@@ -1,4 +1,6 @@
-classes/lib/
-classes/notes/
+.vscode/
 .idea/
 /Jinterest.iml
+
+classes/lib/
+classes/notes/
