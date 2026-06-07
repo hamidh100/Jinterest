@@ -4,7 +4,6 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class Photo {
-
     private UUID ownerID;
     private List<UUID> likeIDs;
     private final UUID uuid;
