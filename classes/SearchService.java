@@ -1,19 +1,66 @@
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.regex.Pattern.matches;
-
 public class SearchService {
 
-    public static List<Photo> search(String text) {
+    public static List<Photo> globalSearch(String text) {
         List<Photo> result = new ArrayList<>();
-
-        for (Photo photo : OurObjects.photos.values()) {
-            if (matches(String.valueOf(photo), text)) {
+        for (var x : OurObjects.photos.entrySet()) {
+            Photo photo = x.getValue();
+            if (photo.toString().matches(text)) {
                 result.add(photo);
             }
         }
-
+        return result;
+    }
+    public static List<Photo> searchByName(String text){
+        List<Photo> result = new ArrayList<>();
+        for (var x : OurObjects.photos.entrySet()) {
+            Photo photo = x.getValue();
+            if (photo.toString().split("|")[0].matches(text)) {
+                result.add(photo);
+            }
+        }
+        return result;
+    }
+    public static List<Photo> searchByCaption(String text){
+        List<Photo> result = new ArrayList<>();
+        for (var x : OurObjects.photos.entrySet()) {
+            Photo photo = x.getValue();
+            if (photo.toString().split("|")[1].matches(text)) {
+                result.add(photo);
+            }
+        }
+        return result;
+    }
+    public static List<Photo> searchByCategory(String text){
+        List<Photo> result = new ArrayList<>();
+        for (var x : OurObjects.photos.entrySet()) {
+            Photo photo = x.getValue();
+            if (photo.toString().split("|")[2].matches(text)) {
+                result.add(photo);
+            }
+        }
+        return result;
+    }
+    public static List<Photo> searchByTime(String text){
+        List<Photo> result = new ArrayList<>();
+        for (var x : OurObjects.photos.entrySet()) {
+            Photo photo = x.getValue();
+            if (photo.toString().split("|")[3].matches(text)) {
+                result.add(photo);
+            }
+        }
+        return result;
+    }
+    public static List<Photo> searchByComments(String text){
+        List<Photo> result = new ArrayList<>();
+        for (var x : OurObjects.photos.entrySet()) {
+            Photo photo = x.getValue();
+            if (photo.toString().split("|")[4].matches(text)) {
+                result.add(photo);
+            }
+        }
         return result;
     }
 }
