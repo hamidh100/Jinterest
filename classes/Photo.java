@@ -1,3 +1,4 @@
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -12,6 +13,7 @@ public class Photo {
     private UUID captionID;
     private final String name;
     private List<UUID> commentIDs;
+    private LocalDateTime photoAge;
 
     public Photo(UUID ownerID, String path) {
         this.ownerID = ownerID;
@@ -22,6 +24,7 @@ public class Photo {
         likeIDs = new ArrayList<UUID>();
         captionID = null;
         name = Helper.extractNameFromPath(path);
+        photoAge = LocalDateTime.now();
         commentIDs = new ArrayList<>();
     }
 
@@ -72,6 +75,12 @@ public class Photo {
     }
     public void setCommentIDs(List<UUID> commentIDs) {
         this.commentIDs = commentIDs;
+    }
+    public LocalDateTime getPhotoAge() {
+        return photoAge;
+    }
+    public void setPhotoAge(LocalDateTime photoAge) {
+        this.photoAge = photoAge;
     }
     /* getter setter end */
 

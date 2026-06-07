@@ -1,3 +1,4 @@
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -6,11 +7,13 @@ public class Album {
     private UUID ownerID;
     private List<UUID> photoIDs;
     private final UUID uuid;
+    private LocalDateTime albumAge;
 
     public Album(UUID ownerID, List<UUID> photoIDs){
         this.ownerID = ownerID;
         this.photoIDs = photoIDs;
         uuid = UUID.randomUUID();
+        albumAge = LocalDateTime.now();
         OurObjects.albums.put(uuid, this);
     }
     
@@ -29,6 +32,12 @@ public class Album {
     }
     public UUID getUuid() {
         return uuid;
+    }
+    public LocalDateTime getAlbumAge() {
+        return albumAge;
+    }
+    public void setAlbumAge(LocalDateTime albumAge) {
+        this.albumAge = albumAge;
     }
     /* getter setter end */
 
