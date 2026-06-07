@@ -127,7 +127,7 @@ public class UserService {
             user.setUsername(oldUsername);
             throw new exceptions.UserAlreadyExists(newUsername);
         }
-        OurObjects.usersLowercase.remove(Helper.toLower(oldUsername));
+        if(oldUsername != null)OurObjects.usersLowercase.remove(Helper.toLower(oldUsername));
         OurObjects.usersLowercase.put(newUsernameLower, user.getUuid());
     }
 
