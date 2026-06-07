@@ -108,7 +108,7 @@ public class UserService {
         }
     }
 
-    public static void changeUsername(User user, String newUsername) throws InvalidUsername, UserAlreadyExists {
+    public static void changeUsername(User user, String newUsername) throws InvalidUsername, UserAlreadyExists, WeakPassword {
         String oldUsername = user.getUsername();
 
         UUID existingUserID = OurObjects.usersLowercase.get(Helper.toLower(newUsername));
@@ -119,7 +119,11 @@ public class UserService {
         user.setUsername(newUsername);
         try {
             checkUsername(user);
+            checkPassword(user);
         } catch (InvalidUsername e) {
+            user.setUsername(oldUsername);
+            throw e;
+        } catch (WeakPassword e) {
             user.setUsername(oldUsername);
             throw e;
         }
