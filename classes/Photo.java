@@ -62,6 +62,9 @@ public class Photo {
     public UUID getUuid() {
         return uuid;
     }
+    public String getName() {
+        return name;
+    }
     /* getter setter end */
 
     @Override
