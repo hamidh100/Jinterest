@@ -5,9 +5,7 @@ TODO:
 
 Part 1:\
 comment\
-caption\
-changeUsername\
-changePassword
+caption
 
 Part 2:\
 api\
