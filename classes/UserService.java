@@ -1,3 +1,5 @@
+import java.time.LocalDateTime;
+
 import exceptions.*;
 
 public class UserService {
@@ -66,6 +68,7 @@ public class UserService {
         if (user.getEmail() != null && OurObjects.emailToUserID.containsKey(user.getEmail())) throw new exceptions.UserAlreadyExists(user.getEmail());
         if (user.getPhone() != null && OurObjects.phoneToUserID.containsKey(user.getPhone())) throw new exceptions.UserAlreadyExists(user.getPhone());
         checkPassword(user);
+        user.setAccountAge(LocalDateTime.now());
         user.setUsername(Helper.generateRandUniqUsername());
         OurObjects.users.put(user.getUuid(), user);
         OurObjects.usersLowercase.put(user.getUsername(), user.getUuid());
