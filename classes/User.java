@@ -166,6 +166,21 @@ public class User {
     /* getter setter end */
 
     @Override
+    public String toString() {
+        return "User{" +
+                "phone='" + phone + '\'' +
+                ", email='" + email + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", fullname='" + fullname + '\'' +
+                ", uuid=" + uuid +
+                ", accountAge=" + accountAge +
+                ", userType=" + userType +
+                ", banned=" + banned +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (!(o instanceof User user)) return false;
         return Objects.equals(uuid, user.uuid);
