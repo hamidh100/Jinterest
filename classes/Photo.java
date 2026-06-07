@@ -11,6 +11,7 @@ public class Photo {
     private Category category;
     private UUID captionID;
     private final String name;
+    private List<UUID> commentIDs;
 
     public Photo(UUID ownerID, String path) {
         this.ownerID = ownerID;
@@ -21,6 +22,7 @@ public class Photo {
         likeIDs = new ArrayList<UUID>();
         captionID = null;
         name = Helper.extractNameFromPath(path);
+        commentIDs = new ArrayList<>();
     }
 
     public Photo(UUID ownerID, String path, Category category) {
@@ -64,6 +66,12 @@ public class Photo {
     }
     public String getName() {
         return name;
+    }
+    public List<UUID> getCommentIDs() {
+        return commentIDs;
+    }
+    public void setCommentIDs(List<UUID> commentIDs) {
+        this.commentIDs = commentIDs;
     }
     /* getter setter end */
 

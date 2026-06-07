@@ -38,4 +38,16 @@ public class PhotoService {
         caption.setPhotoID(null);
         OurObjects.captions.remove(captionID);
     }
+    public static void addComment(Photo photo, Comment comment){
+        if (photo.getCommentIDs().contains(comment.getUuid())) return;
+        comment.setPhotoID(photo.getUuid());
+        photo.getCommentIDs().add(comment.getUuid());
+        OurObjects.comments.put(comment.getUserID(), comment);
+    }
+    public static void removeComment(Photo photo, Comment comment){
+        if (!photo.getCommentIDs().contains(comment.getUuid())) return;
+        comment.setPhotoID(null);
+        photo.getCommentIDs().remove(comment.getUuid());
+        OurObjects.comments.remove(comment.getUserID());
+    }
 }

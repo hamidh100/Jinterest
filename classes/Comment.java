@@ -9,8 +9,8 @@ public class Comment {
     private LocalDateTime time;
     private final UUID uuid;
 
-    public Comment(UUID photoID, UUID userID, String text) {
-        this.photoID = photoID;
+    public Comment(UUID userID, String text) {
+        this.photoID = null;
         this.userID = userID;
         this.text = text;
         time = LocalDateTime.now();
