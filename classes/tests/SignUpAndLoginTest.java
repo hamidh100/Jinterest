@@ -41,10 +41,12 @@ public class SignUpAndLoginTest {
 
     @Test
     public void userSignUpAndLogin() {
-        User user = new User("09111111111", "Qwer1234");
+        String identifier = "09111111111";
+        String password = "Qwer1234";
+        User user = new User(identifier, password);
         try {
             UserService.signup(user);
-            UserService.login(user);
+            UserService.login(identifier, password);
         } catch (Exception e) {
             fail();
         }

@@ -33,11 +33,11 @@ public class AdminServiceTest {
 
         AdminService.banUser(admin, user);
         assertTrue(user.isBanned());
-        assertThrows(UserBanned.class, () -> UserService.login(new User("09111111111", "Qwer1234")));
+        assertThrows(UserBanned.class, () -> UserService.login("09111111111", "Qwer1234"));
 
         AdminService.unbanUser(admin, user);
         assertFalse(user.isBanned());
-        UserService.login(new User("09111111111", "Qwer1234"));
+        UserService.login("09111111111", "Qwer1234");
     }
 
     @Test
