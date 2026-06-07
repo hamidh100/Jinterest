@@ -66,6 +66,11 @@ public class PhotoAndAlbumTest {
         Photo photo2 = new Photo(user.getUuid(), "/Photos/notabeautifultree.jpg");
 
         PhotoService.addPhoto(user, photo1);
+        AlbumService.addPhoto(album, photo2);
+        AlbumService.addPhoto(album, photo1);
+
+        assertEquals(1, user.getPhotoIDs().size());
+        assertEquals(1, user.getAlbumIDs().size());
     }
 
     @Test

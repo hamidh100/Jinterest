@@ -13,4 +13,13 @@ public class AlbumService {
         album.setOwnerID(user.getUuid());
         user.getAlbumIDs().add(album.getUuid());
     }
+    public static void addPhoto(Album album, Photo photo){
+        if (album.getPhotoIDs().contains(photo)) return;
+        photo.setOwnerID(album.getOwnerID());
+        album.getPhotoIDs().add(photo.getUuid());
+    }
+    public static void removePhoto(Album album, Photo photo){
+        if (!album.getPhotoIDs().contains(photo)) return;
+        album.getPhotoIDs().remove(photo.getUuid());
+    }
 }
