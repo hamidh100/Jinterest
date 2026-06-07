@@ -76,22 +76,28 @@ public class UserService {
         if (user.getPhone() != null) OurObjects.phoneToUserID.put(user.getPhone(), user.getUuid());
     }
 
-    public static void login(User user) throws InvalidLoginMethod, UserDoesNotExist, IncorrectPassword {
+    public static void login(User user) throws InvalidLoginMethod, UserDoesNotExist, IncorrectPassword, UserBanned {
         int identifierCount = (user.getEmail() == null ? 0 : 1) + (user.getPhone() == null ? 0 : 1) + (user.getUsername() == null ? 0 : 1);
         if (identifierCount != 1) throw new exceptions.InvalidLoginMethod();
         if (user.getEmail() != null){
             if (!OurObjects.emailToUserID.containsKey(user.getEmail())) throw new exceptions.UserDoesNotExist(user.getEmail());
-            String realPassword = OurObjects.users.get(OurObjects.emailToUserID.get(user.getEmail())).getPassword();
+            User realUser = OurObjects.users.get(OurObjects.emailToUserID.get(user.getEmail()));
+            if (realUser.isBanned()) throw new exceptions.UserBanned(user.getEmail());
+            String realPassword = realUser.getPassword();
             if (!realPassword.equals(user.getPassword())) throw new exceptions.IncorrectPassword();
         }
         if (user.getPhone() != null){
             if (!OurObjects.phoneToUserID.containsKey(user.getPhone())) throw new exceptions.UserDoesNotExist(user.getPhone());
-            String realPassword = OurObjects.users.get(OurObjects.phoneToUserID.get(user.getPhone())).getPassword();
+            User realUser = OurObjects.users.get(OurObjects.phoneToUserID.get(user.getPhone()));
+            if (realUser.isBanned()) throw new exceptions.UserBanned(user.getPhone());
+            String realPassword = realUser.getPassword();
             if (!realPassword.equals(user.getPassword())) throw new exceptions.IncorrectPassword();
         }
         if (user.getUsername() != null){
             if (!OurObjects.usersLowercase.containsKey(Helper.toLower(user.getUsername()))) throw new exceptions.UserDoesNotExist(user.getUsername());
-            String realPassword = OurObjects.users.get(OurObjects.usersLowercase.get(user.getUsername())).getPassword();
+            User realUser = OurObjects.users.get(OurObjects.usersLowercase.get(user.getUsername()));
+            if (realUser.isBanned()) throw new exceptions.UserBanned(user.getUsername());
+            String realPassword = realUser.getPassword();
             if (!realPassword.equals(user.getPassword())) throw new exceptions.IncorrectPassword();
         }
     }
