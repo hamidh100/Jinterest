@@ -1,3 +1,4 @@
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class PhotoService {
@@ -20,5 +21,21 @@ public class PhotoService {
     }
     public static void addPhoto(User user, Photo photo){
         user.getPhotoIDs().add(photo.getUuid());
+    }
+    public static void addCaption(Photo photo, Caption caption){
+        if (caption.getPhotoID() != null && !caption.getPhotoID().equals(photo.getUuid())) return;
+        caption.setPhotoID(photo.getUuid());
+        caption.setTime(LocalDateTime.now());
+        photo.setCaptionID(caption.getUuid());
+        OurObjects.captions.put(caption.getUuid(), caption);
+    }
+    public static void removeCaption(Photo photo){
+        if (photo.getCaptionID() == null) return;
+        UUID captionID = photo.getCaptionID();
+        photo.setCaptionID(null);
+        if (!OurObjects.captions.containsKey(captionID)) return;
+        Caption caption = OurObjects.captions.get(captionID);
+        caption.setPhotoID(null);
+        OurObjects.captions.remove(captionID);
     }
 }

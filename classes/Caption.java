@@ -8,10 +8,10 @@ public class Caption {
     private LocalDateTime time;
     private final UUID uuid;
     
-    public Caption(UUID photoID, String text) {
-        this.photoID = photoID;
+    public Caption(String text) {
+        this.photoID = null;
         this.text = text;
-        time = LocalDateTime.now();
+        time = null;
         uuid = UUID.randomUUID();
     }
     

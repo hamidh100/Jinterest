@@ -9,6 +9,7 @@ public class Photo {
     private final UUID uuid;
     private String path; // db???
     private Category category;
+    private UUID captionID;
 
     public Photo(UUID ownerID, String path) {
         this.ownerID = ownerID;
@@ -17,6 +18,7 @@ public class Photo {
         this.uuid = UUID.randomUUID();
         OurObjects.photos.put(uuid, this);
         likeIDs = new ArrayList<UUID>();
+        captionID = null;
     }
 
     public Photo(UUID ownerID, String path, Category category) {
@@ -43,8 +45,18 @@ public class Photo {
     public void setPath(String path) {
         this.path = path;
     }
-    public Category getCategory() {return category;}
-    public void setCategory(Category category) {this.category = category;}
+    public Category getCategory() {
+        return category;
+    }
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+    public UUID getCaptionID() {
+        return captionID;
+    }
+    public void setCaptionID(UUID captionID){
+        this.captionID = captionID;
+    }
     public UUID getUuid() {
         return uuid;
     }

@@ -12,4 +12,5 @@ public class OurObjects {
     public static Map<UUID, Album> albums = new HashMap<>();
     public static Map<UUID, Like> likes = new HashMap<>();
     public static Map<UUID, Comment> comments = new HashMap<>();
+    public static Map<UUID, Caption> captions = new HashMap<>();
 }
