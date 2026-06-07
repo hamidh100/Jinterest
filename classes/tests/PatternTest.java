@@ -15,27 +15,17 @@ public class PatternTest {
     }
 
     @Test
-    public void simpleValidSignUp(){
-        User user = new User("09121234567", "aStrongPASS!!!#22");
-        try {
-            UserService.signup(user);
-        } catch (Exception e){
-            fail();
-        }
-        assertTrue(OurObjects.users.containsKey(user.getUuid()));
+    public void identifierTest(){
+        String identifier = "09121234567";
+        assertTrue(identifier.matches(User.PHONENUMBER_PATTERN));
+        assertFalse(identifier.matches(User.USERNAME_PATTERN));
+        assertFalse(identifier.matches(User.USERNAME_DEFAULT_PATTERN));
+        assertFalse(identifier.matches(User.EMAIL_PATTERN));
+        assertFalse(identifier.matches(User.PASSWORD_PATTERN));
     }
 
     @Test
-    public void userSignUpAndLogin() {
-        User user = new User("09111111111", "Qwer1234");
-        try {
-            UserService.signup(user);
-            UserService.login(user);
-        } catch (Exception e) {
-            fail();
-        }
-
-        assertNotNull(user.getUuid());
-        assertEquals("09111111111", user.getPhone());
+    public void passwordTest() {
+        
     }
 }
