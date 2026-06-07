@@ -28,6 +28,30 @@ public class PhotoAndAlbumTest {
     }
 
     @Test
+    public void addPhotoWithCaption() {
+        User user = new User("09111111111", "Qwer1234");
+        Photo photo = new Photo(user.getUuid(), "/Photos/tree.jpg");
+        Caption caption = new Caption("My beautiful tree!");
+
+        PhotoService.addPhoto(user, photo);
+
+        assertTrue(user.getPhotoIDs().contains(photo.getUuid()));
+        assertEquals(1, user.getPhotoIDs().size());
+
+        assertNull(photo.getCaptionID());
+        assertNull(caption.getPhotoID());
+        assertFalse(OurObjects.captions.containsKey(caption.getUuid()));
+        PhotoService.addCaption(photo, caption);
+        assertTrue(OurObjects.captions.containsKey(caption.getUuid()));
+        assertNotNull(photo.getCaptionID());
+        assertNotNull(caption.getPhotoID());
+        PhotoService.removeCaption(photo);
+        assertNull(photo.getCaptionID());
+        assertNull(caption.getPhotoID());
+        assertFalse(OurObjects.captions.containsKey(caption.getUuid()));
+    }
+
+    @Test
     public void addAlbum() {
         User user = new User("09111111111", "Qwer1234");
         Album album = new Album(user.getUuid(), new ArrayList<>());
@@ -37,6 +61,11 @@ public class PhotoAndAlbumTest {
         assertEquals(user.getUuid(), album.getOwnerID());
         assertTrue(user.getAlbumIDs().contains(album.getUuid()));
         assertEquals(1, user.getAlbumIDs().size());
+
+        Photo photo1 = new Photo(user.getUuid(), "/Photos/tree.jpg");
+        Photo photo2 = new Photo(user.getUuid(), "/Photos/notabeautifultree.jpg");
+
+        PhotoService.addPhoto(user, photo1);
     }
 
     @Test
