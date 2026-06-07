@@ -101,7 +101,7 @@ public class UserService {
         }
         if (user.getUsername() != null){
             if (!OurObjects.usersLowercase.containsKey(Helper.toLower(user.getUsername()))) throw new exceptions.UserDoesNotExist(user.getUsername());
-            User realUser = OurObjects.users.get(OurObjects.usersLowercase.get(user.getUsername()));
+            User realUser = OurObjects.users.get(OurObjects.usersLowercase.get(Helper.toLower(user.getUsername())));
             if (realUser.isBanned()) throw new exceptions.UserBanned(user.getUsername());
             String realPassword = realUser.getPassword();
             if (!realPassword.equals(user.getPassword())) throw new exceptions.IncorrectPassword();
