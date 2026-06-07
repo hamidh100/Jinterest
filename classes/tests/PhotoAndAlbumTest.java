@@ -2,7 +2,7 @@ import org.junit.jupiter.api.*;
 import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class Tests {
+public class PhotoAndAlbumTest {
     @BeforeEach
     public void init() {
         OurObjects.users.clear();
@@ -13,20 +13,6 @@ public class Tests {
         OurObjects.albums.clear();
         OurObjects.likes.clear();
         OurObjects.comments.clear();
-    }
-
-    @Test
-    public void userSignUpAndLogin() {
-        User user = new User("09111111111", "Qwer1234");
-        try {
-            UserService.signup(user);
-            UserService.login(user);
-        } catch (Exception e) {
-            fail();
-        }
-
-        assertNotNull(user.getUuid());
-        assertEquals("09111111111", user.getPhone());
     }
 
     @Test
