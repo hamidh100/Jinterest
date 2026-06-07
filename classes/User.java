@@ -16,7 +16,7 @@ public class User {
     private List<UUID> followingIDs = new ArrayList<UUID>();/* we have to show posts from followings to user on top of the home page */
 
     /* Patters for verification*/
-    public static final String USERNAME_PATTERN = "^[a-zA-Z0-9][a-zA-Z0-9_]+[a-zA-Z0-9]$";
+    public static final String USERNAME_PATTERN = "(?=.*[a-zA-Z])^[a-zA-Z0-9][a-zA-Z0-9_]+[a-zA-Z0-9]$";
     public static final String USERNAME_DEFAULT_PATTERN = "^user#[a-z0-9]{8}$";
     public static final String EMAIL_PATTERN = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
     public static final String PHONENUMBER_PATTERN = "^(0|\\+\\d{2})?9\\d{9}$";

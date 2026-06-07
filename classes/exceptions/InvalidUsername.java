@@ -8,7 +8,7 @@ public class InvalidUsername extends Exception {
     static { // or with Map.of
         invalidUsernameTypesMap.put(InvalidUsernameTypes.TOOSHORT, "Username is too short");
         invalidUsernameTypesMap.put(InvalidUsernameTypes.TOOLONG, "Username is too long");
-        invalidUsernameTypesMap.put(InvalidUsernameTypes.PATTERNMISMATCH, "Username should only have letters, numbers and underscores and shouldn't start or end with underscores");
+        invalidUsernameTypesMap.put(InvalidUsernameTypes.PATTERNMISMATCH, "Username should only have letters, numbers and underscores and shouldn't start or end with underscores (also it should contain at least one letter)");
     }
     public InvalidUsername(InvalidUsernameTypes type){
         // The Java feature 'Flexible Constructor Bodies' is only available with source level 25 and above ==> Map instead of switch
