@@ -25,6 +25,7 @@ public class Helper {
     }
 
     public static String extractNameFromPath(String str){
+        if (str == null) return null;
         String res = "";
         boolean flag = false;
         for (int i = str.length() - 1; i >= 0; i--){
