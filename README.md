@@ -2,16 +2,12 @@
 
 
 TODO:
-
-Part 1:\
-comment\
-caption
-
-Part 2:\
 api\
 database\
+even more tests\
 suggest\
-times (server logs?)
+times (server logs?)\
+likable comments?
 
 TODON'T:\
 AI based photo finding
