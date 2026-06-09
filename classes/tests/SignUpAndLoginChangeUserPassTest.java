@@ -1,7 +1,12 @@
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import exceptions.IncorrectPassword;
+import exceptions.InvalidLoginMethod;
+import exceptions.InvalidSignupMethod;
 import exceptions.UserAlreadyExists;
+import exceptions.UserBanned;
+import exceptions.UserDoesNotExist;
 import exceptions.WeakPassword;
 
 import java.util.UUID;
@@ -44,6 +49,28 @@ public class SignUpAndLoginChangeUserPassTest extends initTest {
 
         assertNotNull(user.getUuid());
         assertEquals("09111111111", user.getPhone());
+    }
+
+    @Test
+    public void signupFail() {
+        String identifier = "someone@h.co";
+        String password = "Qwer1234";
+        User user = new User(identifier, password);
+        try {
+            UserService.signup(user);
+            UserService.login(identifier, password);
+        } catch (Exception e) {
+            fail();
+        }
+        try {
+            user.setUsername(null);
+            UserService.signup(user);
+            fail();
+        } catch (exceptions.UserAlreadyExists e){
+
+        } catch (Exception e){
+            fail();
+        }
     }
 
     @Test
