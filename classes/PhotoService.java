@@ -42,13 +42,13 @@ public class PhotoService {
         if (photo.getCommentIDs().contains(comment.getUuid())) return;
         comment.setPhotoID(photo.getUuid());
         photo.getCommentIDs().add(comment.getUuid());
-        OurObjects.comments.put(comment.getUserID(), comment);
+        OurObjects.comments.put(comment.getUuid(), comment);
     }
     public static void removeComment(Photo photo, Comment comment){
         if (!photo.getCommentIDs().contains(comment.getUuid())) return;
         comment.setPhotoID(null);
         photo.getCommentIDs().remove(comment.getUuid());
-        OurObjects.comments.remove(comment.getUserID());
+        OurObjects.comments.remove(comment.getUuid());
     }
     public static void addCategory(Photo photo, Category category){
         if (photo.getCategoryList().contains(category)) return;
