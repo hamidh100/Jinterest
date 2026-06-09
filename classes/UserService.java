@@ -70,7 +70,7 @@ public class UserService {
     public static void signup(User user) throws InvalidSignupMethod, UserAlreadyExists, WeakPassword {
         if (user.getEmail() == null && user.getPhone() == null) throw new exceptions.InvalidSignupMethod();
         if (user.getEmail() != null && user.getPhone() != null) throw new exceptions.InvalidSignupMethod(); // only one?
-        if (user.getUsername() != null) throw new exceptions.InvalidSignupMethod(); // pointless ig
+        //if (user.getUsername() != null) throw new exceptions.InvalidSignupMethod(); // pointless ig
         if (user.getEmail() != null && OurObjects.emailToUserID.containsKey(user.getEmail())) throw new exceptions.UserAlreadyExists(user.getEmail());
         if (user.getPhone() != null && OurObjects.phoneToUserID.containsKey(user.getPhone())) throw new exceptions.UserAlreadyExists(user.getPhone());
         checkPassword(user);

@@ -63,7 +63,6 @@ public class SignUpAndLoginChangeUserPassTest extends initTest {
             fail();
         }
         try {
-            user.setUsername(null);
             UserService.signup(user);
             fail();
         } catch (exceptions.UserAlreadyExists e){
