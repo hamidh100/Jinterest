@@ -1,13 +1,14 @@
 # Jinterest
 
 
-TODO:
-api\
-database\
+TODO:\
 even more tests\
+likable comments?\
+some refactoring stuff\
+database\
+api\
 suggest\
 times (server logs?)\
-likable comments?
 
 TODON'T:\
 AI based photo finding
