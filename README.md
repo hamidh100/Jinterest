@@ -8,7 +8,7 @@ some refactoring stuff\
 database\
 api\
 suggest\
-times (server logs?)\
+times (server logs?)
 
 TODON'T:\
 AI based photo finding
