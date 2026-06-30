@@ -5,4 +5,8 @@
 classes/lib/
 classes/notes/
 
-frontend/
+frontend/.dart_tool/
+frontend/.idea/
+frontend/.metadata
+frontend/frontend.iml
+frontend/pubspec.lock
