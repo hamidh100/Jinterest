@@ -1,4 +1,5 @@
 .vscode/
+Jinterest.code-workspace
 .idea/
 /Jinterest.iml
 
@@ -11,4 +12,6 @@ frontend/.metadata
 frontend/frontend.iml
 frontend/pubspec.lock
 
-Jinterest.code-workspace
+# idk
+# frontend/android/gradle.properties
+# frontend/android/settings.gradle.kts
