@@ -8,71 +8,65 @@ class Validators {
   static const String passwordPattern =
       r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$';
 
-  static String? validateUsername(String? value) {
-    if (value == null || value.isEmpty) {
+  static String? validateUsername(String? username) {
+    if (username == null || username.isEmpty) {
       return 'Username required';
     }
-
-    if (!RegExp(usernamePattern).hasMatch(value)) {
-      return 'Username must:\n- Contain letters\n- Start and end with alphanumeric\n- Can contain underscores in middle';
+    if (username.length < 3) {
+      return 'Username too short (min 3 characters)';
     }
-
+    if (username.length > 20) {
+      return 'Username too long (max 20 characters)';
+    }
+    if (!RegExp(usernamePattern).hasMatch(username)) {
+      return 'Username must contain letters, start/end with alphanumeric, can have underscores';
+    }
     return null;
   }
 
-  static String? validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
+  static String? validateEmail(String? email) {
+    if (email == null || email.isEmpty) {
       return 'Email required';
     }
-
-    if (!RegExp(emailPattern).hasMatch(value)) {
+    if (!RegExp(emailPattern).hasMatch(email)) {
       return 'Invalid email format';
     }
-
     return null;
   }
 
-  static String? validatePhone(String? value) {
-    if (value == null || value.isEmpty) {
+  static String? validatePhone(String? phone) {
+    if (phone == null || phone.isEmpty) {
       return 'Phone number required';
     }
-
-    if (!RegExp(phonePattern).hasMatch(value)) {
+    if (!RegExp(phonePattern).hasMatch(phone)) {
       return 'Invalid phone format (e.g., 09xxxxxxxxx or +989xxxxxxxxx)';
     }
-
     return null;
   }
 
-  static String? validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
+  static String? validatePassword(String? password) {
+    if (password == null || password.isEmpty) {
       return 'Password required';
     }
-
-    if (value.length < 8) {
-      return 'Password must be at least 8 characters';
+    if (password.length < 8) {
+      return 'Password too short (min 8 characters)';
     }
-
-    if (!RegExp(passwordPattern).hasMatch(value)) {
-      return 'Password must contain:\n- Lowercase letter\n- Uppercase letter\n- Digit';
+    if (!RegExp(passwordPattern).hasMatch(password)) {
+      return 'Password must contain lowercase, uppercase, and digit';
     }
-
     return null;
   }
 
-  static String? validateIdentifier(String? value) {
-    if (value == null || value.isEmpty) {
+  static String? validateIdentifier(String? identifier) {
+    if (identifier == null || identifier.isEmpty) {
       return 'Email, phone, or username required';
     }
-
-    if (value.contains('@')) {
-      return validateEmail(value);
+    if (identifier.contains('@')) {
+      return validateEmail(identifier);
     }
-
-    if (value.startsWith('0') || value.startsWith('+')) {
-      return validatePhone(value);
+    if (identifier.startsWith('0') || identifier.startsWith('+')) {
+      return validatePhone(identifier);
     }
-
-    return validateUsername(value);
+    return validateUsername(identifier);
   }
 }
