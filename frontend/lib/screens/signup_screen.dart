@@ -89,6 +89,7 @@ class _SignupScreenState extends State<SignupScreen> {
   }*/
 
   void _showErrorToast(String message) {
+    ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
