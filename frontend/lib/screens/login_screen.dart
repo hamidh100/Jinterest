@@ -19,10 +19,14 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
 
   Future<void> _handleLogin() async {
+    if (_isLoading) return;
+
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
 
     setState(() => _isLoading = true);
+
+    ScaffoldMessenger.of(context).clearSnackBars();
 
     try {
       final authProvider = context.read<AuthProvider>();
