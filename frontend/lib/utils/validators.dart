@@ -3,10 +3,10 @@ class Validators {
       r'(?=.*[a-zA-Z])^[a-zA-Z0-9][a-zA-Z0-9_]+[a-zA-Z0-9]$';
   static final String USERNAME_DEFAULT_PATTERN = r'^user#[a-z0-9]{8}$';
   static final String EMAIL_PATTERN =
-      r'^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$';
-  static final String PHONENUMBER_PATTERN = r'^(0|\\+\\d{2})?9\\d{9}$';
+      r'^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$';
+  static final String PHONENUMBER_PATTERN = r'^(0|\+\d{2})?9\d{9}$';
   static final String PASSWORD_PATTERN =
-      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$';
+      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$';
 
   static String? validateUsername(String? username) {
     if (username == null || username.isEmpty) {
@@ -66,7 +66,7 @@ class Validators {
     doesMatch |= RegExp(USERNAME_PATTERN).hasMatch(identifier);
     doesMatch |= RegExp(EMAIL_PATTERN).hasMatch(identifier);
     doesMatch |= RegExp(PHONENUMBER_PATTERN).hasMatch(identifier);
-    return doesMatch ? null : 'identifier didn\'t match anything';
+    return doesMatch ? null : 'Enter a valid username, email or phone';
     /*if (identifier.contains('@')) {
       return validateEmail(identifier);
     }
