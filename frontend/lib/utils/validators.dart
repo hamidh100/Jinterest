@@ -1,11 +1,11 @@
 class Validators {
-  static final String USERNAME_PATTERN =
+  static const String usernamePattern =
       r'(?=.*[a-zA-Z])^[a-zA-Z0-9][a-zA-Z0-9_]+[a-zA-Z0-9]$';
-  static final String USERNAME_DEFAULT_PATTERN = r'^user#[a-z0-9]{8}$';
-  static final String EMAIL_PATTERN =
+  static const String usernameDefaultPattern = r'^user#[a-z0-9]{8}$';
+  static const String emailPattern =
       r'^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$';
-  static final String PHONENUMBER_PATTERN = r'^(0|\+\d{2})?9\d{9}$';
-  static final String PASSWORD_PATTERN =
+  static const String phoneNumberPattern = r'^(0|\+\d{2})?9\d{9}$';
+  static const String passwordPattern =
       r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$';
 
   static String? validateUsername(String? username) {
@@ -18,7 +18,7 @@ class Validators {
     if (username.length > 20) {
       return 'Username too long (max 20 characters)';
     }
-    if (!RegExp(USERNAME_PATTERN).hasMatch(username)) {
+    if (!RegExp(usernamePattern).hasMatch(username)) {
       return 'Username should only have letters, numbers and underscores and shouldn\'t start or end with underscores (also it should contain at least one letter)';
     }
     return null;
@@ -28,7 +28,7 @@ class Validators {
     if (email == null || email.isEmpty) {
       return 'Email required';
     }
-    if (!RegExp(EMAIL_PATTERN).hasMatch(email)) {
+    if (!RegExp(emailPattern).hasMatch(email)) {
       return 'Invalid email format';
     }
     return null;
@@ -38,7 +38,7 @@ class Validators {
     if (phone == null || phone.isEmpty) {
       return 'Phone number required';
     }
-    if (!RegExp(PHONENUMBER_PATTERN).hasMatch(phone)) {
+    if (!RegExp(phoneNumberPattern).hasMatch(phone)) {
       return 'Invalid phone format (e.g., 09xxxxxxxxx or +989xxxxxxxxx)';
     }
     return null;
@@ -51,7 +51,7 @@ class Validators {
     if (password.length < 8) {
       return 'Password too short (min 8 characters)';
     }
-    if (!RegExp(PASSWORD_PATTERN).hasMatch(password)) {
+    if (!RegExp(passwordPattern).hasMatch(password)) {
       return 'Password must contain lowercase, uppercase, and digit';
     }
     return null;
@@ -62,10 +62,10 @@ class Validators {
       return 'Email, phone, or username required';
     }
     bool doesMatch = false;
-    doesMatch |= RegExp(USERNAME_DEFAULT_PATTERN).hasMatch(identifier);
-    doesMatch |= RegExp(USERNAME_PATTERN).hasMatch(identifier);
-    doesMatch |= RegExp(EMAIL_PATTERN).hasMatch(identifier);
-    doesMatch |= RegExp(PHONENUMBER_PATTERN).hasMatch(identifier);
+    doesMatch |= RegExp(usernameDefaultPattern).hasMatch(identifier);
+    doesMatch |= RegExp(usernamePattern).hasMatch(identifier);
+    doesMatch |= RegExp(emailPattern).hasMatch(identifier);
+    doesMatch |= RegExp(phoneNumberPattern).hasMatch(identifier);
     return doesMatch ? null : 'Enter a valid username, email or phone';
     /*if (identifier.contains('@')) {
       return validateEmail(identifier);

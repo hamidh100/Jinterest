@@ -69,14 +69,14 @@ class UserService {
     if (username.length > 20) {
       throw InvalidUsername(InvalidUsernameTypes.TOOLONG);
     }
-    if (!RegExp(Validators.USERNAME_PATTERN).hasMatch(username)) {
+    if (!RegExp(Validators.usernamePattern).hasMatch(username)) {
       throw InvalidUsername(InvalidUsernameTypes.PATTERNMISMATCH);
     }
   }
 
   static String? getEmailName(User? user) {
     if (user == null || user.email == null) return null;
-    if (!RegExp(Validators.EMAIL_PATTERN).hasMatch(user.email!)) return null;
+    if (!RegExp(Validators.emailPattern).hasMatch(user.email!)) return null;
     return user.email!.split('@')[0];
   }
 
@@ -95,7 +95,7 @@ class UserService {
       throw WeakPassword(WeakPasswordTypes.CONTAINSUSER);
     }
 
-    if (!RegExp(Validators.PASSWORD_PATTERN).hasMatch(password)) {
+    if (!RegExp(Validators.passwordPattern).hasMatch(password)) {
       throw WeakPassword(WeakPasswordTypes.PATTERNMISMATCH);
     }
   }
