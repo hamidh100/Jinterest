@@ -34,18 +34,18 @@ class _LoginScreenState extends State<LoginScreen> {
       if (success && mounted) {
         Navigator.pushReplacementNamed(context, '/home');
       } else if (mounted) {
-        _showErrorDialog(authProvider.errorMessage ?? 'Login failed');
+        _showErrorToast(authProvider.errorMessage ?? 'Login failed');
       }
     } catch (e) {
       if (mounted) {
-        _showErrorDialog('Error: $e');
+        _showErrorToast('Error: $e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  void _showErrorDialog(String message) {
+  /*void _showErrorDialog(String message) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -57,6 +57,16 @@ class _LoginScreenState extends State<LoginScreen> {
             child: const Text('OK'),
           ),
         ],
+      ),
+    );
+  }*/
+
+  void _showErrorToast(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }
