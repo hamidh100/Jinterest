@@ -17,7 +17,8 @@ class PhotoProvider extends ChangeNotifier {
 
     try {
       _errorMessage = null;
-      _photos = await PhotoService.getAllPhotos();
+      final result = await PhotoService.getAllPhotos();
+      _photos = List<Photo>.from(result);
     } catch (e) {
       _errorMessage = 'Failed to load photos: $e';
     } finally {
@@ -30,8 +31,9 @@ class PhotoProvider extends ChangeNotifier {
 
     try {
       _errorMessage = null;
-      final savedPhoto = await PhotoService.addPhoto(photo);
-      _photos.insert(0, savedPhoto);
+      await PhotoService.addPhoto(photo);
+      final result = await PhotoService.getAllPhotos();
+      _photos = List<Photo>.from(result);
       notifyListeners();
       return true;
     } catch (e) {
@@ -49,7 +51,8 @@ class PhotoProvider extends ChangeNotifier {
     try {
       _errorMessage = null;
       await PhotoService.deletePhoto(photoId);
-      _photos.removeWhere((photo) => photo.uuid == photoId);
+      final result = await PhotoService.getAllPhotos();
+      _photos = List<Photo>.from(result);
       notifyListeners();
       return true;
     } catch (e) {
@@ -66,7 +69,8 @@ class PhotoProvider extends ChangeNotifier {
 
     try {
       _errorMessage = null;
-      _photos = await PhotoService.searchPhotos(query);
+      final result = await PhotoService.searchPhotos(query);
+      _photos = List<Photo>.from(result);
     } catch (e) {
       _errorMessage = 'Failed to search photos: $e';
     } finally {
