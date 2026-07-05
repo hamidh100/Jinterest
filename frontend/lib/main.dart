@@ -7,6 +7,7 @@ import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/upload_screen.dart';
+import 'screens/photo_details_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,6 +36,12 @@ class MyApp extends StatelessWidget {
           '/signup': (_) => const SignupScreen(),
           '/home': (_) => const HomeScreen(),
           '/upload': (_) => const UploadScreen(),
+          '/photo-details': (context) {
+            final photoId =
+                ModalRoute.of(context)!.settings.arguments as String;
+
+            return PhotoDetailsScreen(photoId: photoId);
+          },
         },
       ),
     );

@@ -184,129 +184,138 @@ class _PhotoCardState extends State<_PhotoCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Photo header (owner info)
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  backgroundColor: Colors.deepPurple,
-                  child: Text(
-                    widget.photo.ownerID[0].toUpperCase(),
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'User ${widget.photo.ownerID}',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      _timeAgo(widget.photo.photoAge),
-                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          // Photo placeholder
-          Container(
-            width: double.infinity,
-            height: 300,
-            color: Colors.grey[300],
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+    return InkWell(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          '/photo-details',
+          arguments: widget.photo.uuid,
+        );
+      },
+      child: Card(
+        margin: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Photo header (owner info)
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
                 children: [
-                  const Icon(Icons.image, size: 80, color: Colors.grey),
-                  const SizedBox(height: 8),
-                  Text(widget.photo.name),
+                  CircleAvatar(
+                    backgroundColor: Colors.deepPurple,
+                    child: Text(
+                      widget.photo.ownerID[0].toUpperCase(),
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'User ${widget.photo.ownerID}',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        _timeAgo(widget.photo.photoAge),
+                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
-          ),
-          // Actions (like, comment, share)
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12.0,
-              vertical: 8.0,
+            // Photo placeholder
+            Container(
+              width: double.infinity,
+              height: 300,
+              color: Colors.grey[300],
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.image, size: 80, color: Colors.grey),
+                    const SizedBox(height: 8),
+                    Text(widget.photo.name),
+                  ],
+                ),
+              ),
             ),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: Icon(
-                    _isLiked ? Icons.favorite : Icons.favorite_border,
-                    color: _isLiked ? Colors.red : null,
-                  ),
-                  onPressed: () {
-                    setState(() => _isLiked = !_isLiked);
-                  },
-                ),
-                Text('${widget.photo.likeIDs.length}'),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(Icons.comment_outlined),
-                  onPressed: () {
-                    _showCommentSheet(context);
-                  },
-                ),
-                Text('${widget.photo.commentIDs.length}'),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.share_outlined),
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Share functionality coming soon'),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-          // Caption
-          if (widget.photo.captionText != null)
+            // Actions (like, comment, share)
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 12.0,
-                vertical: 4.0,
+                vertical: 8.0,
               ),
-              child: Text(
-                widget.photo.captionText!,
-                style: const TextStyle(fontSize: 14),
-              ),
-            ),
-          // Categories
-          if (widget.photo.categoryList.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Wrap(
-                spacing: 8,
-                children: widget.photo.categoryList
-                    .map(
-                      (category) => Chip(
-                        label: Text(category),
-                        backgroundColor: Colors.deepPurple[100],
-                        labelStyle: const TextStyle(
-                          color: Colors.deepPurple,
-                          fontSize: 12,
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      _isLiked ? Icons.favorite : Icons.favorite_border,
+                      color: _isLiked ? Colors.red : null,
+                    ),
+                    onPressed: () {
+                      setState(() => _isLiked = !_isLiked);
+                    },
+                  ),
+                  Text('${widget.photo.likeIDs.length}'),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.comment_outlined),
+                    onPressed: () {
+                      _showCommentSheet(context);
+                    },
+                  ),
+                  Text('${widget.photo.commentIDs.length}'),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.share_outlined),
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Share functionality coming soon'),
                         ),
-                      ),
-                    )
-                    .toList(),
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
-        ],
+            // Caption
+            if (widget.photo.captionText != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12.0,
+                  vertical: 4.0,
+                ),
+                child: Text(
+                  widget.photo.captionText!,
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ),
+            // Categories
+            if (widget.photo.categoryList.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Wrap(
+                  spacing: 8,
+                  children: widget.photo.categoryList
+                      .map(
+                        (category) => Chip(
+                          label: Text(category),
+                          backgroundColor: Colors.deepPurple[100],
+                          labelStyle: const TextStyle(
+                            color: Colors.deepPurple,
+                            fontSize: 12,
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
