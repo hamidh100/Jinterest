@@ -1,6 +1,6 @@
 class Validators {
   static const String usernamePattern =
-      r'^(?=.*[a-zA-Z])^[a-zA-Z0-9][a-zA-Z0-9_]+[a-zA-Z0-9]$';
+      r'^(?=.*[a-zA-Z])[a-zA-Z0-9][a-zA-Z0-9_]+[a-zA-Z0-9]$';
   static const String usernameDefaultPattern = r'^user#[a-z0-9]{8}$';
   static const String emailPattern =
       r'^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$';
