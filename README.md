@@ -2,6 +2,7 @@
 
 
 TODO:\
+improve album model in backend\
 even more tests\
 likable comments?\
 some refactoring stuff\
