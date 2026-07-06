@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../models/album.dart';
 import '../models/photo.dart';
+import '../models/user.dart';
 import '../providers/album_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
@@ -21,6 +22,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   ProfileViewMode _viewMode = ProfileViewMode.photos;
+  User? _editedUser;
 
   @override
   void initState() {
@@ -38,11 +40,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final photoProvider = context.watch<PhotoProvider>();
     final albumProvider = context.watch<AlbumProvider>();
 
-    final user = authProvider.currentUser;
+    final authUser = authProvider.currentUser;
 
-    if (user == null) {
+    if (authUser == null) {
       return const Scaffold(body: Center(child: Text('Not logged in')));
     }
+
+    final user = _editedUser?.uuid == authUser.uuid ? _editedUser! : authUser;
 
     final followersCount = UserService.followersCount(user);
     final followingCount = UserService.followingCount(user);
@@ -178,7 +182,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildEditProfileButton(BuildContext context) {
-    final user = context.read<AuthProvider>().currentUser;
+    final authUser = context.read<AuthProvider>().currentUser;
+    final user = authUser == null
+        ? null
+        : _editedUser?.uuid == authUser.uuid
+            ? _editedUser!
+            : authUser;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -189,15 +198,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         onPressed: user == null
             ? null
-            : () {
-                Navigator.push(
+            : () async {
+                final updatedUser = await Navigator.push<User>(
                   context,
                   MaterialPageRoute(
                     builder: (_) => _EditProfileScreen(
-                      fullname: user.fullname,
-                      username: user.username,
-                      contact: user.email ?? user.phone ?? 'No contact info',
+                      user: user,
                     ),
+                  ),
+                );
+
+                if (updatedUser == null || !context.mounted) return;
+
+                setState(() {
+                  _editedUser = updatedUser;
+                });
+
+                ScaffoldMessenger.of(context).clearSnackBars();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Profile saved.'),
+                    behavior: SnackBarBehavior.floating,
                   ),
                 );
               },
@@ -331,15 +352,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 }
 
 class _EditProfileScreen extends StatefulWidget {
-  final String fullname;
-  final String? username;
-  final String contact;
+  final User user;
 
-  const _EditProfileScreen({
-    required this.fullname,
-    required this.username,
-    required this.contact,
-  });
+  const _EditProfileScreen({required this.user});
 
   @override
   State<_EditProfileScreen> createState() => _EditProfileScreenState();
@@ -353,8 +368,10 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _fullnameController = TextEditingController(text: widget.fullname);
-    _usernameController = TextEditingController(text: widget.username ?? '');
+    _fullnameController = TextEditingController(text: widget.user.fullname);
+    _usernameController = TextEditingController(
+      text: widget.user.username ?? '',
+    );
   }
 
   @override
@@ -364,14 +381,98 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
     super.dispose();
   }
 
+  // Validates the form and returns the updated user to the profile screen.
   void _handleSave() {
     if (!_formKey.currentState!.validate()) return;
 
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Profile saved.'),
-        behavior: SnackBarBehavior.floating,
+    final fullname = _fullnameController.text.trim();
+    final username = _usernameController.text.trim();
+
+    try {
+      final userWithUsername = username == widget.user.username
+          ? widget.user
+          : UserService.changeUsername(widget.user, username);
+
+      final updatedUser = User(
+        uuid: userWithUsername.uuid,
+        email: userWithUsername.email,
+        phone: userWithUsername.phone,
+        username: userWithUsername.username,
+        password: userWithUsername.password,
+        fullname: fullname,
+        banned: userWithUsername.banned,
+      );
+
+      Navigator.pop(context, updatedUser);
+    } catch (error) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.toString()),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  // Returns the read-only contact text shown in the edit form.
+  String get _contact {
+    return widget.user.email ?? widget.user.phone ?? 'No contact info';
+  }
+
+  // Checks whether the user changed any editable profile field.
+  bool get _hasChanges {
+    return _fullnameController.text.trim() != widget.user.fullname ||
+        _usernameController.text.trim() != (widget.user.username ?? '');
+  }
+
+  // Refreshes the save button and avatar preview when text changes.
+  void _refreshSaveButton() {
+    setState(() {});
+  }
+
+  // Saves the form when the username field submits from the keyboard.
+  void _submitFromKeyboard(String _) {
+    _handleSave();
+  }
+
+  // Validates the full name field before saving.
+  String? _validateFullname(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Full name required';
+    }
+    if (value.trim().length < 2) {
+      return 'Full name must be at least 2 characters';
+    }
+    return null;
+  }
+
+  // Validates the username field before saving.
+  String? _validateUsername(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Username required';
+    }
+    if (value.trim().length < 3) {
+      return 'Username must be at least 3 characters';
+    }
+    return null;
+  }
+
+  // Builds the avatar preview from the current full name.
+  Widget _buildAvatar(String firstLetter) {
+    return Center(
+      child: CircleAvatar(
+        radius: 48,
+        backgroundColor: Colors.deepPurple,
+        child: Text(
+          firstLetter,
+          style: const TextStyle(
+            fontSize: 36,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
     );
   }
@@ -381,34 +482,28 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
     final fullname = _fullnameController.text.trim();
     final firstLetter = fullname.isNotEmpty ? fullname[0].toUpperCase() : '?';
 
+    // Main edit profile page layout.
     return Scaffold(
+      // Top bar for the edit profile page.
       appBar: AppBar(
         title: const Text('Edit Profile'),
         centerTitle: true,
         elevation: 0,
       ),
+      // Scrollable page body so the form fits on small screens.
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
+        // Groups all editable profile fields for validation.
         child: Form(
           key: _formKey,
+          // Stacks the avatar, fields, and save button vertically.
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Center(
-                child: CircleAvatar(
-                  radius: 48,
-                  backgroundColor: Colors.deepPurple,
-                  child: Text(
-                    firstLetter,
-                    style: const TextStyle(
-                      fontSize: 36,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
+              // Shows a live avatar preview from the full name.
+              _buildAvatar(firstLetter),
               const SizedBox(height: 28),
+              // Full name input box.
               TextFormField(
                 controller: _fullnameController,
                 textInputAction: TextInputAction.next,
@@ -419,21 +514,15 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                onChanged: (_) => setState(() {}),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Full name required';
-                  }
-                  if (value.trim().length < 2) {
-                    return 'Full name must be at least 2 characters';
-                  }
-                  return null;
-                },
+                onChanged: (_) => _refreshSaveButton(),
+                validator: _validateFullname,
               ),
               const SizedBox(height: 16),
+              // Username input box.
               TextFormField(
                 controller: _usernameController,
                 textInputAction: TextInputAction.done,
+                onFieldSubmitted: _submitFromKeyboard,
                 decoration: InputDecoration(
                   labelText: 'Username',
                   prefixIcon: const Icon(Icons.alternate_email),
@@ -441,19 +530,13 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Username required';
-                  }
-                  if (value.trim().length < 3) {
-                    return 'Username must be at least 3 characters';
-                  }
-                  return null;
-                },
+                onChanged: (_) => _refreshSaveButton(),
+                validator: _validateUsername,
               ),
               const SizedBox(height: 16),
+              // Read-only contact box.
               TextFormField(
-                initialValue: widget.contact,
+                initialValue: _contact,
                 enabled: false,
                 decoration: InputDecoration(
                   labelText: 'Contact',
@@ -464,11 +547,13 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
                 ),
               ),
               const SizedBox(height: 32),
+              // Save button for submitting valid profile changes.
               ElevatedButton(
-                onPressed: _handleSave,
+                onPressed: _hasChanges ? _handleSave : null,
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 48),
                   backgroundColor: Colors.deepPurple,
+                  disabledBackgroundColor: Colors.grey,
                 ),
                 child: const Text(
                   'Save Changes',
