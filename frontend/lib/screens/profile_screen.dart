@@ -9,6 +9,7 @@ import '../models/user.dart';
 import '../providers/album_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
+import '../providers/theme_provider.dart';
 import '../services/user_service.dart';
 
 enum ProfileViewMode { photos, albums }
@@ -62,6 +63,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         centerTitle: true,
         elevation: 0,
         actions: [
+          _buildThemeToggleButton(),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () => _showLogoutConfirmation(context, authProvider),
@@ -112,6 +114,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  // Builds the app bar button that switches between light and dark mode.
+  Widget _buildThemeToggleButton() {
+    final themeProvider = context.watch<ThemeProvider>();
+
+    return IconButton(
+      tooltip: themeProvider.isDarkMode ? 'Light mode' : 'Dark mode',
+      icon: Icon(
+        themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+      ),
+      onPressed: themeProvider.toggleTheme,
     );
   }
 
