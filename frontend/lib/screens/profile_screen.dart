@@ -178,6 +178,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildEditProfileButton(BuildContext context) {
+    final user = context.read<AuthProvider>().currentUser;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: ElevatedButton(
@@ -185,15 +187,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
           minimumSize: const Size(double.infinity, 48),
           backgroundColor: Colors.deepPurple,
         ),
-        onPressed: () {
-          ScaffoldMessenger.of(context).clearSnackBars();
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Edit profile coming soon'),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        },
+        onPressed: user == null
+            ? null
+            : () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => _EditProfileScreen(
+                      fullname: user.fullname,
+                      username: user.username,
+                      contact: user.email ?? user.phone ?? 'No contact info',
+                    ),
+                  ),
+                );
+              },
         child: const Text(
           'Edit Profile',
           style: TextStyle(
@@ -320,6 +327,163 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (!context.mounted) return;
 
     Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
+  }
+}
+
+class _EditProfileScreen extends StatefulWidget {
+  final String fullname;
+  final String? username;
+  final String contact;
+
+  const _EditProfileScreen({
+    required this.fullname,
+    required this.username,
+    required this.contact,
+  });
+
+  @override
+  State<_EditProfileScreen> createState() => _EditProfileScreenState();
+}
+
+class _EditProfileScreenState extends State<_EditProfileScreen> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _fullnameController;
+  late final TextEditingController _usernameController;
+
+  @override
+  void initState() {
+    super.initState();
+    _fullnameController = TextEditingController(text: widget.fullname);
+    _usernameController = TextEditingController(text: widget.username ?? '');
+  }
+
+  @override
+  void dispose() {
+    _fullnameController.dispose();
+    _usernameController.dispose();
+    super.dispose();
+  }
+
+  void _handleSave() {
+    if (!_formKey.currentState!.validate()) return;
+
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Profile saved.'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final fullname = _fullnameController.text.trim();
+    final firstLetter = fullname.isNotEmpty ? fullname[0].toUpperCase() : '?';
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Edit Profile'),
+        centerTitle: true,
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: CircleAvatar(
+                  radius: 48,
+                  backgroundColor: Colors.deepPurple,
+                  child: Text(
+                    firstLetter,
+                    style: const TextStyle(
+                      fontSize: 36,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 28),
+              TextFormField(
+                controller: _fullnameController,
+                textInputAction: TextInputAction.next,
+                decoration: InputDecoration(
+                  labelText: 'Full Name',
+                  prefixIcon: const Icon(Icons.person_outline),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onChanged: (_) => setState(() {}),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Full name required';
+                  }
+                  if (value.trim().length < 2) {
+                    return 'Full name must be at least 2 characters';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _usernameController,
+                textInputAction: TextInputAction.done,
+                decoration: InputDecoration(
+                  labelText: 'Username',
+                  prefixIcon: const Icon(Icons.alternate_email),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Username required';
+                  }
+                  if (value.trim().length < 3) {
+                    return 'Username must be at least 3 characters';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                initialValue: widget.contact,
+                enabled: false,
+                decoration: InputDecoration(
+                  labelText: 'Contact',
+                  prefixIcon: const Icon(Icons.mail_outline),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton(
+                onPressed: _handleSave,
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 48),
+                  backgroundColor: Colors.deepPurple,
+                ),
+                child: const Text(
+                  'Save Changes',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
