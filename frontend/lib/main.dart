@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/photo_provider.dart';
 import 'providers/album_provider.dart';
+import 'providers/theme_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
@@ -25,31 +26,48 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => PhotoProvider()),
         ChangeNotifierProvider(create: (_) => AlbumProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
-      child: MaterialApp(
-        title: 'Jinterest',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
+      child: Consumer<ThemeProvider>(
+        // Rebuilds MaterialApp when the user toggles the app theme.
+        builder: (context, themeProvider, _) => MaterialApp(
+          title: 'Jinterest',
+          themeMode: themeProvider.themeMode,
+          // Light colors used when dark mode is off.
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.deepPurple,
+              brightness: Brightness.light,
+            ),
+            useMaterial3: true,
+          ),
+          // Dark colors used when dark mode is on.
+          darkTheme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.deepPurple,
+              brightness: Brightness.dark,
+            ),
+            useMaterial3: true,
+          ),
+          debugShowCheckedModeBanner: false,
+          home: const SplashScreen(),
+          routes: {
+            '/login': (_) => const LoginScreen(),
+            '/signup': (_) => const SignupScreen(),
+            '/home': (_) => const HomeScreen(),
+            '/upload': (_) => const UploadScreen(),
+            '/photo-details': (context) {
+              final photoId =
+                  ModalRoute.of(context)!.settings.arguments as String;
+              return PhotoDetailsScreen(photoId: photoId);
+            },
+            '/album-details': (context) {
+              final albumId =
+                  ModalRoute.of(context)!.settings.arguments as String;
+              return AlbumDetailsScreen(albumId: albumId);
+            },
+          },
         ),
-        debugShowCheckedModeBanner: false,
-        home: const SplashScreen(),
-        routes: {
-          '/login': (_) => const LoginScreen(),
-          '/signup': (_) => const SignupScreen(),
-          '/home': (_) => const HomeScreen(),
-          '/upload': (_) => const UploadScreen(),
-          '/photo-details': (context) {
-            final photoId =
-                ModalRoute.of(context)!.settings.arguments as String;
-            return PhotoDetailsScreen(photoId: photoId);
-          },
-          '/album-details': (context) {
-            final albumId =
-                ModalRoute.of(context)!.settings.arguments as String;
-            return AlbumDetailsScreen(albumId: albumId);
-          },
-        },
       ),
     );
   }
