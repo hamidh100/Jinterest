@@ -7,6 +7,7 @@ plugins {
 android {
     namespace = "com.jinterest.app"
     compileSdk = flutter.compileSdkVersion
+    buildToolsVersion = "36.1.0"
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
