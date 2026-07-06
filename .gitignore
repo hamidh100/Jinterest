@@ -15,3 +15,5 @@ frontend/pubspec.lock
 # idk
 # frontend/android/gradle.properties
 # frontend/android/settings.gradle.kts
+frontend/android/
+frontend/pubspec.yaml/
