@@ -8,6 +8,7 @@ class Photo {
   final DateTime photoAge;
   final List<String> likeIDs;
   final List<String> commentIDs;
+  final bool isPublic;
 
   Photo({
     required this.uuid,
@@ -19,5 +20,6 @@ class Photo {
     required this.photoAge,
     this.likeIDs = const [],
     this.commentIDs = const [],
+    this.isPublic = false,
   });
 }
