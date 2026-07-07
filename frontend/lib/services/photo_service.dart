@@ -66,17 +66,7 @@ class PhotoService {
       updatedLikes.add(userId);
     }
 
-    final updatedPhoto = Photo(
-      uuid: oldPhoto.uuid,
-      ownerID: oldPhoto.ownerID,
-      path: oldPhoto.path,
-      name: oldPhoto.name,
-      categoryList: oldPhoto.categoryList,
-      captionText: oldPhoto.captionText,
-      photoAge: oldPhoto.photoAge,
-      likeIDs: updatedLikes,
-      commentIDs: oldPhoto.commentIDs,
-    );
+    final updatedPhoto = oldPhoto.copyWith(likeIDs: updatedLikes);
 
     _photos[index] = updatedPhoto;
     return updatedPhoto;

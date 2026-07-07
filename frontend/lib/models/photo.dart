@@ -22,4 +22,30 @@ class Photo {
     this.commentIDs = const [],
     this.isPublic = false,
   });
+
+  Photo copyWith({
+    String? uuid,
+    String? ownerID,
+    String? path,
+    String? name,
+    List<String>? categoryList,
+    String? captionText,
+    DateTime? photoAge,
+    List<String>? likeIDs,
+    List<String>? commentIDs,
+    bool? isPublic,
+  }) {
+    return Photo(
+      uuid: uuid ?? this.uuid,
+      ownerID: ownerID ?? this.ownerID,
+      path: path ?? this.path,
+      name: name ?? this.name,
+      categoryList: categoryList ?? this.categoryList,
+      captionText: captionText ?? this.captionText,
+      photoAge: photoAge ?? this.photoAge,
+      likeIDs: likeIDs ?? this.likeIDs,
+      commentIDs: commentIDs ?? this.commentIDs,
+      isPublic: isPublic ?? this.isPublic,
+    );
+  }
 }
