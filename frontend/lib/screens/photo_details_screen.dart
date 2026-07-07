@@ -54,14 +54,20 @@ class PhotoDetailsScreen extends StatelessWidget {
               _buildImage(photo),
               const SizedBox(height: 16),
               _buildHeader(context, photo, isLiked),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               UploaderTile(ownerID: photo.ownerID),
-              const Divider(height: 32),
-              _buildCaption(photo),
+              const SizedBox(height: 16),
+              _buildCaption(context, photo),
               _buildTags(photo),
-              const Divider(height: 32),
+              Container(
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                child: const Divider(height: 32),
+              ),
               _buildInfo(photo),
-              const Divider(height: 32),
+              Container(
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                child: const Divider(height: 32),
+              ),
               _buildCommentsSection(context, photo),
             ],
           ),
@@ -128,17 +134,33 @@ class PhotoDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCaption(Photo photo) {
+  Widget _buildCaption(BuildContext context, Photo photo) {
     if (photo.captionText == null || photo.captionText!.trim().isEmpty) {
-      return const Padding(
+      return Padding(
         padding: EdgeInsets.symmetric(horizontal: 16),
-        child: Text('No caption', style: TextStyle(color: Colors.grey)),
+        child: Text(
+          'No caption',
+          style: TextStyle(
+            fontSize: 16,
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.45),
+            height: 1.35,
+          ),
+        ),
       );
     }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Text(photo.captionText!, style: const TextStyle(fontSize: 16)),
+      child: Text(
+        photo.captionText!,
+        style: TextStyle(
+          fontSize: 16,
+          color: Theme.of(context).colorScheme.onSurface,
+          height: 1.35,
+        ),
+      ),
     );
   }
 
@@ -148,7 +170,7 @@ class PhotoDetailsScreen extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Wrap(
         spacing: 8,
         runSpacing: 8,

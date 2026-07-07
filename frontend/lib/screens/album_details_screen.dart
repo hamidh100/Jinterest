@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:jinterest/widgets/uploader_tile.dart';
 import 'package:provider/provider.dart';
 
 import '../models/album.dart';
@@ -56,7 +57,7 @@ class AlbumDetailsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(album.name),
+        title: Text('Album'),
         centerTitle: true,
         actions: [
           if (isOwner)
@@ -69,8 +70,11 @@ class AlbumDetailsScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _buildAlbumHeader(album, albumPhotos.length),
-            const Divider(height: 32),
+            _buildAlbumHeader(context, album, albumPhotos.length),
+            Container(
+              padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+              child: const Divider(height: 32),
+            ),
             _buildPhotosGrid(context, album, albumPhotos, isOwner),
           ],
         ),
@@ -78,10 +82,10 @@ class AlbumDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAlbumHeader(Album album, int photoCount) {
+  Widget _buildAlbumHeader(BuildContext context, Album album, int photoCount) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -89,18 +93,24 @@ class AlbumDetailsScreen extends StatelessWidget {
             album.name,
             style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
+          UploaderTile(ownerID: album.ownerID, padding: EdgeInsets.zero),
+          const SizedBox(height: 14),
           Text(
             album.description?.trim().isNotEmpty == true
                 ? album.description!
                 : 'No description',
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey.shade600,
+              color: album.description?.trim().isNotEmpty == true
+                  ? Theme.of(context).colorScheme.onSurface
+                  : Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.45),
               height: 1.35,
             ),
           ),
-          const SizedBox(height: 18),
+          const Divider(height: 32),
           Wrap(
             spacing: 10,
             runSpacing: 10,
