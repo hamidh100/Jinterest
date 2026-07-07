@@ -93,26 +93,30 @@ class AlbumDetailsScreen extends StatelessWidget {
             album.description?.trim().isNotEmpty == true
                 ? album.description!
                 : 'No description',
-            style: const TextStyle(fontSize: 16, color: Colors.grey),
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey.shade600,
+              height: 1.35,
+            ),
           ),
-          const SizedBox(height: 16),
-          Row(
+          const SizedBox(height: 18),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
             children: [
-              const Icon(Icons.photo_library_outlined),
-              const SizedBox(width: 8),
-              Text('$photoCount ${photoCount == 1 ? 'photo' : 'photos'}'),
-              const SizedBox(width: 24),
-              const Icon(Icons.calendar_today_outlined),
-              const SizedBox(width: 8),
-              Expanded(child: Text(album.albumAge.toLocal().toString())),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Icon(album.isPublic ? Icons.public : Icons.lock_outline),
-              const SizedBox(width: 8),
-              Text(album.isPublic ? 'Public album' : 'Private album'),
+              _AlbumInfoChip(
+                icon: album.isPublic ? Icons.public : Icons.lock_outline,
+                label: album.isPublic ? 'Public' : 'Private',
+              ),
+              _AlbumInfoChip(
+                icon: Icons.photo_library_outlined,
+                label: '$photoCount ${photoCount == 1 ? 'photo' : 'photos'}',
+              ),
+              _AlbumInfoChip(
+                icon: Icons.calendar_today_outlined,
+                label:
+                    '${album.albumAge.year}/${album.albumAge.month.toString().padLeft(2, '0')}/${album.albumAge.day.toString().padLeft(2, '0')} ${album.albumAge.hour.toString().padLeft(2, '0')}:${album.albumAge.minute.toString().padLeft(2, '0')}',
+              ),
             ],
           ),
         ],
@@ -281,6 +285,42 @@ class _AlbumPhotoTile extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+class _AlbumInfoChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _AlbumInfoChip({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colorScheme.outlineVariant),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18, color: colorScheme.primary),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              color: colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
