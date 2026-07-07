@@ -32,6 +32,22 @@ class AlbumDetailsScreen extends StatelessWidget {
 
     final isOwner = currentUser != null && currentUser.uuid == album.ownerID;
 
+    if (!album.isPublic && !isOwner) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Private Album'), centerTitle: true),
+        body: const Center(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Text(
+              'This album is private.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+        ),
+      );
+    }
+
     final albumPhotos = photoProvider.photos
         .where((photo) => album.photoIDs.contains(photo.uuid))
         .where((photo) => isOwner || photo.isPublic)
