@@ -244,9 +244,10 @@ class _ExploreAlbumTile extends StatelessWidget {
 
     final albumPhotos = photoProvider.photos
         .where((photo) => album.photoIDs.contains(photo.uuid))
+        .where((photo) => photo.isPublic)
         .toList();
 
-    final coverPhoto = albumPhotos.isNotEmpty ? albumPhotos.first : null;
+    final coverPhoto = albumPhotos.isNotEmpty ? albumPhotos.last : null;
 
     return InkWell(
       onTap: () {
