@@ -170,6 +170,8 @@ class PhotoDetailsScreen extends StatelessWidget {
           Text('Uploaded: ${photo.photoAge.toLocal()}'),
           const SizedBox(height: 8),
           Text('Comments: ${photo.commentIDs.length}'),
+          const SizedBox(height: 8),
+          Text('Visibility: ${photo.isPublic ? 'Public' : 'Private'}'),
         ],
       ),
     );
