@@ -4,11 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/photo.dart';
-import '../models/user.dart';
 import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
 import '../widgets/info_chip.dart';
-import '../services/user_service.dart';
+import '../widgets/uploader_tile.dart';
 
 class PhotoDetailsScreen extends StatelessWidget {
   final String photoId;
@@ -29,8 +28,6 @@ class PhotoDetailsScreen extends StatelessWidget {
         body: const Center(child: Text('Photo not found')),
       );
     }
-
-    final uploader = UserService.getUserById(photo.ownerID);
 
     final isOwner = currentUser != null && currentUser.uuid == photo.ownerID;
     final isLiked =
@@ -58,7 +55,8 @@ class PhotoDetailsScreen extends StatelessWidget {
               const SizedBox(height: 16),
               _buildHeader(context, photo, isLiked),
               const SizedBox(height: 8),
-              _buildUploader(context, uploader, photo),
+              //_buildUploader(context, uploader, photo),
+              UploaderTile(ownerID: photo.ownerID),
               const Divider(height: 32),
               _buildCaption(photo),
               _buildTags(photo),
@@ -127,83 +125,6 @@ class PhotoDetailsScreen extends StatelessWidget {
           ),
           Text('${photo.likeIDs.length}'),
         ],
-      ),
-    );
-  }
-
-  Widget _buildUploader(BuildContext context, User? uploader, Photo photo) {
-    final displayName = uploader?.fullname.trim().isNotEmpty == true
-        ? uploader!.fullname.trim()
-        : uploader?.username ?? 'Unknown user';
-
-    final username = uploader?.username;
-    final firstLetter = displayName.isNotEmpty
-        ? displayName[0].toUpperCase()
-        : '?';
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: uploader == null
-            ? null
-            : () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('User profile screen coming soon'),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 22,
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                child: Text(
-                  firstLetter,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      displayName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    if (username != null && username.trim().isNotEmpty)
-                      Text(
-                        '@$username',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_right,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
