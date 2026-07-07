@@ -36,9 +36,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
     final photoProvider = context.watch<PhotoProvider>();
     final albumProvider = context.watch<AlbumProvider>();
 
-    // For now, Photo has no isPublic field, so we show all photos.
-    // Later add isPublic to Photo and filter here.
     final photos = photoProvider.photos
+        .where((photo) => photo.isPublic)
         .where((photo) => _matchesPhotoQuery(photo))
         .toList();
 
