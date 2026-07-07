@@ -43,21 +43,24 @@ class PhotoDetailsScreen extends StatelessWidget {
             ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildImage(photo),
-            const SizedBox(height: 16),
-            _buildHeader(context, photo, isLiked),
-            const Divider(height: 32),
-            _buildCaption(photo),
-            _buildTags(photo),
-            const Divider(height: 32),
-            _buildInfo(photo),
-            const Divider(height: 32),
-            _buildCommentsSection(context, photo),
-          ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(bottom: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildImage(photo),
+              const SizedBox(height: 16),
+              _buildHeader(context, photo, isLiked),
+              const Divider(height: 32),
+              _buildCaption(photo),
+              _buildTags(photo),
+              const Divider(height: 32),
+              _buildInfo(photo),
+              const Divider(height: 32),
+              _buildCommentsSection(context, photo),
+            ],
+          ),
         ),
       ),
     );
