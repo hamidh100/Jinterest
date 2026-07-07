@@ -3,6 +3,8 @@
 
 TODO:\
 improve album model in backend\
+album tumbnail\
+private photo in public album visibility\
 even more tests\
 likable comments?\
 some refactoring stuff\
