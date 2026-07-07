@@ -55,7 +55,6 @@ class PhotoDetailsScreen extends StatelessWidget {
               const SizedBox(height: 16),
               _buildHeader(context, photo, isLiked),
               const SizedBox(height: 8),
-              //_buildUploader(context, uploader, photo),
               UploaderTile(ownerID: photo.ownerID),
               const Divider(height: 32),
               _buildCaption(photo),
