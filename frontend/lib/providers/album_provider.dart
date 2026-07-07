@@ -37,11 +37,9 @@ class AlbumProvider extends ChangeNotifier {
       final result = await AlbumService.getAllAlbums();
       _albums = List<Album>.from(result);
 
-      notifyListeners();
       return true;
     } catch (e) {
       _errorMessage = 'Failed to create album: $e';
-      notifyListeners();
       return false;
     } finally {
       _setLoading(false);
@@ -59,11 +57,9 @@ class AlbumProvider extends ChangeNotifier {
       final result = await AlbumService.getAllAlbums();
       _albums = List<Album>.from(result);
 
-      notifyListeners();
       return true;
     } catch (e) {
       _errorMessage = 'Failed to delete album: $e';
-      notifyListeners();
       return false;
     } finally {
       _setLoading(false);
