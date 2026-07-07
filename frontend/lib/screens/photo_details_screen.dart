@@ -38,7 +38,7 @@ class PhotoDetailsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(photo.name),
+        title: const Text('Photo'),
         centerTitle: true,
         actions: [
           if (isOwner)
@@ -57,6 +57,7 @@ class PhotoDetailsScreen extends StatelessWidget {
               _buildImage(photo),
               const SizedBox(height: 16),
               _buildHeader(context, photo, isLiked),
+              const SizedBox(height: 8),
               _buildUploader(context, uploader, photo),
               const Divider(height: 32),
               _buildCaption(photo),
