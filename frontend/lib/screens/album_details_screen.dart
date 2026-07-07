@@ -34,6 +34,7 @@ class AlbumDetailsScreen extends StatelessWidget {
 
     final albumPhotos = photoProvider.photos
         .where((photo) => album.photoIDs.contains(photo.uuid))
+        .where((photo) => isOwner || photo.isPublic)
         .toList();
 
     return Scaffold(
