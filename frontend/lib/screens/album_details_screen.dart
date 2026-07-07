@@ -100,7 +100,7 @@ class AlbumDetailsScreen extends StatelessWidget {
             children: [
               const Icon(Icons.photo_library_outlined),
               const SizedBox(width: 8),
-              Text('$photoCount photos'),
+              Text('$photoCount ${photoCount == 1 ? 'photo' : 'photos'}'),
               const SizedBox(width: 24),
               const Icon(Icons.calendar_today_outlined),
               const SizedBox(width: 8),
