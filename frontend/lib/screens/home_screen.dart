@@ -525,7 +525,7 @@ class _AlbumCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '${album.photoIDs.length} photos',
+                      '${album.photoIDs.length} ${album.photoIDs.length == 1 ? 'photo' : 'photos'}',
                       style: const TextStyle(color: Colors.grey),
                     ),
                   ],

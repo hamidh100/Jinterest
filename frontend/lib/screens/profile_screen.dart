@@ -123,9 +123,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return IconButton(
       tooltip: themeProvider.isDarkMode ? 'Light mode' : 'Dark mode',
-      icon: Icon(
-        themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
-      ),
+      icon: Icon(themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode),
       onPressed: themeProvider.toggleTheme,
     );
   }
@@ -201,8 +199,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final user = authUser == null
         ? null
         : _editedUser?.uuid == authUser.uuid
-            ? _editedUser!
-            : authUser;
+        ? _editedUser!
+        : authUser;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -217,9 +215,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 final updatedUser = await Navigator.push<User>(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => _EditProfileScreen(
-                      user: user,
-                    ),
+                    builder: (_) => _EditProfileScreen(user: user),
                   ),
                 );
 
@@ -694,7 +690,7 @@ class _ProfileAlbumTile extends StatelessWidget {
                     const SizedBox(height: 8),
 
                     Text(
-                      '${album.photoIDs.length} photos',
+                      '${album.photoIDs.length} ${album.photoIDs.length == 1 ? 'photo' : 'photos'}',
                       style: const TextStyle(
                         color: Colors.deepPurple,
                         fontWeight: FontWeight.w500,
