@@ -5,8 +5,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../models/photo.dart';
+import '../providers/album_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
+import '../widgets/create_album_dialog.dart';
 
 class UploadScreen extends StatefulWidget {
   const UploadScreen({super.key});
@@ -24,6 +26,18 @@ class _UploadScreenState extends State<UploadScreen> {
   String _caption = '';
   String _tagsText = '';
   bool _isUploading = false;
+
+  final Set<String> _selectedAlbumIds = {};
+
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      if (!mounted) return;
+      context.read<AlbumProvider>().loadAlbums();
+    });
+  }
 
   Future<void> _pickFromGallery() async {
     final XFile? pickedImage = await _picker.pickImage(
@@ -60,11 +74,9 @@ class _UploadScreenState extends State<UploadScreen> {
     }
 
     if (!_formKey.currentState!.validate()) return;
-
     _formKey.currentState!.save();
 
-    final authProvider = context.read<AuthProvider>();
-    final currentUser = authProvider.currentUser;
+    final currentUser = context.read<AuthProvider>().currentUser;
 
     if (currentUser == null) {
       _showToast('You must be logged in to upload photos', isError: true);
@@ -81,29 +93,40 @@ class _UploadScreenState extends State<UploadScreen> {
           .toList();
 
       final photo = Photo(
-        uuid: DateTime.now().millisecondsSinceEpoch.toString(),
+        uuid: DateTime.now().microsecondsSinceEpoch.toString(),
         ownerID: currentUser.uuid,
         path: _selectedImage!.path,
         name: _photoName.trim(),
-        categoryList: tags,
         captionText: _caption.trim().isEmpty ? null : _caption.trim(),
+        categoryList: tags,
         photoAge: DateTime.now(),
       );
 
-      final success = await context.read<PhotoProvider>().addPhoto(photo);
+      final photoSuccess = await context.read<PhotoProvider>().addPhoto(photo);
+
+      if (!photoSuccess) {
+        final error = context.read<PhotoProvider>().errorMessage;
+        _showToast(error ?? 'Failed to upload photo', isError: true);
+        return;
+      }
+
+      final albumProvider = context.read<AlbumProvider>();
+
+      for (final albumId in _selectedAlbumIds) {
+        await albumProvider.addPhotoToAlbum(
+          albumId: albumId,
+          photoId: photo.uuid,
+        );
+      }
 
       if (!mounted) return;
 
-      if (success) {
-        _showToast('Photo uploaded successfully');
-        Navigator.pop(context);
-      } else {
-        final error = context.read<PhotoProvider>().errorMessage;
-        _showToast(error ?? 'Upload failed', isError: true);
-      }
+      _showToast('Photo uploaded successfully');
+
+      Navigator.pop(context);
     } catch (e) {
       if (mounted) {
-        _showToast('Upload failed: $e', isError: true);
+        _showToast('Error: $e', isError: true);
       }
     } finally {
       if (mounted) {
@@ -117,10 +140,42 @@ class _UploadScreenState extends State<UploadScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? Colors.red : Colors.green,
+        backgroundColor: isError ? Colors.red : null,
         behavior: SnackBarBehavior.floating,
       ),
     );
+  }
+
+  Future<void> _handleCreateAlbum() async {
+    final currentUser = context.read<AuthProvider>().currentUser;
+
+    if (currentUser == null) {
+      _showToast('You must be logged in to create an album', isError: true);
+      return;
+    }
+
+    final album = await showCreateAlbumDialog(
+      context: context,
+      currentUser: currentUser,
+    );
+
+    if (!mounted || album == null) return;
+
+    final success = await context.read<AlbumProvider>().createAlbum(album);
+
+    if (!mounted) return;
+
+    if (!success) {
+      final error = context.read<AlbumProvider>().errorMessage;
+      _showToast(error ?? 'Failed to create album', isError: true);
+      return;
+    }
+
+    setState(() {
+      _selectedAlbumIds.add(album.uuid);
+    });
+
+    _showToast('Album created');
   }
 
   @override
@@ -128,12 +183,12 @@ class _UploadScreenState extends State<UploadScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Upload Photo'), centerTitle: true),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
-              _buildImagePreview(),
+              _buildImagePicker(),
               const SizedBox(height: 16),
               _buildPickButtons(),
               const SizedBox(height: 24),
@@ -143,6 +198,8 @@ class _UploadScreenState extends State<UploadScreen> {
               const SizedBox(height: 16),
               _buildTagsField(),
               const SizedBox(height: 24),
+              _buildAlbumSelector(),
+              const SizedBox(height: 32),
               _buildUploadButton(),
             ],
           ),
@@ -151,16 +208,17 @@ class _UploadScreenState extends State<UploadScreen> {
     );
   }
 
-  Widget _buildImagePreview() {
-    return GestureDetector(
-      onTap: _pickFromGallery,
+  Widget _buildImagePicker() {
+    return InkWell(
+      onTap: _isUploading ? null : _pickFromGallery,
+      borderRadius: BorderRadius.circular(16),
       child: Container(
-        height: 240,
+        height: 260,
         width: double.infinity,
         decoration: BoxDecoration(
           color: Colors.grey[200],
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade400),
+          border: Border.all(color: Colors.deepPurple.shade100),
         ),
         child: _selectedImage == null
             ? const Column(
@@ -216,12 +274,9 @@ class _UploadScreenState extends State<UploadScreen> {
         if (value == null || value.trim().isEmpty) {
           return 'Photo name is required';
         }
-
         return null;
       },
-      onSaved: (value) {
-        _photoName = value ?? '';
-      },
+      onSaved: (value) => _photoName = value ?? '',
     );
   }
 
@@ -232,50 +287,107 @@ class _UploadScreenState extends State<UploadScreen> {
         border: OutlineInputBorder(),
       ),
       maxLines: 3,
-      onSaved: (value) {
-        _caption = value ?? '';
-      },
+      onSaved: (value) => _caption = value ?? '',
     );
   }
 
   Widget _buildTagsField() {
     return TextFormField(
       decoration: const InputDecoration(
-        labelText: 'Tags / categories',
-        hintText: 'nature, travel, family',
+        labelText: 'Tags',
+        hintText: 'nature, travel, friends',
         border: OutlineInputBorder(),
       ),
-      onSaved: (value) {
-        _tagsText = value ?? '';
-      },
+      onSaved: (value) => _tagsText = value ?? '',
+    );
+  }
+
+  Widget _buildAlbumSelector() {
+    final currentUser = context.watch<AuthProvider>().currentUser;
+    final albumProvider = context.watch<AlbumProvider>();
+
+    if (currentUser == null) return const SizedBox.shrink();
+
+    final userAlbums = albumProvider.albums
+        .where((album) => album.ownerID == currentUser.uuid)
+        .toList();
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Add to albums',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+              TextButton.icon(
+                onPressed: _isUploading ? null : _handleCreateAlbum,
+                icon: const Icon(Icons.add),
+                label: const Text('New'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (albumProvider.isLoading)
+            const Center(child: CircularProgressIndicator())
+          else if (userAlbums.isEmpty)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Text('No albums yet. Create one first.'),
+            )
+          else
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: userAlbums.map((album) {
+                final selected = _selectedAlbumIds.contains(album.uuid);
+
+                return FilterChip(
+                  label: Text(album.name),
+                  selected: selected,
+                  onSelected: _isUploading
+                      ? null
+                      : (value) {
+                          setState(() {
+                            if (value) {
+                              _selectedAlbumIds.add(album.uuid);
+                            } else {
+                              _selectedAlbumIds.remove(album.uuid);
+                            }
+                          });
+                        },
+                );
+              }).toList(),
+            ),
+        ],
+      ),
     );
   }
 
   Widget _buildUploadButton() {
-    return ElevatedButton(
-      onPressed: _isUploading ? null : _uploadPhoto,
-      style: ElevatedButton.styleFrom(
-        minimumSize: const Size(double.infinity, 50),
-        backgroundColor: Colors.deepPurple,
-        disabledBackgroundColor: Colors.grey,
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: _isUploading ? null : _uploadPhoto,
+        icon: _isUploading
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.cloud_upload),
+        label: Text(_isUploading ? 'Uploading...' : 'Upload Photo'),
       ),
-      child: _isUploading
-          ? const SizedBox(
-              height: 22,
-              width: 22,
-              child: CircularProgressIndicator(
-                color: Colors.white,
-                strokeWidth: 2,
-              ),
-            )
-          : const Text(
-              'Upload',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
     );
   }
 }
