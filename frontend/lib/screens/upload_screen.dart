@@ -26,6 +26,7 @@ class _UploadScreenState extends State<UploadScreen> {
   String _caption = '';
   String _tagsText = '';
   bool _isUploading = false;
+  bool _isPublic = false;
 
   final Set<String> _selectedAlbumIds = {};
 
@@ -100,6 +101,7 @@ class _UploadScreenState extends State<UploadScreen> {
         captionText: _caption.trim().isEmpty ? null : _caption.trim(),
         categoryList: tags,
         photoAge: DateTime.now(),
+        isPublic: _isPublic,
       );
 
       final photoSuccess = await context.read<PhotoProvider>().addPhoto(photo);
@@ -200,6 +202,8 @@ class _UploadScreenState extends State<UploadScreen> {
                 _buildTagsField(),
                 const SizedBox(height: 24),
                 _buildAlbumSelector(),
+                const SizedBox(height: 24),
+                _buildPublicToggle(),
                 const SizedBox(height: 32),
                 _buildUploadButton(),
               ],
@@ -389,6 +393,33 @@ class _UploadScreenState extends State<UploadScreen> {
               )
             : const Icon(Icons.cloud_upload),
         label: Text(_isUploading ? 'Uploading...' : 'Upload Photo'),
+      ),
+    );
+  }
+
+  Widget _buildPublicToggle() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        title: const Text(
+          'Public photo',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: const Text('Public photos can be shown in Explore.'),
+        value: _isPublic,
+        onChanged: _isUploading
+            ? null
+            : (value) {
+                setState(() {
+                  _isPublic = value;
+                });
+              },
       ),
     );
   }
