@@ -8,6 +8,7 @@ import '../models/photo.dart';
 import '../providers/album_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
+import '../widgets/info_chip.dart';
 
 class AlbumDetailsScreen extends StatelessWidget {
   final String albumId;
@@ -104,15 +105,15 @@ class AlbumDetailsScreen extends StatelessWidget {
             spacing: 10,
             runSpacing: 10,
             children: [
-              _AlbumInfoChip(
+              InfoChip(
                 icon: album.isPublic ? Icons.public : Icons.lock_outline,
                 label: album.isPublic ? 'Public' : 'Private',
               ),
-              _AlbumInfoChip(
+              InfoChip(
                 icon: Icons.photo_library_outlined,
                 label: '$photoCount ${photoCount == 1 ? 'photo' : 'photos'}',
               ),
-              _AlbumInfoChip(
+              InfoChip(
                 icon: Icons.calendar_today_outlined,
                 label:
                     '${album.albumAge.year}/${album.albumAge.month.toString().padLeft(2, '0')}/${album.albumAge.day.toString().padLeft(2, '0')} ${album.albumAge.hour.toString().padLeft(2, '0')}:${album.albumAge.minute.toString().padLeft(2, '0')}',
@@ -285,42 +286,6 @@ class _AlbumPhotoTile extends StatelessWidget {
             ),
           ),
       ],
-    );
-  }
-}
-
-class _AlbumInfoChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-
-  const _AlbumInfoChip({required this.icon, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: colorScheme.outlineVariant),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 18, color: colorScheme.primary),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              color: colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
