@@ -182,26 +182,28 @@ class _UploadScreenState extends State<UploadScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Upload Photo'), centerTitle: true),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              _buildImagePicker(),
-              const SizedBox(height: 16),
-              _buildPickButtons(),
-              const SizedBox(height: 24),
-              _buildPhotoNameField(),
-              const SizedBox(height: 16),
-              _buildCaptionField(),
-              const SizedBox(height: 16),
-              _buildTagsField(),
-              const SizedBox(height: 24),
-              _buildAlbumSelector(),
-              const SizedBox(height: 32),
-              _buildUploadButton(),
-            ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                _buildImagePicker(),
+                const SizedBox(height: 16),
+                _buildPickButtons(),
+                const SizedBox(height: 24),
+                _buildPhotoNameField(),
+                const SizedBox(height: 16),
+                _buildCaptionField(),
+                const SizedBox(height: 16),
+                _buildTagsField(),
+                const SizedBox(height: 24),
+                _buildAlbumSelector(),
+                const SizedBox(height: 32),
+                _buildUploadButton(),
+              ],
+            ),
           ),
         ),
       ),
