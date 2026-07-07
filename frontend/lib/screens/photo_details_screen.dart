@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../models/photo.dart';
 import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
+import '../widgets/info_chip.dart';
 
 class PhotoDetailsScreen extends StatelessWidget {
   final String photoId;
@@ -160,18 +161,41 @@ class PhotoDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildInfo(Photo photo) {
+    final uploadedDate =
+        '${photo.photoAge.year}/${photo.photoAge.month.toString().padLeft(2, '0')}/${photo.photoAge.day.toString().padLeft(2, '0')}';
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Wrap(
+        spacing: 10,
+        runSpacing: 10,
         children: [
-          Text('Owner ID: ${photo.ownerID}'),
-          const SizedBox(height: 8),
-          Text('Uploaded: ${photo.photoAge.toLocal()}'),
-          const SizedBox(height: 8),
-          Text('Comments: ${photo.commentIDs.length}'),
-          const SizedBox(height: 8),
-          Text('Visibility: ${photo.isPublic ? 'Public' : 'Private'}'),
+          InfoChip(
+            icon: photo.isPublic ? Icons.public : Icons.lock_outline,
+            label: photo.isPublic ? 'Public' : 'Private',
+          ),
+          InfoChip(
+            icon: Icons.favorite,
+            label:
+                '${photo.likeIDs.length} ${photo.likeIDs.length == 1 ? 'like' : 'likes'}',
+            iconColor: Colors.red,
+          ),
+          InfoChip(
+            icon: Icons.comment_outlined,
+            label:
+                '${photo.commentIDs.length} ${photo.commentIDs.length == 1 ? 'comment' : 'comments'}',
+          ),
+          InfoChip(
+            icon: Icons.calendar_today_outlined,
+            label:
+                '${photo.photoAge.year}/${photo.photoAge.month.toString().padLeft(2, '0')}/${photo.photoAge.day.toString().padLeft(2, '0')} ${photo.photoAge.hour.toString().padLeft(2, '0')}:${photo.photoAge.minute.toString().padLeft(2, '0')}',
+          ),
+          if (photo.categoryList.isNotEmpty)
+            InfoChip(
+              icon: Icons.sell_outlined,
+              label:
+                  '${photo.categoryList.length} ${photo.categoryList.length == 1 ? 'tag' : 'tags'}',
+            ),
         ],
       ),
     );
