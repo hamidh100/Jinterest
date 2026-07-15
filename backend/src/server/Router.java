@@ -11,6 +11,8 @@ public class Router {
             }
 
             switch (request.getRoute()) {
+                case "ping":
+                    return handlePing(request);
                 default:
                     throw new RouteNotFoundException("Unknown route: " + request.getRoute());
             }
@@ -21,4 +23,9 @@ public class Router {
         }
     }
 
+    private Response handlePing(Request request) {
+        JsonObject payload = new JsonObject();
+        payload.addProperty("pong", true);
+        return Response.ok("pong", payload);
+    }
 }
