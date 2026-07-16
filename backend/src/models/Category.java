@@ -1,3 +1,5 @@
+package models;
+
 public enum Category {
     NATURE,
     PORTRAIT,

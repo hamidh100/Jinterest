@@ -1,3 +1,5 @@
+import models.*;
+import services.*;
 import org.junit.jupiter.api.*;
 
 import exceptions.InvalidSignupMethod;
