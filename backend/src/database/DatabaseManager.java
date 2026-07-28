@@ -7,8 +7,10 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializer;
 
 import java.io.IOException;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -49,6 +51,32 @@ public final class DatabaseManager {
             }
         } catch (JsonParseException e) {
             throw new IOException("Could not parse database file: " + DEFAULT_DATABASE_PATH, e);
+        }
+    }
+
+    public static synchronized void save() throws IOException {
+        Path directory = DEFAULT_DATABASE_PATH.getParent();
+        Files.createDirectories(directory);
+
+        Path temporaryFile = Files.createTempFile(directory, "jinterest-", ".tmp");
+        boolean saved = false;
+
+        try {
+            DatabaseSnapshot snapshot = DatabaseSnapshot.fromCurrentState();
+            Files.writeString(temporaryFile, GSON.toJson(snapshot));
+
+            try {
+                Files.move(temporaryFile, DEFAULT_DATABASE_PATH,
+                        StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            } catch (AtomicMoveNotSupportedException e) {
+                Files.move(temporaryFile, DEFAULT_DATABASE_PATH, StandardCopyOption.REPLACE_EXISTING);
+            }
+
+            saved = true;
+        } finally {
+            if (!saved) {
+                Files.deleteIfExists(temporaryFile);
+            }
         }
     }
 }
