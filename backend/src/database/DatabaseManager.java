@@ -38,6 +38,10 @@ public final class DatabaseManager {
     }
 
     public static synchronized void load() throws IOException {
+        if (Files.notExists(DEFAULT_DATABASE_PATH) || Files.size(DEFAULT_DATABASE_PATH) == 0) {
+            return;
+        }
+
         try {
             DatabaseSnapshot snapshot = GSON.fromJson(Files.readString(DEFAULT_DATABASE_PATH), DatabaseSnapshot.class);
             if (snapshot != null) {
