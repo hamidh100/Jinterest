@@ -1,27 +1,31 @@
 package services;
 
+import database.DatabaseManager;
 import models.*;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 import exceptions.*;
 
 public class UserService {
-    public static void follow(User follower, User followed) {
+    public static void follow(User follower, User followed) throws IOException {
         if (follower == null || followed == null) return;
         if (isFollowing(follower, followed)) return;
 
         follower.getFollowingIDs().add(followed.getUuid());
         followed.getFollowerIDs().add(follower.getUuid());
+        DatabaseManager.save();
     }
 
-    public static void unfollow(User follower, User followed) {
+    public static void unfollow(User follower, User followed) throws IOException {
         if (follower == null || followed == null) return;
         if (!isFollowing(follower, followed)) return;
 
         follower.getFollowingIDs().remove(followed.getUuid());
         followed.getFollowerIDs().remove(follower.getUuid());
+        DatabaseManager.save();
     }
 
     public static boolean isFollowing(User follower, User followed) {
@@ -36,12 +40,14 @@ public class UserService {
         return user.getFollowingIDs().size();
     }
 
-    public static void saveAlbum(User user, Album album) {
+    public static void saveAlbum(User user, Album album) throws IOException {
         user.getSavedAlbums().add(album.getUuid());
+        DatabaseManager.save();
     }
 
-    public static void savePhoto(User user, Photo photo) {
+    public static void savePhoto(User user, Photo photo) throws IOException {
         user.getSavedPhotoIDs().add(photo.getUuid());
+        DatabaseManager.save();
     }
 
     public static void checkUsername(User user) throws InvalidUsername {
@@ -71,7 +77,7 @@ public class UserService {
         if (!password.matches(User.PASSWORD_PATTERN)) throw new exceptions.WeakPassword(exceptions.WeakPasswordTypes.PATTERNMISMATCH); // error priority?
     }
 
-    public static void signup(User user) throws InvalidSignupMethod, UserAlreadyExists, WeakPassword {
+    public static void signup(User user) throws InvalidSignupMethod, UserAlreadyExists, WeakPassword, IOException {
         if (user.getEmail() == null && user.getPhone() == null) throw new exceptions.InvalidSignupMethod();
         if (user.getEmail() != null && user.getPhone() != null) throw new exceptions.InvalidSignupMethod(); // only one?
         //if (user.getUsername() != null) throw new exceptions.InvalidSignupMethod(); // pointless ig
@@ -84,6 +90,7 @@ public class UserService {
         OurObjects.usersLowercase.put(user.getUsername(), user.getUuid());
         if (user.getEmail() != null) OurObjects.emailToUserID.put(user.getEmail(), user.getUuid());
         if (user.getPhone() != null) OurObjects.phoneToUserID.put(user.getPhone(), user.getUuid());
+        DatabaseManager.save();
     }
 
     public static void login(String identifier, String password) throws InvalidLoginMethod, UserDoesNotExist, IncorrectPassword, UserBanned {
@@ -113,7 +120,7 @@ public class UserService {
         }
     }
 
-    public static void changeUsername(User user, String newUsername) throws InvalidUsername, UserAlreadyExists, WeakPassword {
+    public static void changeUsername(User user, String newUsername) throws InvalidUsername, UserAlreadyExists, WeakPassword, IOException {
         String oldUsername = user.getUsername();
 
         user.setUsername(newUsername);
@@ -133,9 +140,10 @@ public class UserService {
         }
         if(oldUsername != null)OurObjects.usersLowercase.remove(Helper.toLower(oldUsername));
         OurObjects.usersLowercase.put(newUsernameLower, user.getUuid());
+        DatabaseManager.save();
     }
 
-    public static void changePassword(User user, String newPassword) throws WeakPassword {
+    public static void changePassword(User user, String newPassword) throws WeakPassword, IOException {
         String oldPassword = user.getPassword();
         user.setPassword(newPassword);
         try {
@@ -144,5 +152,6 @@ public class UserService {
             user.setPassword(oldPassword);
             throw e;
         }
+        DatabaseManager.save();
     }
 }
