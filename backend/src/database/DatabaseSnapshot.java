@@ -39,4 +39,19 @@ public class DatabaseSnapshot {
         snapshot.captions.putAll(OurObjects.captions);
         return snapshot;
     }
+
+    public void restoreCurrentState() {
+        OurObjects.users = new HashMap<>(users == null ? Map.of() : users);
+        OurObjects.usersLowercase = new HashMap<>(
+                usersLowercase == null ? Map.of() : usersLowercase);
+        OurObjects.emailToUserID = new HashMap<>(
+                emailToUserID == null ? Map.of() : emailToUserID);
+        OurObjects.phoneToUserID = new HashMap<>(
+                phoneToUserID == null ? Map.of() : phoneToUserID);
+        OurObjects.photos = new HashMap<>(photos == null ? Map.of() : photos);
+        OurObjects.albums = new HashMap<>(albums == null ? Map.of() : albums);
+        OurObjects.likes = new HashMap<>(likes == null ? Map.of() : likes);
+        OurObjects.comments = new HashMap<>(comments == null ? Map.of() : comments);
+        OurObjects.captions = new HashMap<>(captions == null ? Map.of() : captions);
+    }
 }
