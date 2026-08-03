@@ -5,12 +5,14 @@ import org.junit.jupiter.api.*;
 import exceptions.InvalidSignupMethod;
 import exceptions.UserAlreadyExists;
 import exceptions.WeakPassword;
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
 public class FollowTest extends initTest {
     @Test
-    public void twoUsersFollowAndUnfollowEachOther() throws InvalidSignupMethod, UserAlreadyExists, WeakPassword {
+    public void twoUsersFollowAndUnfollowEachOther() throws InvalidSignupMethod, UserAlreadyExists, WeakPassword, IOException {
         User user1 = new User("a@gmail.com", "SDF#$%HGNx1");
         UserService.signup(user1);
         User user2 = new User("b@gmail.com", "SDF#$%HGNx1");
@@ -59,7 +61,7 @@ public class FollowTest extends initTest {
         assertEquals(0, user1.getFollowerIDs().size());
     }
     @Test
-    public void fourUsers() throws InvalidSignupMethod, UserAlreadyExists, WeakPassword {
+    public void fourUsers() throws InvalidSignupMethod, UserAlreadyExists, WeakPassword, IOException {
         User user1 = new User("a@gmail.com", "SDF#$%HGNx1");
         UserService.signup(user1);
         User user2 = new User("b@gmail.com", "SDF#$%HGNx1");
