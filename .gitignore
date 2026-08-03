@@ -3,8 +3,8 @@ Jinterest.code-workspace
 .idea/
 /Jinterest.iml
 
-classes/lib/
-classes/notes/
+backend/lib/
+backend/notes/
 
 frontend/.dart_tool/
 frontend/.idea/
