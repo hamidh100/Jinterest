@@ -5,6 +5,7 @@ Jinterest.code-workspace
 
 backend/lib/
 backend/notes/
+backend/database/jinterest.json
 
 frontend/.dart_tool/
 frontend/.idea/
