@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public final class DatabaseManager {
-    private static final Path DEFAULT_DATABASE_PATH = Path.of("backend", "database", "jinterest.json");
+    private static final Path DEFAULT_DATABASE_PATH = Path.of("database", "jinterest.json");
 
     private static final Gson GSON = createGson();
 
