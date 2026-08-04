@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../models/photo.dart';
@@ -31,9 +33,17 @@ class PhotoProvider extends ChangeNotifier {
 
     try {
       _errorMessage = null;
-      await PhotoService.addPhoto(photo);
+
+      await PhotoService.addPhoto(
+        ownerId: photo.ownerID,
+        imageFile: File(photo.path),
+        categories: photo.categoryList,
+        caption: photo.captionText,
+      );
+
       final result = await PhotoService.getAllPhotos();
       _photos = List<Photo>.from(result);
+
       notifyListeners();
       return true;
     } catch (e) {

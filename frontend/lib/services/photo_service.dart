@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import '../exceptions/exceptions.dart';
 import '../models/photo.dart';
 import 'api_client.dart';
@@ -23,11 +26,10 @@ class PhotoService {
     final categories = (json['categories'] as List? ?? const [])
         .map((category) => category.toString())
         .toList();
+
     final caption = json['caption'];
+    final likeCount = json['likeCount'] as int? ?? 0;
     final commentCount = json['commentCount'] as int? ?? 0;
-    final likedByUserIds = (json['likedByUserIds'] as List? ?? const [])
-        .map((userId) => userId.toString())
-        .toList();
 
     return Photo(
       uuid: json['id']?.toString() ?? '',
@@ -41,7 +43,9 @@ class PhotoService {
       photoAge:
           DateTime.tryParse(json['photoAge']?.toString() ?? '') ??
           DateTime.now(),
-      likeIDs: likedByUserIds,
+
+      // Temporary count representation because backend returns counts
+      likeIDs: List.generate(likeCount, (index) => 'server-like-$index'),
       commentIDs: List.generate(
         commentCount,
         (index) => 'server-comment-$index',
@@ -67,18 +71,32 @@ class PhotoService {
     }
   }
 
-  static Future<Photo> addPhoto(Photo photo) async {
+  static Future<Photo> addPhoto({
+    required String ownerId,
+    required File imageFile,
+    required List<String> categories,
+    String? caption,
+  }) async {
+    final imageBytes = await imageFile.readAsBytes();
+
     final response = await ApiClient.instance.send(
       method: 'POST',
       route: '/photos',
       payload: {
-        'ownerId': photo.ownerID,
-        'path': photo.path,
-        'categories': photo.categoryList,
-        if (photo.captionText != null) 'caption': photo.captionText,
+        'ownerId': ownerId,
+        'fileName': _fileNameFromPath(imageFile.path),
+        'imageBase64': base64Encode(imageBytes),
+        'categories': categories,
+        if (caption != null && caption.trim().isNotEmpty)
+          'caption': caption.trim(),
       },
     );
+
     return _photoFromPayload(response);
+  }
+
+  static String _fileNameFromPath(String path) {
+    return path.replaceAll('\\', '/').split('/').last;
   }
 
   static Future<void> deletePhoto(String photoId) async {
