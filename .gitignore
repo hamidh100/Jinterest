@@ -3,6 +3,7 @@ Jinterest.code-workspace
 .idea/
 /Jinterest.iml
 
+backend/out/
 backend/lib/
 backend/notes/
 backend/database/jinterest.json

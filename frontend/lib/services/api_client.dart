@@ -18,7 +18,7 @@ class ApiClient {
   );
   static const int port = int.fromEnvironment(
     'JINTEREST_PORT',
-    defaultValue: 5050,
+    defaultValue: 8800,
   );
 
   static const Duration connectionTimeout = Duration(seconds: 10);
@@ -40,12 +40,11 @@ class ApiClient {
         'payload': payload ?? <String, dynamic>{},
       };
 
-      final requestJson = jsonEncode(request);
-
-      socket.write('$requestJson\n');
+      socket.write('${jsonEncode(request)}\n');
 
       final responseLine = await socket
-          .transform(utf8.decoder as StreamTransformer<Uint8List, dynamic>)
+          .cast<List<int>>()
+          .transform(utf8.decoder)
           .transform(const LineSplitter())
           .first
           .timeout(responseTimeout);

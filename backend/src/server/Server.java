@@ -9,7 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server {
-    private static final int DEFAULT_PORT = 5050;
+    private static final int DEFAULT_PORT = 8800;
     private final int port;
     private final Router router;
     private final ExecutorService clientPool;
