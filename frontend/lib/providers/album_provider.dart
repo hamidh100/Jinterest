@@ -26,21 +26,22 @@ class AlbumProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> createAlbum(Album album) async {
+  Future<Album?> createAlbum(Album album) async {
     _setLoading(true);
 
     try {
       _errorMessage = null;
 
-      await AlbumService.createAlbum(album);
+      final createdAlbum = await AlbumService.createAlbum(album);
 
-      final result = await AlbumService.getAllAlbums();
-      _albums = List<Album>.from(result);
+      _albums = await AlbumService.getAllAlbums();
 
-      return true;
+      notifyListeners();
+      return createdAlbum;
     } catch (e) {
       _errorMessage = 'Failed to create album: $e';
-      return false;
+      notifyListeners();
+      return null;
     } finally {
       _setLoading(false);
     }

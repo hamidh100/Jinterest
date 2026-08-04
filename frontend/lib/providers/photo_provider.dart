@@ -28,13 +28,13 @@ class PhotoProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> addPhoto(Photo photo) async {
+  Future<Photo?> addPhoto(Photo photo) async {
     _setLoading(true);
 
     try {
       _errorMessage = null;
 
-      await PhotoService.addPhoto(
+      final uploadedPhoto = await PhotoService.addPhoto(
         ownerId: photo.ownerID,
         imageFile: File(photo.path),
         categories: photo.categoryList,
@@ -43,15 +43,14 @@ class PhotoProvider extends ChangeNotifier {
         caption: photo.captionText,
       );
 
-      final result = await PhotoService.getAllPhotos();
-      _photos = List<Photo>.from(result);
+      _photos = await PhotoService.getAllPhotos();
 
       notifyListeners();
-      return true;
+      return uploadedPhoto;
     } catch (e) {
       _errorMessage = 'Failed to add photo: $e';
       notifyListeners();
-      return false;
+      return null;
     } finally {
       _setLoading(false);
     }

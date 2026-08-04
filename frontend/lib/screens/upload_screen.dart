@@ -104,9 +104,9 @@ class _UploadScreenState extends State<UploadScreen> {
         isPublic: _isPublic,
       );
 
-      final photoSuccess = await context.read<PhotoProvider>().addPhoto(photo);
+      final uploadedPhoto = await context.read<PhotoProvider>().addPhoto(photo);
 
-      if (!photoSuccess) {
+      if (uploadedPhoto == null) {
         final error = context.read<PhotoProvider>().errorMessage;
         _showToast(error ?? 'Failed to upload photo', isError: true);
         return;
@@ -117,7 +117,7 @@ class _UploadScreenState extends State<UploadScreen> {
       for (final albumId in _selectedAlbumIds) {
         await albumProvider.addPhotoToAlbum(
           albumId: albumId,
-          photoId: photo.uuid,
+          photoId: uploadedPhoto.uuid,
         );
       }
 
@@ -163,18 +163,18 @@ class _UploadScreenState extends State<UploadScreen> {
 
     if (!mounted || album == null) return;
 
-    final success = await context.read<AlbumProvider>().createAlbum(album);
+    final createdAlbum = await context.read<AlbumProvider>().createAlbum(album);
 
     if (!mounted) return;
 
-    if (!success) {
+    if (createdAlbum == null) {
       final error = context.read<AlbumProvider>().errorMessage;
       _showToast(error ?? 'Failed to create album', isError: true);
       return;
     }
 
     setState(() {
-      _selectedAlbumIds.add(album.uuid);
+      _selectedAlbumIds.add(createdAlbum.uuid);
     });
 
     _showToast('Album created');
