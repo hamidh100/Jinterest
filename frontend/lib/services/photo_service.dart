@@ -1,74 +1,136 @@
+import '../exceptions/exceptions.dart';
 import '../models/photo.dart';
+import 'api_client.dart';
 
 class PhotoService {
-  static final List<Photo> _photos = [];
-
   static Future<List<Photo>> getAllPhotos() async {
-    return List.unmodifiable(_photos);
+    final response = await ApiClient.instance.send(
+      method: 'GET',
+      route: '/photos',
+    );
+    final payload = response['payload'];
+    if (payload is! Map<String, dynamic> || payload['photos'] is! List) {
+      throw StateError('Server returned an invalid photo list');
+    }
+
+    return (payload['photos'] as List)
+        .whereType<Map<String, dynamic>>()
+        .map(_photoFromJson)
+        .toList();
+  }
+
+  static Photo _photoFromJson(Map<String, dynamic> json) {
+    final categories = (json['categories'] as List? ?? const [])
+        .map((category) => category.toString())
+        .toList();
+    final caption = json['caption'];
+    final likeCount = json['likeCount'] as int? ?? 0;
+    final commentCount = json['commentCount'] as int? ?? 0;
+
+    return Photo(
+      uuid: json['id']?.toString() ?? '',
+      ownerID: json['ownerId']?.toString() ?? '',
+      path: json['path']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      categoryList: categories,
+      captionText: caption is Map<String, dynamic>
+          ? caption['text']?.toString()
+          : null,
+      photoAge:
+          DateTime.tryParse(json['photoAge']?.toString() ?? '') ??
+          DateTime.now(),
+      likeIDs: List.generate(likeCount, (index) => 'server-like-$index'),
+      commentIDs: List.generate(
+        commentCount,
+        (index) => 'server-comment-$index',
+      ),
+    );
   }
 
   static Future<List<Photo>> getPhotosByOwner(String ownerId) async {
-    return _photos.where((photo) => photo.ownerID == ownerId).toList();
+    final photos = await getAllPhotos();
+    return photos.where((photo) => photo.ownerID == ownerId).toList();
   }
 
   static Future<Photo?> getPhotoById(String photoId) async {
     try {
-      return _photos.firstWhere((photo) => photo.uuid == photoId);
-    } catch (_) {
+      final response = await ApiClient.instance.send(
+        method: 'GET',
+        route: '/photos/$photoId',
+      );
+      return _photoFromPayload(response);
+    } on ApiException catch (error) {
+      if (error.statusCode != 404) rethrow;
       return null;
     }
   }
 
   static Future<Photo> addPhoto(Photo photo) async {
-    _photos.insert(0, photo);
-    return photo;
+    final response = await ApiClient.instance.send(
+      method: 'POST',
+      route: '/photos',
+      payload: {
+        'ownerId': photo.ownerID,
+        'path': photo.path,
+        'categories': photo.categoryList,
+        if (photo.captionText != null) 'caption': photo.captionText,
+      },
+    );
+    return _photoFromPayload(response);
   }
 
   static Future<void> deletePhoto(String photoId) async {
-    _photos.removeWhere((photo) => photo.uuid == photoId);
+    await ApiClient.instance.send(method: 'DELETE', route: '/photos/$photoId');
   }
 
   static Future<List<Photo>> searchPhotos(String query) async {
-    final normalizedQuery = query.trim().toLowerCase();
-
-    if (normalizedQuery.isEmpty) {
-      return getAllPhotos();
-    }
-
-    return _photos.where((photo) {
-      final nameMatches = photo.name.toLowerCase().contains(normalizedQuery);
-      final captionMatches =
-          photo.captionText?.toLowerCase().contains(normalizedQuery) ?? false;
-      final tagMatches = photo.categoryList.any(
-        (tag) => tag.toLowerCase().contains(normalizedQuery),
-      );
-
-      return nameMatches || captionMatches || tagMatches;
-    }).toList();
+    if (query.trim().isEmpty) return getAllPhotos();
+    final response = await ApiClient.instance.send(
+      method: 'POST',
+      route: '/search',
+      payload: {'type': 'global', 'text': query.trim()},
+    );
+    return _photoListFromResponse(response);
   }
 
   static Future<Photo?> toggleLike({
     required String photoId,
     required String userId,
   }) async {
-    final index = _photos.indexWhere((photo) => photo.uuid == photoId);
-
-    if (index == -1) {
-      return null;
+    try {
+      await ApiClient.instance.send(
+        method: 'POST',
+        route: '/photos/$photoId/likes',
+        payload: {'userId': userId},
+      );
+    } on ApiException catch (error) {
+      if (error.statusCode != 409) rethrow;
+      await ApiClient.instance.send(
+        method: 'DELETE',
+        route: '/photos/$photoId/likes',
+        payload: {'userId': userId},
+      );
     }
+    return getPhotoById(photoId);
+  }
 
-    final oldPhoto = _photos[index];
-    final updatedLikes = List<String>.from(oldPhoto.likeIDs);
-
-    if (updatedLikes.contains(userId)) {
-      updatedLikes.remove(userId);
-    } else {
-      updatedLikes.add(userId);
+  static List<Photo> _photoListFromResponse(Map<String, dynamic> response) {
+    final payload = response['payload'];
+    if (payload is! Map<String, dynamic> || payload['photos'] is! List) {
+      throw StateError('Server returned an invalid photo list');
     }
+    return (payload['photos'] as List)
+        .whereType<Map<String, dynamic>>()
+        .map(_photoFromJson)
+        .toList();
+  }
 
-    final updatedPhoto = oldPhoto.copyWith(likeIDs: updatedLikes);
-
-    _photos[index] = updatedPhoto;
-    return updatedPhoto;
+  static Photo _photoFromPayload(Map<String, dynamic> response) {
+    final payload = response['payload'];
+    if (payload is! Map<String, dynamic> ||
+        payload['photo'] is! Map<String, dynamic>) {
+      throw StateError('Server returned an invalid photo');
+    }
+    return _photoFromJson(payload['photo'] as Map<String, dynamic>);
   }
 }
