@@ -12,18 +12,20 @@ public class Album {
     private LocalDateTime albumAge;
     private String name;
     private String description;
+    private boolean isPublic;
 
     public Album(UUID ownerID, List<UUID> photoIDs){
-        this(ownerID, photoIDs, "Untitled Album", null);
+        this(ownerID, photoIDs, "Untitled Album", null, true);
     }
 
-    public Album(UUID ownerID, List<UUID> photoIDs, String name, String description){
+    public Album(UUID ownerID, List<UUID> photoIDs, String name, String description, boolean isPublic){
         this.ownerID = ownerID;
         this.photoIDs = photoIDs;
         this.name = name;
         this.description = description;
         uuid = UUID.randomUUID();
         albumAge = LocalDateTime.now();
+        this.isPublic = isPublic;
         OurObjects.albums.put(uuid, this);
     }
     
@@ -60,6 +62,12 @@ public class Album {
     }
     public void setDescription(String description) {
         this.description = description;
+    }
+    public boolean isPublic() {
+        return isPublic;
+    }
+    public void setPublic(boolean isPublic) {
+        this.isPublic = isPublic;
     }
     /* getter setter end */
 

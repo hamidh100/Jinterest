@@ -696,8 +696,13 @@ public class Router {
             }
             String name = getOptionalString(payload, "name");
             String description = getOptionalString(payload, "description");
+            boolean isPublic = true;
+            if (payload.has("isPublic") &&
+                    !payload.get("isPublic").isJsonNull()) {
+                isPublic = payload.get("isPublic").getAsBoolean();
+            }
             Album album = new Album(ownerId, photoIds,
-                    name == null ? "Untitled Album" : name, description);
+                    name == null ? "Untitled Album" : name, description, isPublic);
             AlbumService.addAlbum(owner, album);
             DatabaseManager.save();
             JsonObject responsePayload = new JsonObject();
@@ -737,6 +742,9 @@ public class Router {
             }
             if (payload.has("description") && !payload.get("description").isJsonNull()) {
                 album.setDescription(getRequiredString(payload, "description"));
+            }
+            if (payload.has("isPublic") && !payload.get("isPublic").isJsonNull()) {
+                album.setPublic(payload.get("isPublic").getAsBoolean());
             }
             DatabaseManager.save();
             JsonObject responsePayload = new JsonObject();
@@ -1100,6 +1108,7 @@ public class Router {
         if (album.getDescription() != null) {
             json.addProperty("description", album.getDescription());
         }
+        json.addProperty("isPublic", album.isPublic());
         if (album.getOwnerID() != null) {
             json.addProperty("ownerId", album.getOwnerID().toString());
             User owner = OurObjects.users.get(album.getOwnerID());
