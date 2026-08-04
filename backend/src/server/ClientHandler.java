@@ -36,7 +36,7 @@ public class ClientHandler implements Runnable {
                     Request request = gson.fromJson(line, Request.class);
                     response = router.route(request);
                 } catch (JsonSyntaxException e) {
-                    response = Response.serverError("Invalid JSON: " + e.getMessage());
+                    response = Response.badRequest("Invalid JSON: " + e.getMessage());
                 }
                 out.println(gson.toJson(response));
             }

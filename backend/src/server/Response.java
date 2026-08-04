@@ -21,6 +21,14 @@ public class Response {
         return new Response(200, message, null);
     }
 
+    public static Response created(String message, JsonObject payload) {
+        return new Response(201, message, payload);
+    }
+
+    public static Response badRequest(String message) {
+        return new Response(400, message, null);
+    }
+
     public static Response unauthorized(String message) {
         return new Response(401, message, null);
     }
@@ -28,9 +36,17 @@ public class Response {
     public static Response forbidden(String message) {
         return new Response(403, message, null);
     }
-
+    
     public static Response notFound(String message) {
         return new Response(404, message, null);
+    }
+
+    public static Response methodNotAllowed(String message) {
+        return new Response(405, message, null);
+    }
+
+    public static Response conflict(String message) {
+        return new Response(409, message, null);
     }
 
     public static Response serverError(String message) {
