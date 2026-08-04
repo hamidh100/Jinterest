@@ -296,13 +296,7 @@ class _PhotoCard extends StatelessWidget {
                 arguments: photo.uuid,
               );
             },
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _PhotoHeader(photo: photo),
-                _PhotoImage(photo: photo),
-              ],
-            ),
+            child: _PhotoImage(photo: photo),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
