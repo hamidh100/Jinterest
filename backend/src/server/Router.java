@@ -1,9 +1,16 @@
 package server;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 import database.DatabaseManager;
 import exceptions.IncorrectPassword;
@@ -14,9 +21,15 @@ import exceptions.UserAlreadyExists;
 import exceptions.UserBanned;
 import exceptions.UserDoesNotExist;
 import exceptions.WeakPassword;
+import models.Caption;
+import models.Category;
+import models.Comment;
 import models.Helper;
+import models.Like;
 import models.OurObjects;
+import models.Photo;
 import models.User;
+import services.PhotoService;
 import services.UserService;
 
 public class Router {
@@ -343,64 +356,302 @@ public class Router {
     }
 
     private Response handleGetPhotos(Request request) {
-        return Response.notImplemented(
-                "Get photos has not been implemented yet"
-        );
+        JsonArray photosJson = new JsonArray();
+        for (Photo photo : OurObjects.photos.values()) {
+            photosJson.add(photoToJson(photo));
+        }
+        JsonObject payload = new JsonObject();
+        payload.add("photos", photosJson);
+        return Response.ok("Photos found", payload);
     }
 
     private Response handleGetPhoto(Request request, String photoId) {
-        return Response.notImplemented(
-                "Get photo has not been implemented yet"
-        );
+        try {
+            UUID uuid = parseUuid(photoId);
+            Photo photo = OurObjects.photos.get(uuid);
+            if (photo == null) return Response.notFound("Photo does not exist");
+            JsonObject payload = new JsonObject();
+            payload.add("photo", photoToJson(photo));
+            return Response.ok("Photo found", payload);
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest("Photo ID must be a valid UUID");
+        }
     }
 
     private Response handleCreatePhoto(Request request) {
-        return Response.notImplemented(
-                "Create photo has not been implemented yet"
-        );
+        try {
+            JsonObject payload = request.getPayload();
+            String ownerIdText = getRequiredString(payload, "ownerId");
+            String path = getRequiredString(payload, "path");
+            UUID ownerId = parseUuid(ownerIdText);
+            User owner = OurObjects.users.get(ownerId);
+            if (owner == null) return Response.notFound("Owner user does not exist");
+            List<Category> categories = readCategories(payload);
+            Photo photo;
+            if (categories == null) {
+                photo = new Photo(ownerId, path);
+            } else {
+                photo = new Photo(ownerId, path, categories);
+            }
+            PhotoService.addPhoto(owner, photo);
+            String captionText = getOptionalString(payload, "caption");
+            if (captionText != null) {
+                Caption caption = new Caption(captionText);
+                PhotoService.addCaption(photo, caption);
+            }
+            DatabaseManager.save();
+            JsonObject responsePayload = new JsonObject();
+            responsePayload.add("photo", photoToJson(photo));
+            return Response.created("Photo created successfully", responsePayload);
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest(e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Could not save photo:");
+            e.printStackTrace();
+            return Response.serverError("Could not save photo");
+        } catch (Exception e) {
+            System.err.println("Unexpected create-photo error:");
+            e.printStackTrace();
+            return Response.serverError("Internal server error");
+        }
     }
 
     private Response handleUpdatePhoto(Request request, String photoId) {
-        return Response.notImplemented(
-                "Update photo has not been implemented yet"
-        );
+        try {
+            UUID uuid = parseUuid(photoId);
+            Photo photo = OurObjects.photos.get(uuid);
+            if (photo == null) return Response.notFound("Photo does not exist");
+            JsonObject payload = request.getPayload();
+            boolean updated = false;
+            if (payload.has("path") && !payload.get("path").isJsonNull()) {
+                String path = getRequiredString(payload, "path");
+                photo.setPath(path);
+                updated = true;
+            }
+            if (payload.has("categories") && !payload.get("categories").isJsonNull()) {
+                List<Category> categories = readCategories(payload);
+                photo.setCategory(categories);
+                updated = true;
+            }
+            if (payload.has("caption") && !payload.get("caption").isJsonNull()) {
+                String captionText = getRequiredString(payload, "caption");
+                if (photo.getCaptionID() != null) {
+                    Caption caption = OurObjects.captions.get(
+                            photo.getCaptionID()
+                    );
+                    if (caption != null) {
+                        caption.setText(captionText);
+                        caption.setTime(LocalDateTime.now());
+                    } else {
+                        Caption newCaption = new Caption(captionText);
+                        PhotoService.addCaption(photo, newCaption);
+                    }
+                } else {
+                    Caption newCaption = new Caption(captionText);
+                    PhotoService.addCaption(photo, newCaption);
+                }
+                updated = true;
+            }
+            if (!updated) return Response.badRequest("No valid fields were provided for update");
+            DatabaseManager.save();
+            JsonObject responsePayload = new JsonObject();
+            responsePayload.add("photo", photoToJson(photo));
+            return Response.ok("Photo updated successfully", responsePayload);
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest(e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Could not save photo update:");
+            e.printStackTrace();
+            return Response.serverError("Could not save photo changes");
+        } catch (Exception e) {
+            System.err.println("Unexpected update-photo error:");
+            e.printStackTrace();
+            return Response.serverError("Internal server error");
+        }
     }
 
     private Response handleDeletePhoto(Request request, String photoId) {
-        return Response.notImplemented(
-                "Delete photo has not been implemented yet"
-        );
+        try {
+            UUID uuid = parseUuid(photoId);
+            Photo photo = OurObjects.photos.get(uuid);
+            if (photo == null) return Response.notFound("Photo does not exist");
+            User owner = OurObjects.users.get(photo.getOwnerID());
+            if (owner != null) {
+                owner.getPhotoIDs().remove(photo.getUuid());
+            }
+            if (photo.getCaptionID() != null) {
+                OurObjects.captions.remove(photo.getCaptionID());
+            }
+            for (UUID commentId : new ArrayList<>(photo.getCommentIDs())) {
+                OurObjects.comments.remove(commentId);
+            }
+            for (UUID likeId : new ArrayList<>(photo.getLikeIDs())) {
+                OurObjects.likes.remove(likeId);
+            }
+            OurObjects.photos.remove(photo.getUuid());
+            DatabaseManager.save();
+            return Response.ok("Photo deleted successfully");
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest("Photo ID must be a valid UUID");
+        } catch (IOException e) {
+            System.err.println("Could not save after deleting photo:");
+            e.printStackTrace();
+            return Response.serverError("Could not save photo deletion");
+        } catch (Exception e) {
+            System.err.println("Unexpected delete-photo error:");
+            e.printStackTrace();
+            return Response.serverError("Internal server error");
+        }
     }
 
     private Response handleLikePhoto(Request request, String photoId) {
-        return Response.notImplemented(
-                "Like photo has not been implemented yet"
-        );
+        try {
+            UUID photoUuid = parseUuid(photoId);
+            Photo photo = OurObjects.photos.get(photoUuid);
+            if (photo == null) return Response.notFound("Photo does not exist");
+            String userIdText = getRequiredString(request.getPayload(), "userId");
+            UUID userUuid = parseUuid(userIdText);
+            User user = OurObjects.users.get(userUuid);
+            if (user == null) return Response.notFound("User does not exist");
+            if (PhotoService.isLikedBy(photo, user)) {
+                return Response.conflict("Photo is already liked by this user");
+            }
+            Like like = new Like(userUuid);
+            PhotoService.addLike(photo, like);
+            DatabaseManager.save();
+            JsonObject payload = new JsonObject();
+            payload.addProperty("photoId", photo.getUuid().toString());
+            payload.addProperty("likeCount", photo.getLikeIDs().size());
+            return Response.created("Photo liked successfully", payload);
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest(e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Could not save like:");
+            e.printStackTrace();
+            return Response.serverError("Could not save like");
+        } catch (Exception e) {
+            System.err.println("Unexpected like error:");
+            e.printStackTrace();
+            return Response.serverError("Internal server error");
+        }
     }
 
     private Response handleUnlikePhoto(Request request, String photoId) {
-        return Response.notImplemented(
-                "Unlike photo has not been implemented yet"
-        );
+        try {
+            UUID photoUuid = parseUuid(photoId);
+            Photo photo = OurObjects.photos.get(photoUuid);
+            if (photo == null) return Response.notFound("Photo does not exist");
+            String userIdText = getRequiredString(request.getPayload(), "userId");
+            UUID userUuid = parseUuid(userIdText);
+            User user = OurObjects.users.get(userUuid);
+            if (user == null) return Response.notFound("User does not exist");
+            UUID likeToRemove = null;
+            for (UUID likeId : new ArrayList<>(photo.getLikeIDs())) {
+                Like like = OurObjects.likes.get(likeId);
+                if (like != null && userUuid.equals(like.getUserID())) {
+                    likeToRemove = likeId;
+                    break;
+                }
+            }
+            if (likeToRemove == null) return Response.notFound("This user has not liked the photo");
+            photo.getLikeIDs().remove(likeToRemove);
+            OurObjects.likes.remove(likeToRemove);
+            DatabaseManager.save();
+            JsonObject payload = new JsonObject();
+            payload.addProperty("photoId", photo.getUuid().toString());
+            payload.addProperty("likeCount", photo.getLikeIDs().size());
+            return Response.ok("Photo unliked successfully", payload);
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest(e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Could not save unlike:");
+            e.printStackTrace();
+            return Response.serverError("Could not save unlike");
+        } catch (Exception e) {
+            System.err.println("Unexpected unlike error:");
+            e.printStackTrace();
+            return Response.serverError("Internal server error");
+        }
     }
 
     private Response handleGetPhotoComments(Request request, String photoId) {
-        return Response.notImplemented(
-                "Get comments has not been implemented yet"
-        );
+        try {
+            UUID photoUuid = parseUuid(photoId);
+            Photo photo = OurObjects.photos.get(photoUuid);
+            if (photo == null) return Response.notFound("Photo does not exist");
+            JsonArray commentsJson = new JsonArray();
+            for (UUID commentId : photo.getCommentIDs()) {
+                Comment comment = OurObjects.comments.get(commentId);
+                if (comment != null) {
+                    commentsJson.add(commentToJson(comment));
+                }
+            }
+            JsonObject payload = new JsonObject();
+            payload.add("comments", commentsJson);
+            return Response.ok("Comments found", payload);
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest("Photo ID must be a valid UUID");
+        }
     }
+
 
     private Response handleCreateComment(Request request, String photoId) {
-        return Response.notImplemented(
-                "Create comment has not been implemented yet"
-        );
+        try {
+            UUID photoUuid = parseUuid(photoId);
+            Photo photo = OurObjects.photos.get(photoUuid);
+            if (photo == null) return Response.notFound("Photo does not exist");
+            JsonObject payload = request.getPayload();
+            UUID userUuid = parseUuid(getRequiredString(payload, "userId"));
+            User user = OurObjects.users.get(userUuid);
+            if (user == null) return Response.notFound("User does not exist");
+            String text = getRequiredString(payload, "text");
+            Comment comment = new Comment(userUuid, text);
+            PhotoService.addComment(photo, comment);
+            DatabaseManager.save();
+            JsonObject responsePayload = new JsonObject();
+            responsePayload.add("comment", commentToJson(comment));
+            return Response.created("Comment created successfully", responsePayload);
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest(e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Could not save comment:");
+            e.printStackTrace();
+            return Response.serverError("Could not save comment");
+        } catch (Exception e) {
+            System.err.println("Unexpected create-comment error:");
+            e.printStackTrace();
+            return Response.serverError("Internal server error");
+        }
     }
 
+
     private Response handleDeleteComment(Request request, String commentId) {
-        return Response.notImplemented(
-                "Delete comment has not been implemented yet"
-        );
+        try {
+            UUID commentUuid = parseUuid(commentId);
+            Comment comment = OurObjects.comments.get(commentUuid);
+            if (comment == null) return Response.notFound("Comment does not exist");
+            if (comment.getPhotoID() != null) {
+                Photo photo = OurObjects.photos.get(comment.getPhotoID());
+                if (photo != null) {
+                    photo.getCommentIDs().remove(comment.getUuid());
+                }
+            }
+            OurObjects.comments.remove(comment.getUuid());
+            DatabaseManager.save();
+            return Response.ok("Comment deleted successfully");
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest("Comment ID must be a valid UUID");
+        } catch (IOException e) {
+            System.err.println("Could not save comment deletion:");
+            e.printStackTrace();
+            return Response.serverError("Could not delete comment");
+        } catch (Exception e) {
+            System.err.println("Unexpected delete-comment error:");
+            e.printStackTrace();
+            return Response.serverError("Internal server error");
+        }
     }
+
 
     private Response handleGetAlbums(Request request) {
         return Response.notImplemented(
@@ -489,27 +740,127 @@ public class Router {
         return null;
     }
 
-private JsonObject userToJson(User user) {
-    JsonObject json = new JsonObject();
-    json.addProperty("id", user.getUuid().toString());
-    if (user.getUsername() != null) {
-        json.addProperty("username", user.getUsername());
+    private JsonObject userToJson(User user) {
+        JsonObject json = new JsonObject();
+        json.addProperty("id", user.getUuid().toString());
+        if (user.getUsername() != null) {
+            json.addProperty("username", user.getUsername());
+        }
+        if (user.getEmail() != null) {
+            json.addProperty("email", user.getEmail());
+        }
+        if (user.getPhone() != null) {
+            json.addProperty("phone", user.getPhone());
+        }
+        if (user.getFullname() != null) {
+            json.addProperty("fullname", user.getFullname());
+        }
+        if (user.getAccountAge() != null) {
+            json.addProperty("accountAge", user.getAccountAge().toString());
+        }
+        if (user.getUserType() != null) {
+            json.addProperty("userType", user.getUserType().toString());
+        }
+        return json;
     }
-    if (user.getEmail() != null) {
-        json.addProperty("email", user.getEmail());
+
+    private JsonObject photoToJson(Photo photo) {
+        JsonObject json = new JsonObject();
+        json.addProperty("id", photo.getUuid().toString());
+        if (photo.getOwnerID() != null) {
+            json.addProperty("ownerId", photo.getOwnerID().toString());
+            User owner = OurObjects.users.get(photo.getOwnerID());
+            if (owner != null && owner.getUsername() != null) {
+                json.addProperty("ownerUsername", owner.getUsername());
+            }
+        }
+        json.addProperty("name", photo.getName());
+        json.addProperty("path", photo.getPath());
+        if (photo.getPhotoAge() != null) {
+            json.addProperty("photoAge", photo.getPhotoAge().toString());
+        }
+        JsonArray categories = new JsonArray();
+        if (photo.getCategoryList() != null) {
+            for (Category category : photo.getCategoryList()) {
+                categories.add(category.name());
+            }
+        }
+        json.add("categories", categories);
+        if (photo.getCaptionID() != null) {
+            Caption caption = OurObjects.captions.get(photo.getCaptionID());
+            if (caption != null) {
+                json.add("caption", captionToJson(caption));
+            }
+        }
+        json.addProperty("likeCount", photo.getLikeIDs() == null ? 0 : photo.getLikeIDs().size());
+        json.addProperty("commentCount", photo.getCommentIDs() == null ? 0 : photo.getCommentIDs().size());
+        return json;
     }
-    if (user.getPhone() != null) {
-        json.addProperty("phone", user.getPhone());
+
+    private JsonObject captionToJson(Caption caption) {
+        JsonObject json = new JsonObject();
+        json.addProperty("id", caption.getUuid().toString());
+        json.addProperty("text", caption.getText());
+        if (caption.getTime() != null) {
+            json.addProperty("time", caption.getTime().toString());
+        }
+        return json;
     }
-    if (user.getFullname() != null) {
-        json.addProperty("fullname", user.getFullname());
+
+    private JsonObject commentToJson(Comment comment) {
+        JsonObject json = new JsonObject();
+        json.addProperty("id", comment.getUuid().toString());
+        if (comment.getPhotoID() != null) {
+            json.addProperty("photoId", comment.getPhotoID().toString());
+        }
+        if (comment.getUserID() != null) {
+            json.addProperty("userId", comment.getUserID().toString());
+            User user = OurObjects.users.get(comment.getUserID());
+            if (user != null && user.getUsername() != null) {
+                json.addProperty("username", user.getUsername());
+            }
+        }
+        json.addProperty("text", comment.getText());
+        if (comment.getTime() != null) {
+            json.addProperty("time", comment.getTime().toString());
+        }
+        return json;
     }
-    if (user.getAccountAge() != null) {
-        json.addProperty("accountAge", user.getAccountAge().toString());
+
+    private List<Category> readCategories(JsonObject payload) {
+        if (payload == null || !payload.has("categories") || payload.get("categories").isJsonNull()) {
+            return null;
+        }
+        JsonElement categoriesElement = payload.get("categories");
+        if (!categoriesElement.isJsonArray()) {
+            throw new IllegalArgumentException("'categories' must be an array");
+        }
+        JsonArray categoriesArray = categoriesElement.getAsJsonArray();
+        if (categoriesArray.size() == 0) {
+            throw new IllegalArgumentException("'categories' cannot be empty");
+        }
+        List<Category> categories = new ArrayList<>();
+        for (JsonElement element : categoriesArray) {
+            if (!element.isJsonPrimitive()) {
+                throw new IllegalArgumentException("Each category must be a string");
+            }
+            JsonPrimitive primitive = element.getAsJsonPrimitive();
+            if (!primitive.isString()) {
+                throw new IllegalArgumentException("Each category must be a string");
+            }
+            String categoryText = primitive.getAsString().trim().toUpperCase(Locale.ROOT);
+            if (categoryText.isEmpty()) {
+                throw new IllegalArgumentException("Category cannot be empty");
+            }
+            try {
+                Category category = Category.valueOf(categoryText);
+                if (!categories.contains(category)) {
+                    categories.add(category);
+                }
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Unknown category: " + categoryText);
+            }
+        }
+        return categories;
     }
-    if (user.getUserType() != null) {
-        json.addProperty("userType", user.getUserType().toString());
-    }
-    return json;
-}
 }
