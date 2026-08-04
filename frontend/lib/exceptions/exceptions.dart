@@ -78,3 +78,20 @@ class PhotoDoesNotExist extends JinterestException {
   PhotoDoesNotExist(String identifier)
     : super("Photo does not exist: $identifier");
 }
+
+class ApiException implements Exception {
+  final int statusCode;
+  final String message;
+  final Map<String, dynamic> payload;
+
+  ApiException({
+    required this.statusCode,
+    required this.message,
+    this.payload = const {},
+  });
+
+  @override
+  String toString() {
+    return 'ApiException($statusCode): $message';
+  }
+}
