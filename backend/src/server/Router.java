@@ -21,6 +21,7 @@ import exceptions.UserAlreadyExists;
 import exceptions.UserBanned;
 import exceptions.UserDoesNotExist;
 import exceptions.WeakPassword;
+import models.Album;
 import models.Caption;
 import models.Category;
 import models.Comment;
@@ -29,7 +30,9 @@ import models.Like;
 import models.OurObjects;
 import models.Photo;
 import models.User;
+import services.AlbumService;
 import services.PhotoService;
+import services.SearchService;
 import services.UserService;
 
 public class Router {
@@ -652,53 +655,220 @@ public class Router {
         }
     }
 
-
     private Response handleGetAlbums(Request request) {
-        return Response.notImplemented(
-                "Get albums has not been implemented yet"
-        );
+        JsonArray albumsJson = new JsonArray();
+        for (Album album : OurObjects.albums.values()) {
+            albumsJson.add(albumToJson(album));
+        }
+        JsonObject payload = new JsonObject();
+        payload.add("albums", albumsJson);
+        return Response.ok("Albums found", payload);
     }
 
     private Response handleGetAlbum(Request request, String albumId) {
-        return Response.notImplemented(
-                "Get album has not been implemented yet"
-        );
+        try {
+            UUID uuid = parseUuid(albumId);
+            Album album = OurObjects.albums.get(uuid);
+            if (album == null) return Response.notFound("Album does not exist");
+            JsonObject payload = new JsonObject();
+            payload.add("album", albumToJson(album));
+            return Response.ok("Album found", payload);
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest("Album ID must be a valid UUID");
+        }
     }
 
     private Response handleCreateAlbum(Request request) {
-        return Response.notImplemented(
-                "Create album has not been implemented yet"
-        );
+        try {
+            JsonObject payload = request.getPayload();
+            UUID ownerId = parseUuid(getRequiredString(payload, "ownerId"));
+            User owner = OurObjects.users.get(ownerId);
+            if (owner == null) return Response.notFound("Owner user does not exist");
+            List<UUID> photoIds = readPhotoIds(payload, "photoIds");
+            for (UUID photoId : photoIds) {
+                if (!OurObjects.photos.containsKey(photoId)) {
+                    return Response.notFound("Photo does not exist: " + photoId);
+                }
+            }
+            Album album = new Album(ownerId, photoIds);
+            AlbumService.addAlbum(owner, album);
+            DatabaseManager.save();
+            JsonObject responsePayload = new JsonObject();
+            responsePayload.add("album", albumToJson(album));
+            return Response.created("Album created successfully", responsePayload);
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest(e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Could not save album:");
+            e.printStackTrace();
+            return Response.serverError("Could not save album");
+        } catch (Exception e) {
+            System.err.println("Unexpected create-album error:");
+            e.printStackTrace();
+            return Response.serverError("Internal server error");
+        }
     }
 
     private Response handleUpdateAlbum(Request request, String albumId) {
-        return Response.notImplemented(
-                "Update album has not been implemented yet"
-        );
+        try {
+            UUID albumUuid = parseUuid(albumId);
+            Album album = OurObjects.albums.get(albumUuid);
+            if (album == null) return Response.notFound("Album does not exist");
+            JsonObject payload = request.getPayload();
+            if (!payload.has("photoIds") || payload.get("photoIds").isJsonNull()) {
+                return Response.badRequest("Field 'photoIds' is required");
+            }
+            List<UUID> photoIds = readPhotoIds(payload, "photoIds");
+            for (UUID photoId : photoIds) {
+                if (!OurObjects.photos.containsKey(photoId)) {
+                    return Response.notFound("Photo does not exist: " + photoId);
+                }
+            }
+            album.setPhotoIDs(photoIds);
+            DatabaseManager.save();
+            JsonObject responsePayload = new JsonObject();
+            responsePayload.add("album", albumToJson(album));
+            return Response.ok("Album updated successfully", responsePayload);
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest(e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Could not save album update:");
+            e.printStackTrace();
+            return Response.serverError("Could not save album changes");
+        } catch (Exception e) {
+            System.err.println("Unexpected update-album error:");
+            e.printStackTrace();
+            return Response.serverError("Internal server error");
+        }
     }
 
     private Response handleDeleteAlbum(Request request, String albumId) {
-        return Response.notImplemented(
-                "Delete album has not been implemented yet"
-        );
+        try {
+            UUID albumUuid = parseUuid(albumId);
+            Album album = OurObjects.albums.get(albumUuid);
+            if (album == null) return Response.notFound("Album does not exist");
+            User owner = OurObjects.users.get(album.getOwnerID());
+            if (owner != null) {
+                owner.getAlbumIDs().remove(album.getUuid());
+            }
+            OurObjects.albums.remove(album.getUuid());
+            DatabaseManager.save();
+            return Response.ok("Album deleted successfully");
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest("Album ID must be a valid UUID");
+        } catch (IOException e) {
+            System.err.println("Could not save album deletion:");
+            e.printStackTrace();
+            return Response.serverError("Could not delete album");
+        } catch (Exception e) {
+            System.err.println("Unexpected delete-album error:");
+            e.printStackTrace();
+            return Response.serverError("Internal server error");
+        }
     }
 
     private Response handleFollowUser(Request request, String userId) {
-        return Response.notImplemented(
-                "Follow user has not been implemented yet"
-        );
+        try {
+            UUID followedId = parseUuid(userId);
+            User followed = OurObjects.users.get(followedId);
+            if (followed == null) return Response.notFound("User to follow does not exist");
+            UUID followerId = parseUuid(getRequiredString(request.getPayload(), "followerId"));
+            User follower = OurObjects.users.get(followerId);
+            if (follower == null) return Response.notFound("Follower user does not exist");
+            if (follower.equals(followed)) return Response.badRequest("A user cannot follow themselves");
+            if (UserService.isFollowing(follower, followed)) {
+                return Response.conflict("User is already being followed");
+            }
+            UserService.follow(follower, followed);
+            JsonObject payload = new JsonObject();
+            payload.addProperty("followerId", follower.getUuid().toString());
+            payload.addProperty("followedId", followed.getUuid().toString());
+            return Response.created("User followed successfully", payload);
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest(e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Could not save follow:");
+            e.printStackTrace();
+            return Response.serverError("Could not save follow");
+        } catch (Exception e) {
+            System.err.println("Unexpected follow error:");
+            e.printStackTrace();
+            return Response.serverError("Internal server error");
+        }
     }
 
     private Response handleUnfollowUser(Request request, String userId) {
-        return Response.notImplemented(
-                "Unfollow user has not been implemented yet"
-        );
+        try {
+            UUID followedId = parseUuid(userId);
+            User followed = OurObjects.users.get(followedId);
+            if (followed == null) return Response.notFound("User does not exist");
+            UUID followerId = parseUuid(getRequiredString(request.getPayload(), "followerId"));
+            User follower = OurObjects.users.get(followerId);
+            if (follower == null) return Response.notFound("Follower user does not exist");
+            if (follower.equals(followed)) return Response.badRequest("A user cannot unfollow themselves");
+            if (!UserService.isFollowing(follower, followed)) {
+                return Response.notFound("User is not currently being followed");
+            }
+            UserService.unfollow(follower, followed);
+            JsonObject payload = new JsonObject();
+            payload.addProperty("followerId", follower.getUuid().toString());
+            payload.addProperty("followedId", followed.getUuid().toString());
+            return Response.ok("User unfollowed successfully", payload);
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest(e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Could not save unfollow:");
+            e.printStackTrace();
+            return Response.serverError("Could not save unfollow");
+        } catch (Exception e) {
+            System.err.println("Unexpected unfollow error:");
+            e.printStackTrace();
+            return Response.serverError("Internal server error");
+        }
     }
 
     private Response handleSearch(Request request) {
-        return Response.notImplemented(
-                "Search has not been implemented yet"
-        );
+        try {
+            JsonObject payload = request.getPayload();
+            String type = Helper.toLower(getRequiredString(payload, "type"));
+            String text = getRequiredString(payload, "text");
+            List<Photo> results;
+            switch (type) {
+                case "global":
+                    results = SearchService.globalSearch(text);
+                    break;
+                case "name":
+                    results = SearchService.searchByName(text);
+                    break;
+                case "caption":
+                    results = SearchService.searchByCaption(text);
+                    break;
+                case "category":
+                    results = SearchService.searchByCategory(text);
+                    break;
+                case "time":
+                    results = SearchService.searchByTime(text);
+                    break;
+                case "comments":
+                    results = SearchService.searchByComments(text);
+                    break;
+                default:
+                    return Response.badRequest("Unknown search type: " + type);
+            }
+            JsonArray photosJson = new JsonArray();
+            for (Photo photo : results) {
+                photosJson.add(photoToJson(photo));
+            }
+            JsonObject responsePayload = new JsonObject();
+            responsePayload.add("photos", photosJson);
+            return Response.ok("Search completed", responsePayload);
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest(e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Unexpected search error:");
+            e.printStackTrace();
+            return Response.serverError("Internal server error");
+        }
     }
 
     private String getRequiredString( JsonObject payload, String field) {
@@ -862,5 +1032,60 @@ public class Router {
             }
         }
         return categories;
+    }
+
+    private List<UUID> readPhotoIds(JsonObject payload, String field) {
+        if (!payload.has(field) || payload.get(field).isJsonNull()) {
+            throw new IllegalArgumentException("Field '" + field + "' is required");
+        }
+        JsonElement element = payload.get(field);
+        if (!element.isJsonArray()) {
+            throw new IllegalArgumentException("Field '" + field + "' must be an array");
+        }
+        JsonArray array = element.getAsJsonArray();
+        List<UUID> result = new ArrayList<>();
+        for (JsonElement item : array) {
+            if (!item.isJsonPrimitive()) {
+                throw new IllegalArgumentException("Every photo ID must be a string");
+            }
+            String value = item.getAsString().trim();
+            if (value.isEmpty()) {
+                throw new IllegalArgumentException("Photo ID cannot be empty");
+            }
+            UUID photoId = parseUuid(value);
+            if (!result.contains(photoId)) {
+                result.add(photoId);
+            }
+        }
+        return result;
+    }
+
+    private JsonObject albumToJson(Album album) {
+        JsonObject json = new JsonObject();
+        json.addProperty("id", album.getUuid().toString());
+        if (album.getOwnerID() != null) {
+            json.addProperty("ownerId", album.getOwnerID().toString());
+            User owner = OurObjects.users.get(album.getOwnerID());
+            if (owner != null && owner.getUsername() != null) {
+                json.addProperty("ownerUsername", owner.getUsername());
+            }
+        }
+        JsonArray photos = new JsonArray();
+        int totalLikes = 0;
+        if (album.getPhotoIDs() != null) {
+            for (UUID photoId : album.getPhotoIDs()) {
+                Photo photo = OurObjects.photos.get(photoId);
+                if (photo == null) continue;
+                photos.add(photoToJson(photo));
+                totalLikes += (photo.getLikeIDs() == null) ? 0 : photo.getLikeIDs().size();
+            }
+        }
+        json.add("photos", photos);
+        json.addProperty("photoCount", photos.size());
+        json.addProperty("totalLikes", totalLikes);
+        if (album.getAlbumAge() != null) {
+            json.addProperty("albumAge", album.getAlbumAge().toString());
+        }
+        return json;
     }
 }
