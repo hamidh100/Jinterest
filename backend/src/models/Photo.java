@@ -13,14 +13,15 @@ public class Photo {
     private String path; // db???
     private List<Category> categoryList = new ArrayList<>();
     private UUID captionID;
-    private final String name;
+    private String name;
     private List<UUID> commentIDs;
     private LocalDateTime photoAge;
+    private boolean isPublic = true;
 
     public Photo(UUID ownerID, String path) {
         this.ownerID = ownerID;
         this.path = path; // ?
-        this.categoryList.add(Category.OTHERS);// it should be selectable when they are posting sth.
+        //this.categoryList.add(Category.OTHERS);// it should be selectable when they are posting sth.
         this.uuid = UUID.randomUUID();
         OurObjects.photos.put(uuid, this);
         likeIDs = new ArrayList<UUID>();
@@ -72,6 +73,9 @@ public class Photo {
     public String getName() {
         return name;
     }
+    public void setName(String name){
+        this.name = name;
+    }
     public List<UUID> getCommentIDs() {
         return commentIDs;
     }
@@ -83,6 +87,12 @@ public class Photo {
     }
     public void setPhotoAge(LocalDateTime photoAge) {
         this.photoAge = photoAge;
+    }
+    public boolean isPublic() {
+        return isPublic;
+    }
+    public void setPublic(boolean isPublic) {
+        this.isPublic = isPublic;
     }
     /* getter setter end */
 

@@ -1039,27 +1039,19 @@ public class Router {
     }
 
     private List<Category> readCategories(JsonObject payload) {
-        if (payload == null || !payload.has("categories") || payload.get("categories").isJsonNull()) {
-            return null;
+        List<Category> categories = new ArrayList<>();
+        if (payload == null || !payload.has("categories") ||
+            payload.get("categories").isJsonNull()) {
+            return categories;
         }
         JsonElement categoriesElement = payload.get("categories");
-        if (!categoriesElement.isJsonArray()) {
-            throw new IllegalArgumentException("'categories' must be an array");
-        }
+        if (!categoriesElement.isJsonArray()) throw new IllegalArgumentException("'categories' must be an array");
         JsonArray categoriesArray = categoriesElement.getAsJsonArray();
-        if (categoriesArray.size() == 0) {
-            return null;
-        }
-        List<Category> categories = new ArrayList<>();
         for (JsonElement element : categoriesArray) {
-            if (!element.isJsonPrimitive()) {
+            if (!element.isJsonPrimitive() || !element.getAsJsonPrimitive().isString()) {
                 throw new IllegalArgumentException("Each category must be a string");
             }
-            JsonPrimitive primitive = element.getAsJsonPrimitive();
-            if (!primitive.isString()) {
-                throw new IllegalArgumentException("Each category must be a string");
-            }
-            String categoryText = primitive.getAsString().trim().toUpperCase(Locale.ROOT);
+            String categoryText = Helper.toUpper(element.getAsString().trim());
             if (categoryText.isEmpty()) {
                 throw new IllegalArgumentException("Category cannot be empty");
             }
