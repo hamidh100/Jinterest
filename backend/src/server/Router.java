@@ -400,6 +400,13 @@ public class Router {
             }
             List<Category> categories = readCategories(payload);
             Photo photo = (categories == null) ? new Photo(ownerId, path) : new Photo(ownerId, path, categories);
+            photo.setName(Helper.extractNameFromPath(fileName));
+            boolean isPublic = true;
+            if (payload.has("isPublic") &&
+                    !payload.get("isPublic").isJsonNull()) {
+                isPublic = payload.get("isPublic").getAsBoolean();
+            }
+            photo.setPublic(isPublic);
             PhotoService.addPhoto(owner, photo);
             String captionText = getOptionalString(payload, "caption");
             if (captionText != null) {
@@ -977,6 +984,7 @@ public class Router {
         }
         json.addProperty("name", photo.getName());
         json.addProperty("path", photo.getPath());
+        json.addProperty("isPublic", photo.isPublic());
         if (photo.getPhotoAge() != null) {
             json.addProperty("photoAge", photo.getPhotoAge().toString());
         }
