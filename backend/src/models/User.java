@@ -173,7 +173,6 @@ public class User {
                 "phone='" + phone + '\'' +
                 ", email='" + email + '\'' +
                 ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
                 ", fullname='" + fullname + '\'' +
                 ", uuid=" + uuid +
                 ", accountAge=" + accountAge +
