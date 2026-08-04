@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import database.DatabaseManager;
 
 public class OurObjects {
     // is hashmap ok?
+    public static final ReentrantReadWriteLock DATABASE_LOCK = new ReentrantReadWriteLock();
     public static Map<UUID, User> users = new ConcurrentHashMap<>();
     public static Map<String, UUID> usersLowercase = new ConcurrentHashMap<>(); // for uniqueness (idk20 = iDK20)
     public static Map<String, UUID> emailToUserID = new ConcurrentHashMap<>();

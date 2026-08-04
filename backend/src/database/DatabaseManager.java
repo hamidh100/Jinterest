@@ -13,11 +13,12 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.locks.ReentrantLock;
 
 public final class DatabaseManager {
     private static final Path DEFAULT_DATABASE_PATH = Path.of("database", "jinterest.json");
-
     private static final Gson GSON = createGson();
+    private static final ReentrantLock SAVE_LOCK = new ReentrantLock();
 
     private DatabaseManager() {
     }
@@ -55,6 +56,7 @@ public final class DatabaseManager {
     }
 
     public static synchronized void save() throws IOException {
+        SAVE_LOCK.lock();
         Path directory = DEFAULT_DATABASE_PATH.getParent();
         Files.createDirectories(directory);
 
@@ -77,6 +79,7 @@ public final class DatabaseManager {
             if (!saved) {
                 Files.deleteIfExists(temporaryFile);
             }
+            SAVE_LOCK.unlock();
         }
     }
 }

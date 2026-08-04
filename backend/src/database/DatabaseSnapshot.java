@@ -27,17 +27,22 @@ public class DatabaseSnapshot {
     }
 
     public static DatabaseSnapshot fromCurrentState() {
-        DatabaseSnapshot snapshot = new DatabaseSnapshot();
-        snapshot.users.putAll(OurObjects.users);
-        snapshot.usersLowercase.putAll(OurObjects.usersLowercase);
-        snapshot.emailToUserID.putAll(OurObjects.emailToUserID);
-        snapshot.phoneToUserID.putAll(OurObjects.phoneToUserID);
-        snapshot.photos.putAll(OurObjects.photos);
-        snapshot.albums.putAll(OurObjects.albums);
-        snapshot.likes.putAll(OurObjects.likes);
-        snapshot.comments.putAll(OurObjects.comments);
-        snapshot.captions.putAll(OurObjects.captions);
-        return snapshot;
+        OurObjects.DATABASE_LOCK.readLock().lock();
+        try {
+            DatabaseSnapshot snapshot = new DatabaseSnapshot();
+            snapshot.users.putAll(OurObjects.users);
+            snapshot.usersLowercase.putAll(OurObjects.usersLowercase);
+            snapshot.emailToUserID.putAll(OurObjects.emailToUserID);
+            snapshot.phoneToUserID.putAll(OurObjects.phoneToUserID);
+            snapshot.photos.putAll(OurObjects.photos);
+            snapshot.albums.putAll(OurObjects.albums);
+            snapshot.likes.putAll(OurObjects.likes);
+            snapshot.comments.putAll(OurObjects.comments);
+            snapshot.captions.putAll(OurObjects.captions);
+            return snapshot;
+        } finally {
+            OurObjects.DATABASE_LOCK.readLock().unlock();
+        }
     }
 
     public void restoreCurrentState() {
