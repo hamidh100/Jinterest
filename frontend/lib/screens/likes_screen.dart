@@ -1,11 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/photo.dart';
 import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
+import '../widgets/server_photo_image.dart';
 
 class LikesScreen extends StatefulWidget {
   const LikesScreen({super.key});
@@ -87,8 +86,6 @@ class _LikedPhotoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final file = File(photo.path);
-
     return InkWell(
       onTap: () {
         Navigator.pushNamed(context, '/photo-details', arguments: photo.uuid);
@@ -96,54 +93,43 @@ class _LikedPhotoTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: Container(
-          color: Colors.grey[300],
+        child: ColoredBox(
+          color: Colors.grey,
           child: Stack(
             fit: StackFit.expand,
             children: [
-              if (file.existsSync())
-                Image.file(file, fit: BoxFit.cover)
-              else
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.broken_image,
-                      size: 48,
-                      color: Colors.grey,
-                    ),
-                    const SizedBox(height: 8),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Text(photo.name, textAlign: TextAlign.center),
-                    ),
-                  ],
-                ),
-
+              ServerPhotoImage(
+                photoId: photo.uuid,
+                width: double.infinity,
+                height: double.infinity,
+                fit: BoxFit.cover,
+              ),
               Positioned(
                 left: 0,
                 right: 0,
                 bottom: 0,
-                child: Container(
-                  padding: const EdgeInsets.all(8),
+                child: ColoredBox(
                   color: Colors.black54,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          photo.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            photo.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ),
+                        const Icon(Icons.favorite, color: Colors.red, size: 18),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${photo.likeIDs.length}',
                           style: const TextStyle(color: Colors.white),
                         ),
-                      ),
-                      const Icon(Icons.favorite, color: Colors.red, size: 18),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${photo.likeIDs.length}',
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
