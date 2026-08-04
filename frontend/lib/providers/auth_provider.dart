@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
-import '../services/user_service.dart';
+import '../services/api_client.dart';
 import '../exceptions/exceptions.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -21,17 +20,16 @@ class AuthProvider extends ChangeNotifier {
     try {
       _errorMessage = null;
 
-      User tempUser = User(
-        uuid: DateTime.now().millisecondsSinceEpoch.toString(),
-        email: identifier.contains('@') ? identifier : null,
-        phone: identifier.contains('@') ? null : identifier,
-        username: null,
-        password: password,
-        fullname: fullname,
+      final response = await ApiClient.instance.send(
+        method: 'POST',
+        route: '/auth/signup',
+        payload: {
+          if (identifier.contains('@')) 'email': identifier else 'phone': identifier,
+          'password': password,
+          'fullname': fullname,
+        },
       );
-
-      User newUser = UserService.signup(tempUser);
-      _currentUser = newUser;
+      _currentUser = _userFromResponse(response, password);
       _isLoggedIn = true;
 
       notifyListeners();
@@ -54,8 +52,12 @@ class AuthProvider extends ChangeNotifier {
     try {
       _errorMessage = null;
 
-      User user = UserService.login(identifier, password);
-      _currentUser = user;
+      final response = await ApiClient.instance.send(
+        method: 'POST',
+        route: '/auth/login',
+        payload: {'identifier': identifier, 'password': password},
+      );
+      _currentUser = _userFromResponse(response, password);
       _isLoggedIn = true;
 
       notifyListeners();
@@ -81,5 +83,21 @@ class AuthProvider extends ChangeNotifier {
   void updateCurrentUser(User updatedUser) {
     _currentUser = updatedUser;
     notifyListeners();
+  }
+
+  User _userFromResponse(Map<String, dynamic> response, String password) {
+    final payload = response['payload'];
+    if (payload is! Map<String, dynamic> || payload['user'] is! Map<String, dynamic>) {
+      throw ApiException(statusCode: 500, message: 'Server returned an invalid user');
+    }
+    final user = payload['user'] as Map<String, dynamic>;
+    return User(
+      uuid: user['id']?.toString() ?? '',
+      username: user['username']?.toString(),
+      email: user['email']?.toString(),
+      phone: user['phone']?.toString(),
+      password: password,
+      fullname: user['fullname']?.toString() ?? '',
+    );
   }
 }
