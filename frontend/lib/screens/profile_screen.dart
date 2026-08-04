@@ -696,16 +696,15 @@ class _AlbumCoverImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final file = File(photo.path);
-
-    if (!file.existsSync()) {
-      return Container(
-        color: Colors.grey[300],
-        child: const Icon(Icons.broken_image, color: Colors.grey),
-      );
-    }
-
-    return Image.file(file, fit: BoxFit.cover);
+    return ColoredBox(
+      color: Colors.grey,
+      child: ServerPhotoImage(
+        photoId: photo.uuid,
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.cover,
+      ),
+    );
   }
 }
 
