@@ -7,6 +7,7 @@ import '../models/album.dart';
 import '../models/photo.dart';
 import '../providers/album_provider.dart';
 import '../providers/photo_provider.dart';
+import '../widgets/server_photo_image.dart';
 
 enum ExploreViewMode { photos, albums, mixed }
 
@@ -207,26 +208,20 @@ class _ExplorePhotoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final file = File(photo.path);
-
     return InkWell(
       onTap: () {
         Navigator.pushNamed(context, '/photo-details', arguments: photo.uuid);
       },
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
-        child: Container(
-          color: Colors.grey[300],
-          child: file.existsSync()
-              ? Image.file(file, fit: BoxFit.cover)
-              : Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.broken_image, size: 48),
-                    const SizedBox(height: 8),
-                    Text(photo.name, textAlign: TextAlign.center),
-                  ],
-                ),
+        child: ColoredBox(
+          color: Colors.grey,
+          child: ServerPhotoImage(
+            photoId: photo.uuid,
+            width: double.infinity,
+            height: double.infinity,
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );
@@ -292,13 +287,12 @@ class _ExploreAlbumTile extends StatelessWidget {
   }
 
   Widget _buildCover(Photo photo) {
-    final file = File(photo.path);
-
-    if (!file.existsSync()) {
-      return const Center(child: Icon(Icons.broken_image, size: 48));
-    }
-
-    return Image.file(file, fit: BoxFit.cover);
+    return ServerPhotoImage(
+      photoId: photo.uuid,
+      width: double.infinity,
+      height: double.infinity,
+      fit: BoxFit.cover,
+    );
   }
 }
 

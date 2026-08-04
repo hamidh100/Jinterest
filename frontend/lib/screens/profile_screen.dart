@@ -11,6 +11,7 @@ import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
 import '../providers/theme_provider.dart';
 import '../services/user_service.dart';
+import '../widgets/server_photo_image.dart';
 
 enum ProfileViewMode { photos, albums }
 
@@ -585,32 +586,18 @@ class _ProfilePhotoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final file = File(photo.path);
-
     return InkWell(
       onTap: () {
         Navigator.pushNamed(context, '/photo-details', arguments: photo.uuid);
       },
-      child: Container(
-        color: Colors.grey[300],
-        child: file.existsSync()
-            ? Image.file(file, fit: BoxFit.cover)
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.broken_image, color: Colors.grey),
-                  const SizedBox(height: 4),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Text(
-                      photo.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 11),
-                    ),
-                  ),
-                ],
-              ),
+      child: ColoredBox(
+        color: Colors.grey,
+        child: ServerPhotoImage(
+          photoId: photo.uuid,
+          width: double.infinity,
+          height: double.infinity,
+          fit: BoxFit.cover,
+        ),
       ),
     );
   }

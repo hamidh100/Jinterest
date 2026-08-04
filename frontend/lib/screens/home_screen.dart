@@ -8,6 +8,7 @@ import '../models/photo.dart';
 import '../providers/album_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
+import '../widgets/server_photo_image.dart';
 import 'explore_screen.dart';
 import 'likes_screen.dart';
 import 'profile_screen.dart';
@@ -434,31 +435,18 @@ class _PhotoImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final file = File(photo.path);
-
-    if (!file.existsSync()) {
-      return Container(
-        width: double.infinity,
-        height: 300,
-        color: Colors.grey[300],
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.broken_image, size: 80, color: Colors.grey),
-              const SizedBox(height: 8),
-              Text(photo.name),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Image.file(
-      file,
+    return SizedBox(
       width: double.infinity,
       height: 300,
-      fit: BoxFit.cover,
+      child: ColoredBox(
+        color: Colors.grey,
+        child: ServerPhotoImage(
+          photoId: photo.uuid,
+          width: double.infinity,
+          height: 300,
+          fit: BoxFit.cover,
+        ),
+      ),
     );
   }
 }
@@ -550,16 +538,15 @@ class _AlbumCoverImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final file = File(photo.path);
-
-    if (!file.existsSync()) {
-      return Container(
-        color: Colors.grey[300],
-        child: const Icon(Icons.broken_image, size: 48, color: Colors.grey),
-      );
-    }
-
-    return Image.file(file, fit: BoxFit.cover);
+    return ColoredBox(
+      color: Colors.grey,
+      child: ServerPhotoImage(
+        photoId: photo.uuid,
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.cover,
+      ),
+    );
   }
 }
 
