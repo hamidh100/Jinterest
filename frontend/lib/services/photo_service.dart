@@ -43,7 +43,7 @@ class PhotoService {
       photoAge:
           DateTime.tryParse(json['photoAge']?.toString() ?? '') ??
           DateTime.now(),
-
+      isPublic: json['isPublic'] as bool? ?? true,
       // Temporary count representation because backend returns counts
       likeIDs: List.generate(likeCount, (index) => 'server-like-$index'),
       commentIDs: List.generate(
@@ -75,6 +75,7 @@ class PhotoService {
     required String ownerId,
     required File imageFile,
     required List<String> categories,
+    required bool isPublic,
     String? caption,
   }) async {
     final imageBytes = await imageFile.readAsBytes();
@@ -87,6 +88,7 @@ class PhotoService {
         'fileName': _fileNameFromPath(imageFile.path),
         'imageBase64': base64Encode(imageBytes),
         'categories': categories,
+        'isPublic': isPublic,
         if (caption != null && caption.trim().isNotEmpty)
           'caption': caption.trim(),
       },

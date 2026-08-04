@@ -38,6 +38,7 @@ class PhotoProvider extends ChangeNotifier {
         ownerId: photo.ownerID,
         imageFile: File(photo.path),
         categories: photo.categoryList,
+        isPublic: photo.isPublic,
         caption: photo.captionText,
       );
 
