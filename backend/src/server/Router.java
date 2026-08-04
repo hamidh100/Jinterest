@@ -1,8 +1,23 @@
 package server;
 
+import java.io.IOException;
+import java.util.UUID;
+
 import com.google.gson.JsonObject;
 
+import database.DatabaseManager;
+import exceptions.IncorrectPassword;
+import exceptions.InvalidLoginMethod;
+import exceptions.InvalidSignupMethod;
+import exceptions.InvalidUsername;
+import exceptions.UserAlreadyExists;
+import exceptions.UserBanned;
+import exceptions.UserDoesNotExist;
+import exceptions.WeakPassword;
 import models.Helper;
+import models.OurObjects;
+import models.User;
+import services.UserService;
 
 public class Router {
     public Response route(Request request) {
@@ -197,27 +212,134 @@ public class Router {
     }
 
     private Response handleSignup(Request request) {
-        return Response.notImplemented(
-                "Signup has not been implemented yet"
-        );
+        JsonObject payload = request.getPayload();
+        try {
+            String email = getOptionalString(payload, "email");
+            String phone = getOptionalString(payload, "phone");
+            String password = getRequiredString(payload, "password");
+            String fullname = getOptionalString(payload, "fullname");
+            boolean hasEmail = (email != null);
+            boolean hasPhone = (phone != null);
+            if (hasEmail == hasPhone) {
+                return Response.badRequest("Signup requires exactly one email or phone number");
+            }
+            String identifier = hasEmail ? email : phone;
+            User user = new User(identifier, password, fullname);
+            UserService.signup(user);
+            JsonObject responsePayload = new JsonObject();
+            responsePayload.add("user", userToJson(user));
+            return Response.created("Account created successfully", responsePayload);
+        } catch (InvalidSignupMethod e) {
+            return Response.badRequest("Invalid signup method");
+        } catch (UserAlreadyExists e) {
+            return Response.conflict(e.getMessage());
+        } catch (WeakPassword e) {
+            return Response.badRequest(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest(e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Could not save account:");
+            e.printStackTrace();
+            return Response.serverError("Could not save account");
+        } catch (Exception e) {
+            System.err.println("Unexpected signup error:");
+            e.printStackTrace();
+            return Response.serverError("Internal server error");
+        }
     }
 
     private Response handleLogin(Request request) {
-        return Response.notImplemented(
-                "Login has not been implemented yet"
-        );
+        JsonObject payload = request.getPayload();
+        try {
+            String identifier = getRequiredString(payload, "identifier");
+            String password = getRequiredString(payload, "password");
+            UserService.login(identifier, password);
+            User user = findUserByIdentifier(identifier);
+            if (user == null) return Response.serverError("Logged-in user could not be found");
+            JsonObject responsePayload = new JsonObject();
+            responsePayload.add("user", userToJson(user));
+            return Response.ok("Login successful", responsePayload);
+        } catch (InvalidLoginMethod e) {
+            return Response.badRequest("Invalid login method");
+        } catch (UserDoesNotExist e) {
+            return Response.unauthorized(e.getMessage());
+        } catch (IncorrectPassword e) {
+            return Response.unauthorized(e.getMessage());
+        } catch (UserBanned e) {
+            return Response.forbidden(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest(e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Unexpected login error:");
+            e.printStackTrace();
+            return Response.serverError("Internal server error");
+        }
     }
 
     private Response handleGetUser(Request request, String userId) {
-        return Response.notImplemented(
-                "Get user has not been implemented yet"
-        );
+        try {
+            UUID uuid = parseUuid(userId);
+            User user = OurObjects.users.get(uuid);
+            if (user == null) return Response.notFound("User does not exist");
+            JsonObject responsePayload = new JsonObject();
+            responsePayload.add("user", userToJson(user));
+            return Response.ok("User found", responsePayload);
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest("User ID must be a valid UUID");
+        } catch (Exception e) {
+            System.err.println("Unexpected get-user error:");
+            e.printStackTrace();
+            return Response.serverError("Internal server error");
+        }
     }
 
     private Response handleUpdateUser(Request request, String userId) {
-        return Response.notImplemented(
-                "Update user has not been implemented yet"
-        );
+        try {
+            UUID uuid = parseUuid(userId);
+            User user = OurObjects.users.get(uuid);
+            if (user == null) return Response.notFound("User does not exist");
+            JsonObject payload = request.getPayload();
+            boolean updated = false;
+            if (payload.has("username") && !payload.get("username").isJsonNull()) {
+                String newUsername = getRequiredString(payload, "username");
+                UserService.changeUsername(user, newUsername);
+                updated = true;
+            }
+            if (payload.has("password") && !payload.get("password").isJsonNull()) {
+                String newPassword = getRequiredString(payload, "password");
+                UserService.changePassword(user, newPassword);
+                updated = true;
+            }
+            if (payload.has("fullname") && !payload.get("fullname").isJsonNull()) {
+                String newFullname = getRequiredString(payload, "fullname");
+                user.setFullname(newFullname);
+                DatabaseManager.save();
+                updated = true;
+            }
+            if (payload.has("email") || payload.has("phone")) {
+                return Response.notImplemented("Changing email or phone is not supported yet");
+            }
+            if (!updated) return Response.badRequest("No valid fields were provided for update");
+            JsonObject responsePayload = new JsonObject();
+            responsePayload.add("user", userToJson(user));
+            return Response.ok("User updated successfully", responsePayload);
+        } catch (InvalidUsername e) {
+            return Response.badRequest(e.getMessage());
+        } catch (UserAlreadyExists e) {
+            return Response.conflict(e.getMessage());
+        } catch (WeakPassword e) {
+            return Response.badRequest(e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Could not save user update:");
+            e.printStackTrace();
+            return Response.serverError("Could not save user changes");
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest(e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Unexpected update-user error:");
+            e.printStackTrace();
+            return Response.serverError("Internal server error");
+        }
     }
 
     private Response handleGetPhotos(Request request) {
@@ -327,4 +449,67 @@ public class Router {
                 "Search has not been implemented yet"
         );
     }
+
+    private String getRequiredString( JsonObject payload, String field) {
+        if (payload == null || !payload.has(field) || payload.get(field).isJsonNull()){
+            throw new IllegalArgumentException("Field '" + field + "' is required");
+        }
+        String value = payload.get(field).getAsString().trim();
+        if (value.isEmpty()) {
+            throw new IllegalArgumentException("Field '" + field + "' cannot be empty");
+        }
+        return value;
+    }
+
+    private String getOptionalString(JsonObject payload, String field) {
+        if (payload == null || !payload.has(field) || payload.get(field).isJsonNull()) {
+            return null;
+        }
+        String value = payload.get(field).getAsString().trim();
+        return value.isEmpty() ? null : value;
+    }
+
+    private UUID parseUuid(String value) {
+        if (value == null || value.equals("")) {
+            throw new IllegalArgumentException("UUID is required");
+        }
+        return UUID.fromString(value);
+    }
+
+    private User findUserByIdentifier(String identifier) {
+        if (identifier == null || identifier.equals("")) return null;
+        String value = identifier.trim();
+        String lowercaseValue = Helper.toLower(value);
+        UUID userId = OurObjects.usersLowercase.get(lowercaseValue);
+        if (userId != null) return OurObjects.users.get(userId);
+        userId = OurObjects.emailToUserID.get(value);
+        if (userId != null) return OurObjects.users.get(userId);
+        userId = OurObjects.phoneToUserID.get(value);
+        if (userId != null) return OurObjects.users.get(userId);
+        return null;
+    }
+
+private JsonObject userToJson(User user) {
+    JsonObject json = new JsonObject();
+    json.addProperty("id", user.getUuid().toString());
+    if (user.getUsername() != null) {
+        json.addProperty("username", user.getUsername());
+    }
+    if (user.getEmail() != null) {
+        json.addProperty("email", user.getEmail());
+    }
+    if (user.getPhone() != null) {
+        json.addProperty("phone", user.getPhone());
+    }
+    if (user.getFullname() != null) {
+        json.addProperty("fullname", user.getFullname());
+    }
+    if (user.getAccountAge() != null) {
+        json.addProperty("accountAge", user.getAccountAge().toString());
+    }
+    if (user.getUserType() != null) {
+        json.addProperty("userType", user.getUserType().toString());
+    }
+    return json;
+}
 }
