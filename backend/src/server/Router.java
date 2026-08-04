@@ -985,6 +985,16 @@ public class Router {
                 json.add("caption", captionToJson(caption));
             }
         }
+        JsonArray likedByUserIds = new JsonArray();
+        if (photo.getLikeIDs() != null) {
+            for (UUID likeId : photo.getLikeIDs()) {
+                Like like = OurObjects.likes.get(likeId);
+                if (like != null && like.getUserID() != null) {
+                    likedByUserIds.add(like.getUserID().toString());
+                }
+            }
+        }
+        json.add("likedByUserIds", likedByUserIds);
         json.addProperty("likeCount", photo.getLikeIDs() == null ? 0 : photo.getLikeIDs().size());
         json.addProperty("commentCount", photo.getCommentIDs() == null ? 0 : photo.getCommentIDs().size());
         return json;
