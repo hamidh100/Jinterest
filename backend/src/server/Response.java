@@ -53,6 +53,10 @@ public class Response {
         return new Response(500, message, null);
     }
 
+    public static Response notImplemented(String message) {
+        return new Response(501, message, null);
+    }
+
     public int getStatusCode() {
         return statusCode;
     }
