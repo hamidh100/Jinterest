@@ -1,8 +1,11 @@
 package server;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -64,6 +67,14 @@ public class Router {
             case "/albums": return handleGetAlbums(request);
             case "/search": return handleSearch(request);
             default:
+                /*
+                    /photos/{id}/image
+                    /photos/{id}
+                 */
+                if (isPhotoImageRoute(route)) {
+                    String photoId = getPart(route, 2);
+                    return handleGetPhotoImage(request, photoId);
+                }
                 if (isPhotoRoute(route)) {
                     String photoId = getPart(route, 2);
                     return handleGetPhoto(request, photoId);
@@ -168,6 +179,11 @@ public class Router {
         return result;
     }
 
+    private boolean isPhotoImageRoute(String route) {
+        String[] parts = splitRoute(route);
+        return parts.length == 3 && parts[0].equals("photos") && parts[2].equals("image");
+    }
+
     private boolean isPhotoRoute(String route) {
         String[] parts = splitRoute(route);
         return parts.length == 2 && parts[0].equals("photos");
@@ -217,7 +233,7 @@ public class Router {
     private boolean pathExists(String route) {
         return route.equals("/ping") || route.equals("/photos") || route.equals("/albums") ||
                 route.equals("/search") || route.equals("/auth/signup") || route.equals("/auth/login") ||
-                isPhotoRoute(route) ||isAlbumRoute(route) || isUserRoute(route) || isCommentRoute(route) ||
+                isPhotoImageRoute(route) || isPhotoRoute(route) || isAlbumRoute(route) || isUserRoute(route) || isCommentRoute(route) ||
                 isPhotoLikesRoute(route) || isPhotoCommentsRoute(route) || isUserFollowRoute(route);
     }
 
@@ -367,6 +383,38 @@ public class Router {
         payload.add("photos", photosJson);
         return Response.ok("Photos found", payload);
     }
+
+    private Response handleGetPhotoImage(Request request, String photoId) {
+        try {
+            UUID photoUuid = parseUuid(photoId);
+            Photo photo = OurObjects.photos.get(photoUuid);
+            if (photo == null) return Response.notFound("Photo does not exist");
+            String imagePath = photo.getPath();
+            if (imagePath == null || imagePath.isBlank()) {
+                return Response.notFound("Photo image does not exist");
+            }
+            Path path = Path.of(imagePath);
+            if (!Files.exists(path) || !Files.isRegularFile(path)) {
+                return Response.notFound("Photo image file does not exist");
+            }
+            byte[] imageBytes = Files.readAllBytes(path);
+            JsonObject payload = new JsonObject();
+            payload.addProperty("fileName", path.getFileName().toString());
+            payload.addProperty("imageBase64", Base64.getEncoder().encodeToString(imageBytes));
+            return Response.ok("Photo image found", payload);
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest("Photo ID must be a valid UUID");
+        } catch (IOException e) {
+            System.err.println("Could not read photo image:");
+            e.printStackTrace();
+            return Response.serverError("Could not read photo image");
+        } catch (Exception e) {
+            System.err.println("Unexpected get-photo-image error:");
+            e.printStackTrace();
+            return Response.serverError("Internal server error");
+        }
+    }
+
 
     private Response handleGetPhoto(Request request, String photoId) {
         try {
