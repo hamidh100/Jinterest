@@ -384,18 +384,22 @@ public class Router {
     private Response handleCreatePhoto(Request request) {
         try {
             JsonObject payload = request.getPayload();
-            String ownerIdText = getRequiredString(payload, "ownerId");
-            String path = getRequiredString(payload, "path");
-            UUID ownerId = parseUuid(ownerIdText);
+            UUID ownerId = parseUuid(getRequiredString(payload, "ownerId"));
             User owner = OurObjects.users.get(ownerId);
             if (owner == null) return Response.notFound("Owner user does not exist");
-            List<Category> categories = readCategories(payload);
-            Photo photo;
-            if (categories == null) {
-                photo = new Photo(ownerId, path);
+            String imageBase64 = getOptionalString(payload, "imageBase64");
+            String fileName = getOptionalString(payload, "fileName");
+            String path;
+            if (imageBase64 != null) {
+                if (fileName == null) {
+                    return Response.badRequest("fileName is required with imageBase64");
+                }
+                path = ImageStorage.saveBase64Image(imageBase64, fileName);
             } else {
-                photo = new Photo(ownerId, path, categories);
+                path = getRequiredString(payload, "path");
             }
+            List<Category> categories = readCategories(payload);
+            Photo photo = (categories == null) ? new Photo(ownerId, path) : new Photo(ownerId, path, categories);
             PhotoService.addPhoto(owner, photo);
             String captionText = getOptionalString(payload, "caption");
             if (captionText != null) {
