@@ -17,8 +17,13 @@ class UploaderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final User? uploader = UserService.getUserById(ownerID);
+    return FutureBuilder<User?>(
+      future: UserService.getUserById(ownerID),
+      builder: (context, snapshot) => _buildTile(context, snapshot.data),
+    );
+  }
 
+  Widget _buildTile(BuildContext context, User? uploader) {
     final displayName = uploader?.fullname.trim().isNotEmpty == true
         ? uploader!.fullname.trim()
         : uploader?.username ?? 'Unknown user';

@@ -395,27 +395,20 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
   }
 
   // Validates the form and returns the updated user to the profile screen.
-  void _handleSave() {
+  Future<void> _handleSave() async {
     if (!_formKey.currentState!.validate()) return;
 
     final fullname = _fullnameController.text.trim();
     final username = _usernameController.text.trim();
 
     try {
-      final userWithUsername = username == widget.user.username
-          ? widget.user
-          : UserService.changeUsername(widget.user, username);
-
-      final updatedUser = User(
-        uuid: userWithUsername.uuid,
-        email: userWithUsername.email,
-        phone: userWithUsername.phone,
-        username: userWithUsername.username,
-        password: userWithUsername.password,
+      final updatedUser = await UserService.updateUser(
+        user: widget.user,
+        username: username,
         fullname: fullname,
-        banned: userWithUsername.banned,
       );
 
+      if (!mounted) return;
       Navigator.pop(context, updatedUser);
     } catch (error) {
       ScaffoldMessenger.of(context).clearSnackBars();
