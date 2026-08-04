@@ -49,8 +49,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     final user = _editedUser?.uuid == authUser.uuid ? _editedUser! : authUser;
 
-    final followersCount = UserService.followersCount(user);
-    final followingCount = UserService.followingCount(user);
+    final followersCount = user.followerIDs.length;
+    final followingCount = user.followingIDs.length;
 
     final userPhotos = photoProvider.getUserPhotos(user.uuid);
     final userAlbums = albumProvider.getUserAlbums(user.uuid);

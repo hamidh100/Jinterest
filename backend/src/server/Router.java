@@ -944,6 +944,16 @@ public class Router {
         if (user.getUserType() != null) {
             json.addProperty("userType", user.getUserType().toString());
         }
+        JsonArray followerIds = new JsonArray();
+        for (UUID followerId : user.getFollowerIDs()) {
+            followerIds.add(followerId.toString());
+        }
+        json.add("followerIds", followerIds);
+        JsonArray followingIds = new JsonArray();
+        for (UUID followingId : user.getFollowingIDs()) {
+            followingIds.add(followingId.toString());
+        }
+        json.add("followingIds", followingIds);
         return json;
     }
 

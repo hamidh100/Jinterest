@@ -6,6 +6,8 @@ class User {
   final String password;
   final String fullname;
   final bool banned;
+  final List<String> followerIDs;
+  final List<String> followingIDs;
 
   User({
     required this.uuid,
@@ -15,5 +17,7 @@ class User {
     required this.password,
     this.fullname = '',
     this.banned = false,
+    this.followerIDs = const [],
+    this.followingIDs = const [],
   });
 }

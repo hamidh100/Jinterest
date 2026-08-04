@@ -106,6 +106,12 @@ class AuthProvider extends ChangeNotifier {
       phone: user['phone']?.toString(),
       password: password,
       fullname: user['fullname']?.toString() ?? '',
+      followerIDs: (user['followerIds'] as List? ?? const [])
+          .map((id) => id.toString())
+          .toList(),
+      followingIDs: (user['followingIds'] as List? ?? const [])
+          .map((id) => id.toString())
+          .toList(),
     );
   }
 }
