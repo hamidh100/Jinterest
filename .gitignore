@@ -7,6 +7,7 @@ backend/out/
 backend/lib/
 backend/notes/
 backend/database/jinterest.json
+backend/database/images/
 
 frontend/.dart_tool/
 frontend/.idea/
