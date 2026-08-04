@@ -38,7 +38,8 @@ class AlbumService {
       payload: {
         'ownerId': album.ownerID,
         'name': album.name,
-        if (album.description != null) 'description': album.description,
+        'description': album.description,
+        'isPublic': album.isPublic,
         'photoIds': album.photoIDs,
       },
     );
@@ -93,7 +94,8 @@ class AlbumService {
       route: '/albums/${album.uuid}',
       payload: {
         'name': album.name,
-        if (album.description != null) 'description': album.description,
+        'description': album.description,
+        'isPublic': album.isPublic,
         'photoIds': album.photoIDs,
       },
     );
@@ -135,7 +137,7 @@ class AlbumService {
       albumAge:
           DateTime.tryParse(json['albumAge']?.toString() ?? '') ??
           DateTime.now(),
-      isPublic: true,
+      isPublic: json['isPublic'] as bool? ?? true,
     );
   }
 }
