@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import '../exceptions/exceptions.dart';
 import '../models/photo.dart';
@@ -156,5 +157,20 @@ class PhotoService {
       throw StateError('Server returned an invalid photo');
     }
     return _photoFromJson(payload['photo'] as Map<String, dynamic>);
+  }
+
+  static Future<Uint8List> getPhotoImage(String photoId) async {
+    final response = await ApiClient.instance.send(
+      method: 'GET',
+      route: '/photos/$photoId/image',
+    );
+
+    final payload = response['payload'];
+
+    if (payload is! Map<String, dynamic> || payload['imageBase64'] is! String) {
+      throw StateError('Server returned an invalid photo image');
+    }
+
+    return base64Decode(payload['imageBase64'] as String);
   }
 }

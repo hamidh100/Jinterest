@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -8,6 +6,7 @@ import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
 import '../widgets/info_chip.dart';
 import '../widgets/uploader_tile.dart';
+import '../widgets/server_photo_image.dart';
 
 class PhotoDetailsScreen extends StatelessWidget {
   final String photoId;
@@ -85,20 +84,16 @@ class PhotoDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildImage(Photo photo) {
-    final file = File(photo.path);
-
-    if (!file.existsSync()) {
-      return Container(
-        height: 350,
+    return SizedBox(
+      height: 350,
+      width: double.infinity,
+      child: ServerPhotoImage(
+        photoId: photo.uuid,
         width: double.infinity,
-        color: Colors.grey[300],
-        child: const Center(
-          child: Icon(Icons.broken_image, size: 80, color: Colors.grey),
-        ),
-      );
-    }
-
-    return Image.file(file, width: double.infinity, fit: BoxFit.cover);
+        height: 350,
+        fit: BoxFit.cover,
+      ),
+    );
   }
 
   Widget _buildHeader(BuildContext context, Photo photo, bool isLiked) {
