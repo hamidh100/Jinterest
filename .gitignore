@@ -5,6 +5,7 @@ Jinterest.code-workspace
 
 backend/out/
 backend/lib/
+backend/target/
 backend/notes/
 backend/database/jinterest.json
 backend/database/images/
