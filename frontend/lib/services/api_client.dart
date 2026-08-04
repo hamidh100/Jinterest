@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import '../exceptions/exceptions.dart';
 
@@ -40,7 +41,7 @@ class ApiClient {
       socket.write('$requestJson\n');
 
       final responseLine = await socket
-          .transform(utf8.decoder)
+          .transform(utf8.decoder as StreamTransformer<Uint8List, dynamic>)
           .transform(const LineSplitter())
           .first
           .timeout(responseTimeout);
