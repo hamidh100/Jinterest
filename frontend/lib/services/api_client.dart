@@ -10,8 +10,16 @@ class ApiClient {
 
   static final ApiClient instance = ApiClient._();
 
-  static const String host = '192.168.1.10';
-  static const int port = 5050;
+  // example:
+  // flutter run --dart-define=JINTEREST_HOST=192.168.1.10
+  static const String host = String.fromEnvironment(
+    'JINTEREST_HOST',
+    defaultValue: 'localhost',
+  );
+  static const int port = int.fromEnvironment(
+    'JINTEREST_PORT',
+    defaultValue: 5050,
+  );
 
   static const Duration connectionTimeout = Duration(seconds: 10);
   static const Duration responseTimeout = Duration(seconds: 30);
@@ -24,11 +32,7 @@ class ApiClient {
     Socket? socket;
 
     try {
-      socket = await Socket.connect(
-        host,
-        port,
-        timeout: connectionTimeout,
-      );
+      socket = await Socket.connect(host, port, timeout: connectionTimeout);
 
       final request = <String, dynamic>{
         'method': method,
@@ -67,8 +71,7 @@ class ApiClient {
       if (statusCode < 200 || statusCode >= 300) {
         throw ApiException(
           statusCode: statusCode,
-          message: decoded['message']?.toString() ??
-              'Server request failed',
+          message: decoded['message']?.toString() ?? 'Server request failed',
           payload: _mapOrEmpty(decoded['payload']),
         );
       }
