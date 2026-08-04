@@ -1048,7 +1048,7 @@ public class Router {
         }
         JsonArray categoriesArray = categoriesElement.getAsJsonArray();
         if (categoriesArray.size() == 0) {
-            throw new IllegalArgumentException("'categories' cannot be empty");
+            return null;
         }
         List<Category> categories = new ArrayList<>();
         for (JsonElement element : categoriesArray) {
