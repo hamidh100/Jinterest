@@ -266,16 +266,35 @@ class _ExploreAlbumTile extends StatelessWidget {
                   ),
                 ),
               Positioned(
-                left: 8,
-                right: 8,
-                bottom: 8,
-                child: Container(
-                  padding: const EdgeInsets.all(8),
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: ColoredBox(
                   color: Colors.black54,
-                  child: Text(
-                    album.name,
-                    style: const TextStyle(color: Colors.white),
-                    overflow: TextOverflow.ellipsis,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            album.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ),
+                        const Icon(
+                          Icons.photo_library_outlined,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${album.photoIDs.length}',
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
