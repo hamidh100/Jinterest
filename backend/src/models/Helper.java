@@ -26,6 +26,16 @@ public class Helper {
         return res;
     }
 
+    public static String toUpper(String str){
+        String res = "";
+        for (int i = 0; i < str.length(); i++){
+            char c = str.charAt(i);
+            if (c >= 'a' && c <= 'z') c = (char)(c - 'a' + 'A');
+            res += c;
+        }
+        return res;
+    }
+
     public static String extractNameFromPath(String str){
         if (str == null) return null;
         String res = "";
