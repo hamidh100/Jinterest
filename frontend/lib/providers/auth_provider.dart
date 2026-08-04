@@ -34,6 +34,10 @@ class AuthProvider extends ChangeNotifier {
 
       notifyListeners();
       return true;
+    } on ApiException catch (e) {
+      _errorMessage = e.message;
+      notifyListeners();
+      return false;
     } on JinterestException catch (e) {
       _errorMessage = e.message;
       notifyListeners();
@@ -62,6 +66,10 @@ class AuthProvider extends ChangeNotifier {
 
       notifyListeners();
       return true;
+    } on ApiException catch (e) {
+      _errorMessage = e.message;
+      notifyListeners();
+      return false;
     } on JinterestException catch (e) {
       _errorMessage = e.message;
       notifyListeners();
