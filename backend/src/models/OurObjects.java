@@ -1,8 +1,11 @@
 package models;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import database.DatabaseManager;
 
 public class OurObjects {
     // is hashmap ok?
@@ -15,4 +18,11 @@ public class OurObjects {
     public static Map<UUID, Like> likes = new HashMap<>();
     public static Map<UUID, Comment> comments = new HashMap<>();
     public static Map<UUID, Caption> captions = new HashMap<>();
+    static {
+        try {
+            DatabaseManager.load();
+        } catch (IOException e){
+            System.out.println(e);
+        }
+    }
 }
