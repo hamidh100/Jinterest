@@ -24,8 +24,10 @@ class PhotoService {
         .map((category) => category.toString())
         .toList();
     final caption = json['caption'];
-    final likeCount = json['likeCount'] as int? ?? 0;
     final commentCount = json['commentCount'] as int? ?? 0;
+    final likedByUserIds = (json['likedByUserIds'] as List? ?? const [])
+        .map((userId) => userId.toString())
+        .toList();
 
     return Photo(
       uuid: json['id']?.toString() ?? '',
@@ -39,7 +41,7 @@ class PhotoService {
       photoAge:
           DateTime.tryParse(json['photoAge']?.toString() ?? '') ??
           DateTime.now(),
-      likeIDs: List.generate(likeCount, (index) => 'server-like-$index'),
+      likeIDs: likedByUserIds,
       commentIDs: List.generate(
         commentCount,
         (index) => 'server-comment-$index',
