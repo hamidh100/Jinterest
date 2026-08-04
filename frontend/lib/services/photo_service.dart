@@ -76,6 +76,7 @@ class PhotoService {
     required File imageFile,
     required List<String> categories,
     required bool isPublic,
+    String? name,
     String? caption,
   }) async {
     final imageBytes = await imageFile.readAsBytes();
@@ -89,6 +90,7 @@ class PhotoService {
         'imageBase64': base64Encode(imageBytes),
         'categories': categories,
         'isPublic': isPublic,
+        if (name != null && name.trim().isNotEmpty) 'name': name.trim(),
         if (caption != null && caption.trim().isNotEmpty)
           'caption': caption.trim(),
       },

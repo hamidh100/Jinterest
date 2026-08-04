@@ -400,7 +400,12 @@ public class Router {
             }
             List<Category> categories = readCategories(payload);
             Photo photo = (categories == null) ? new Photo(ownerId, path) : new Photo(ownerId, path, categories);
-            photo.setName(Helper.extractNameFromPath(fileName));
+            String name = getOptionalString(payload, "name");
+            if (name != null) {
+                photo.setName(name);
+            } else {
+                photo.setName(Helper.extractNameFromPath(fileName));
+            }
             boolean isPublic = true;
             if (payload.has("isPublic") &&
                     !payload.get("isPublic").isJsonNull()) {
