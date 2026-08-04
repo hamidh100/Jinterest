@@ -694,7 +694,10 @@ public class Router {
                     return Response.notFound("Photo does not exist: " + photoId);
                 }
             }
-            Album album = new Album(ownerId, photoIds);
+            String name = getOptionalString(payload, "name");
+            String description = getOptionalString(payload, "description");
+            Album album = new Album(ownerId, photoIds,
+                    name == null ? "Untitled Album" : name, description);
             AlbumService.addAlbum(owner, album);
             DatabaseManager.save();
             JsonObject responsePayload = new JsonObject();
@@ -729,6 +732,12 @@ public class Router {
                 }
             }
             album.setPhotoIDs(photoIds);
+            if (payload.has("name") && !payload.get("name").isJsonNull()) {
+                album.setName(getRequiredString(payload, "name"));
+            }
+            if (payload.has("description") && !payload.get("description").isJsonNull()) {
+                album.setDescription(getRequiredString(payload, "description"));
+            }
             DatabaseManager.save();
             JsonObject responsePayload = new JsonObject();
             responsePayload.add("album", albumToJson(album));
@@ -1067,6 +1076,10 @@ public class Router {
     private JsonObject albumToJson(Album album) {
         JsonObject json = new JsonObject();
         json.addProperty("id", album.getUuid().toString());
+        json.addProperty("name", album.getName());
+        if (album.getDescription() != null) {
+            json.addProperty("description", album.getDescription());
+        }
         if (album.getOwnerID() != null) {
             json.addProperty("ownerId", album.getOwnerID().toString());
             User owner = OurObjects.users.get(album.getOwnerID());

@@ -10,10 +10,18 @@ public class Album {
     private List<UUID> photoIDs;
     private final UUID uuid;
     private LocalDateTime albumAge;
+    private String name;
+    private String description;
 
     public Album(UUID ownerID, List<UUID> photoIDs){
+        this(ownerID, photoIDs, "Untitled Album", null);
+    }
+
+    public Album(UUID ownerID, List<UUID> photoIDs, String name, String description){
         this.ownerID = ownerID;
         this.photoIDs = photoIDs;
+        this.name = name;
+        this.description = description;
         uuid = UUID.randomUUID();
         albumAge = LocalDateTime.now();
         OurObjects.albums.put(uuid, this);
@@ -40,6 +48,18 @@ public class Album {
     }
     public void setAlbumAge(LocalDateTime albumAge) {
         this.albumAge = albumAge;
+    }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public String getDescription() {
+        return description;
+    }
+    public void setDescription(String description) {
+        this.description = description;
     }
     /* getter setter end */
 
