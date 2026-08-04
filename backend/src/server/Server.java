@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server {
+    private static final int DEFAULT_PORT = 5050;
     private final int port;
     private final Router router;
     private final ExecutorService clientPool;
@@ -30,6 +31,32 @@ public class Server {
             }
         } finally {
             clientPool.shutdown();
+        }
+    }
+
+    public static void main(String[] args) {
+        int port = DEFAULT_PORT;
+        if (args.length > 1) {
+            System.err.println("Usage: java server.Server [port]");
+            System.exit(1);
+        }
+        if (args.length == 1) {
+            try {
+                port = Integer.parseInt(args[0]);
+                if (port < 1 || port > 65535) {
+                    throw new NumberFormatException();
+                }
+            } catch (NumberFormatException e) {
+                System.err.println("Port must be an integer between 1 and 65535");
+                System.exit(1);
+            }
+        }
+
+        try {
+            new Server(port).start();
+        } catch (IOException e) {
+            System.err.println("Could not start server: " + e.getMessage());
+            System.exit(1);
         }
     }
 }
