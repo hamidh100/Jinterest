@@ -105,7 +105,7 @@ public class Photo {
 
         res += name + '|';
 
-        res += (OurObjects.captions.containsKey(captionID) ? OurObjects.captions.get(captionID).getText() : "") + '|';
+        res += ((captionID != null && OurObjects.captions.containsKey(captionID)) ? OurObjects.captions.get(captionID).getText() : "") + '|';
 
         for (Category category : categoryList) res += category.toString() + ',';
         if (res.charAt(res.length() - 1) == ',') res = res.substring(0, res.length() - 1);
