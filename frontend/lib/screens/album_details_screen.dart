@@ -10,6 +10,7 @@ import '../providers/album_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
 import '../widgets/info_chip.dart';
+import '../widgets/server_photo_image.dart';
 
 class AlbumDetailsScreen extends StatelessWidget {
   final String albumId;
@@ -236,8 +237,6 @@ class _AlbumPhotoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final file = File(photo.path);
-
     return Stack(
       children: [
         InkWell(
@@ -250,28 +249,14 @@ class _AlbumPhotoTile extends StatelessWidget {
           },
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Container(
-              width: double.infinity,
-              height: double.infinity,
-              color: Colors.grey[300],
-              child: file.existsSync()
-                  ? Image.file(file, fit: BoxFit.cover)
-                  : Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.broken_image,
-                          size: 48,
-                          color: Colors.grey,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          photo.name,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ],
-                    ),
+            child: ColoredBox(
+              color: Colors.grey,
+              child: ServerPhotoImage(
+                photoId: photo.uuid,
+                width: double.infinity,
+                height: double.infinity,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
         ),
