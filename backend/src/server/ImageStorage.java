@@ -11,7 +11,7 @@ import models.Helper;
 
 public final class ImageStorage {
     private static final Path IMAGE_DIRECTORY = Path.of("database", "images");
-    private static final int MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+    private static final int MAX_IMAGE_BYTES = 10 * 1024 * 1024;
     private ImageStorage() {}
 
     public static String saveBase64Image(String base64, String originalFileName) throws IOException {
