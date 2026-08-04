@@ -29,7 +29,6 @@ class PhotoService {
         .toList();
 
     final caption = json['caption'];
-    final likeCount = json['likeCount'] as int? ?? 0;
     final commentCount = json['commentCount'] as int? ?? 0;
 
     return Photo(
@@ -45,8 +44,9 @@ class PhotoService {
           DateTime.tryParse(json['photoAge']?.toString() ?? '') ??
           DateTime.now(),
       isPublic: json['isPublic'] as bool? ?? true,
-      // Temporary count representation because backend returns counts
-      likeIDs: List.generate(likeCount, (index) => 'server-like-$index'),
+      likeIDs: (json['likedByUserIds'] as List? ?? const [])
+          .map((userId) => userId.toString())
+          .toList(),
       commentIDs: List.generate(
         commentCount,
         (index) => 'server-comment-$index',
