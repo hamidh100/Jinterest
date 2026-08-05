@@ -50,6 +50,8 @@ class AlbumService {
     await ApiClient.instance.send(method: 'DELETE', route: '/albums/$albumId');
   }
 
+  static Future<Album> updateAlbum(Album album) => _updateAlbum(album);
+
   static Future<Album?> addPhotoToAlbum({
     required String albumId,
     required String photoId,

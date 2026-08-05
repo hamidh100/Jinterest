@@ -30,7 +30,7 @@ Status: `[x]` complete ast; `[ ]` yani incomplete, partial, ya moredi ke az code
 | F-20 | Details | Emkan-e neveshtan caption haye moteaddad va like kardan ax vojood dashte bashad. | Lazem | [ ] |
 | F-21 | Details | Sabt-e comment rooye ax haye share shode. | ⭐ Emtiazi | [x] |
 | F-22 | Details | Owner betavanad tajhizat-e share ra taein konad; mesalan mojavez-e comment baraye digaran ra. | ⭐ Emtiazi | [ ] |
-| F-23 | Albums | Create, delete, va edit-e ax haye album ha vojood dashte bashad. | Lazem | [ ] |
+| F-23 | Albums | Create, delete, va edit-e ax haye album ha vojood dashte bashad. | Lazem | [x] |
 | F-24 | Albums | List-e album ha va ax haye dakhel har album neshan dade shavad. | Lazem | [x] |
 | F-25 | Albums | Har ax betavanad dar album ha va category haye moteaddad gharar begirad. | Lazem | [x] |
 | F-26 | Albums | Sort-e ax haye album va transfer-e ax az yek album be album-e digar vojood dashte bashad. | Lazem | [ ] |

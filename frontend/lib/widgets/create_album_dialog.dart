@@ -10,31 +10,47 @@ Future<Album?> showCreateAlbumDialog({
   return showDialog<Album>(
     context: context,
     builder: (_) {
-      return _CreateAlbumDialog(currentUser: currentUser);
+      return _AlbumDialog(currentUser: currentUser);
     },
   );
 }
 
-class _CreateAlbumDialog extends StatefulWidget {
-  final User currentUser;
-
-  const _CreateAlbumDialog({required this.currentUser});
-
-  @override
-  State<_CreateAlbumDialog> createState() => _CreateAlbumDialogState();
+Future<Album?> showEditAlbumDialog({
+  required BuildContext context,
+  required Album album,
+}) {
+  return showDialog<Album>(
+    context: context,
+    builder: (_) => _AlbumDialog(album: album),
+  );
 }
 
-class _CreateAlbumDialogState extends State<_CreateAlbumDialog> {
+class _AlbumDialog extends StatefulWidget {
+  final User? currentUser;
+  final Album? album;
+
+  const _AlbumDialog({this.currentUser, this.album});
+
+  bool get isEditing => album != null;
+
+  @override
+  State<_AlbumDialog> createState() => _AlbumDialogState();
+}
+
+class _AlbumDialogState extends State<_AlbumDialog> {
   late final TextEditingController _nameController;
   late final TextEditingController _descriptionController;
 
-  bool _isPublic = false;
+  late bool _isPublic;
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController();
-    _descriptionController = TextEditingController();
+    _nameController = TextEditingController(text: widget.album?.name ?? '');
+    _descriptionController = TextEditingController(
+      text: widget.album?.description ?? '',
+    );
+    _isPublic = widget.album?.isPublic ?? false;
   }
 
   @override
@@ -44,7 +60,7 @@ class _CreateAlbumDialogState extends State<_CreateAlbumDialog> {
     super.dispose();
   }
 
-  void _createAlbum() {
+  void _submitAlbum() {
     final name = _nameController.text.trim();
 
     if (name.isEmpty) {
@@ -57,17 +73,27 @@ class _CreateAlbumDialogState extends State<_CreateAlbumDialog> {
       return;
     }
 
-    final album = Album(
-      uuid: DateTime.now().microsecondsSinceEpoch.toString(),
-      ownerID: widget.currentUser.uuid,
-      name: name,
-      description: _descriptionController.text.trim().isEmpty
-          ? null
-          : _descriptionController.text.trim(),
-      photoIDs: const [],
-      albumAge: DateTime.now(),
-      isPublic: _isPublic,
-    );
+    final description = _descriptionController.text.trim();
+    final existingAlbum = widget.album;
+    final album = existingAlbum == null
+        ? Album(
+            uuid: DateTime.now().microsecondsSinceEpoch.toString(),
+            ownerID: widget.currentUser!.uuid,
+            name: name,
+            description: description.isEmpty ? null : description,
+            photoIDs: const [],
+            albumAge: DateTime.now(),
+            isPublic: _isPublic,
+          )
+        : Album(
+            uuid: existingAlbum.uuid,
+            ownerID: existingAlbum.ownerID,
+            name: name,
+            description: description.isEmpty ? null : description,
+            photoIDs: existingAlbum.photoIDs,
+            albumAge: existingAlbum.albumAge,
+            isPublic: _isPublic,
+          );
 
     Navigator.of(context).pop(album);
   }
@@ -75,7 +101,7 @@ class _CreateAlbumDialogState extends State<_CreateAlbumDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Create Album'),
+      title: Text(widget.isEditing ? 'Edit Album' : 'Create Album'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -118,7 +144,10 @@ class _CreateAlbumDialogState extends State<_CreateAlbumDialog> {
           },
           child: const Text('Cancel'),
         ),
-        ElevatedButton(onPressed: _createAlbum, child: const Text('Create')),
+        ElevatedButton(
+          onPressed: _submitAlbum,
+          child: Text(widget.isEditing ? 'Save' : 'Create'),
+        ),
       ],
     );
   }

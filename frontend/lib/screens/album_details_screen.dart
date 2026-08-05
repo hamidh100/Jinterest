@@ -8,6 +8,7 @@ import '../providers/album_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
 import '../widgets/info_chip.dart';
+import '../widgets/create_album_dialog.dart';
 import '../widgets/server_photo_image.dart';
 
 class AlbumDetailsScreen extends StatelessWidget {
@@ -61,6 +62,11 @@ class AlbumDetailsScreen extends StatelessWidget {
         actions: [
           if (isOwner)
             IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: () => _editAlbum(context, album),
+            ),
+          if (isOwner)
+            IconButton(
               icon: const Icon(Icons.delete_outline, color: Colors.red),
               onPressed: () => _confirmDeleteAlbum(context, album),
             ),
@@ -77,6 +83,27 @@ class AlbumDetailsScreen extends StatelessWidget {
             _buildPhotosGrid(context, album, albumPhotos, isOwner),
           ],
         ),
+      ),
+    );
+  }
+
+  Future<void> _editAlbum(BuildContext context, Album album) async {
+    final editedAlbum = await showEditAlbumDialog(context: context, album: album);
+
+    if (editedAlbum == null || !context.mounted) return;
+
+    final success = await context.read<AlbumProvider>().updateAlbum(editedAlbum);
+
+    if (!context.mounted) return;
+
+    final message = success
+        ? 'Album updated'
+        : context.read<AlbumProvider>().errorMessage ?? 'Update failed';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: success ? null : Colors.red,
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }

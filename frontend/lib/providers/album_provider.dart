@@ -67,6 +67,25 @@ class AlbumProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> updateAlbum(Album album) async {
+    try {
+      _errorMessage = null;
+      final updatedAlbum = await AlbumService.updateAlbum(album);
+      final index = _albums.indexWhere((item) => item.uuid == album.uuid);
+
+      if (index != -1) {
+        _albums[index] = updatedAlbum;
+      }
+
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Failed to update album: $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<bool> addPhotoToAlbum({
     required String albumId,
     required String photoId,
