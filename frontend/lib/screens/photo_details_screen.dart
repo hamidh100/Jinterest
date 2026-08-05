@@ -9,6 +9,7 @@ import '../providers/photo_provider.dart';
 import '../widgets/info_chip.dart';
 import '../widgets/uploader_tile.dart';
 import '../widgets/server_photo_image.dart';
+import '../widgets/create_album_dialog.dart';
 import '../services/photo_service.dart';
 
 class PhotoDetailsScreen extends StatefulWidget {
@@ -464,7 +465,7 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
         .toSet();
     final selectedAlbumIds = Set<String>.from(currentAlbumIds);
 
-    final updatedAlbumIds = await showDialog<Set<String>>(
+    final result = await showDialog<_AlbumSelection>(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
@@ -489,7 +490,18 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
                       },
                     ),
                   )
-                  .toList(),
+                  .toList()
+                ..add(const Divider())
+                ..add(
+                  ListTile(
+                    leading: const Icon(Icons.add),
+                    title: const Text('Add to new album'),
+                    onTap: () => Navigator.pop(
+                      dialogContext,
+                      const _AlbumSelection.createNew(),
+                    ),
+                  ),
+                ),
             ),
           ),
           actions: [
@@ -500,7 +512,7 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
             ElevatedButton(
               onPressed: () => Navigator.pop(
                 dialogContext,
-                Set<String>.from(selectedAlbumIds),
+                _AlbumSelection.selected(Set<String>.from(selectedAlbumIds)),
               ),
               child: const Text('Save'),
             ),
@@ -509,7 +521,14 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
       ),
     );
 
-    if (updatedAlbumIds == null || !mounted) return;
+    if (result == null || !mounted) return;
+    if (result.createNewAlbum) {
+      await _createAlbumForPhoto(photo);
+      return;
+    }
+
+    final updatedAlbumIds = result.selectedAlbumIds;
+    if (updatedAlbumIds == null) return;
 
     var isSuccess = true;
     for (final albumId in updatedAlbumIds.difference(currentAlbumIds)) {
@@ -541,4 +560,51 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
       ),
     );
   }
+
+  Future<void> _createAlbumForPhoto(Photo photo) async {
+    final currentUser = context.read<AuthProvider>().currentUser;
+    if (currentUser == null) return;
+
+    final album = await showCreateAlbumDialog(
+      context: context,
+      currentUser: currentUser,
+    );
+    if (album == null || !mounted) return;
+
+    final albumProvider = context.read<AlbumProvider>();
+    final createdAlbum = await albumProvider.createAlbum(album);
+    var wasAdded = false;
+    if (createdAlbum != null) {
+      wasAdded = await albumProvider.addPhotoToAlbum(
+        albumId: createdAlbum.uuid,
+        photoId: photo.uuid,
+      );
+    }
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          wasAdded
+              ? 'Album created and photo added'
+              : albumProvider.errorMessage ?? 'Could not create album',
+        ),
+        backgroundColor: wasAdded ? null : Colors.red,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+}
+
+class _AlbumSelection {
+  final Set<String>? selectedAlbumIds;
+  final bool createNewAlbum;
+
+  const _AlbumSelection.selected(this.selectedAlbumIds)
+      : createNewAlbum = false;
+
+  const _AlbumSelection.createNew()
+      : selectedAlbumIds = null,
+        createNewAlbum = true;
 }
