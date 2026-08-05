@@ -21,6 +21,7 @@ class PhotoDetailsScreen extends StatefulWidget {
 
 class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
   List<Comment> _comments = [];
+  final TextEditingController _commentController = TextEditingController();
   bool _isLoadingComments = true;
   bool _isAddingComment = false;
   String? _commentError;
@@ -29,6 +30,12 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
   void initState() {
     super.initState();
     _loadComments();
+  }
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
   }
 
   @override
@@ -119,38 +126,10 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
     }
   }
 
-  Future<void> _openAddCommentDialog() async {
-    final controller = TextEditingController();
-    final text = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Add comment'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          maxLines: 3,
-          textCapitalization: TextCapitalization.sentences,
-          decoration: const InputDecoration(hintText: 'Write a comment'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, controller.text),
-            child: const Text('Post'),
-          ),
-        ],
-      ),
-    );
-    controller.dispose();
+  Future<void> _addComment() async {
+    final text = _commentController.text.trim();
+    if (text.isEmpty) return;
 
-    if (!mounted || text == null || text.trim().isEmpty) return;
-    await _addComment(text);
-  }
-
-  Future<void> _addComment(String text) async {
     final currentUser = context.read<AuthProvider>().currentUser;
     final photoProvider = context.read<PhotoProvider>();
     if (currentUser == null) return;
@@ -163,7 +142,10 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
         text: text,
       );
       if (!mounted) return;
-      setState(() => _comments.add(comment));
+      setState(() {
+        _comments.add(comment);
+        _commentController.clear();
+      });
       await photoProvider.loadPhotos();
     } catch (error) {
       if (!mounted) return;
@@ -361,12 +343,33 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
 
           const SizedBox(height: 16),
 
-          OutlinedButton.icon(
-            onPressed: currentUser == null || _isAddingComment
-                ? null
-                : _openAddCommentDialog,
-            icon: const Icon(Icons.comment_outlined),
-            label: Text(_isAddingComment ? 'Posting...' : 'Add Comment'),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _commentController,
+                  enabled: currentUser != null && !_isAddingComment,
+                  textCapitalization: TextCapitalization.sentences,
+                  onSubmitted: (_) => _addComment(),
+                  decoration: const InputDecoration(
+                    hintText: 'Write a comment',
+                  ),
+                ),
+              ),
+              IconButton(
+                onPressed: currentUser == null || _isAddingComment
+                    ? null
+                    : _addComment,
+                icon: _isAddingComment
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.send),
+                tooltip: 'Post comment',
+              ),
+            ],
           ),
         ],
       ),
