@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import '../exceptions/exceptions.dart';
+import '../models/comment.dart';
 import '../models/photo.dart';
 import 'api_client.dart';
 
@@ -137,6 +138,58 @@ class PhotoService {
       );
     }
     return getPhotoById(photoId);
+  }
+
+  static Future<List<Comment>> getComments(String photoId) async {
+    final response = await ApiClient.instance.send(
+      method: 'GET',
+      route: '/photos/$photoId/comments',
+    );
+    final payload = response['payload'];
+    if (payload is! Map<String, dynamic> || payload['comments'] is! List) {
+      throw StateError('Server returned an invalid comment list');
+    }
+
+    return (payload['comments'] as List)
+        .whereType<Map<String, dynamic>>()
+        .map(_commentFromJson)
+        .toList();
+  }
+
+  static Future<Comment> addComment({
+    required String photoId,
+    required String userId,
+    required String text,
+  }) async {
+    final response = await ApiClient.instance.send(
+      method: 'POST',
+      route: '/photos/$photoId/comments',
+      payload: {'userId': userId, 'text': text.trim()},
+    );
+    final payload = response['payload'];
+    if (payload is! Map<String, dynamic> || payload['comment'] is! Map) {
+      throw StateError('Server returned an invalid comment');
+    }
+
+    return _commentFromJson(payload['comment'] as Map<String, dynamic>);
+  }
+
+  static Future<void> deleteComment(String commentId) async {
+    await ApiClient.instance.send(
+      method: 'DELETE',
+      route: '/comments/$commentId',
+    );
+  }
+
+  static Comment _commentFromJson(Map<String, dynamic> json) {
+    return Comment(
+      uuid: json['id']?.toString() ?? '',
+      photoID: json['photoId']?.toString() ?? '',
+      userID: json['userId']?.toString() ?? '',
+      username: json['username']?.toString(),
+      text: json['text']?.toString() ?? '',
+      time: DateTime.tryParse(json['time']?.toString() ?? '') ?? DateTime.now(),
+    );
   }
 
   static List<Photo> _photoListFromResponse(Map<String, dynamic> response) {
