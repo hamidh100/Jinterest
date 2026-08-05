@@ -62,7 +62,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return const Scaffold(body: Center(child: Text('Not logged in')));
     }
 
-    final isOwnProfile = widget.userId == null || widget.userId == authUser.uuid;
+    final isOwnProfile =
+        widget.userId == null || widget.userId == authUser.uuid;
     final user = isOwnProfile
         ? (_editedUser?.uuid == authUser.uuid ? _editedUser! : authUser)
         : _viewedUser;
@@ -354,7 +355,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       itemCount: albums.length,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      //padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 120),
       itemBuilder: (context, index) {
         return _ProfileAlbumTile(album: albums[index]);
       },

@@ -153,7 +153,7 @@ class AlbumDetailsScreen extends StatelessWidget {
     }
 
     return GridView.builder(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 80),
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: photos.length,

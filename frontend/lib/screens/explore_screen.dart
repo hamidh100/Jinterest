@@ -136,9 +136,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
       return MasonryGridView.count(
         controller: _scrollController,
         crossAxisCount: 2,
-        mainAxisSpacing: 6,
-        crossAxisSpacing: 3,
-        padding: const EdgeInsets.fromLTRB(3, 120, 3, 150),
+        mainAxisSpacing: 3,
+        crossAxisSpacing: 2,
+        padding: const EdgeInsets.fromLTRB(1, 120, 1, 150),
         itemCount: photos.length,
         itemBuilder: (context, index) {
           return _ExplorePhotoTile(photo: photos[index]);
@@ -152,7 +152,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
       }
       return GridView.builder(
         controller: _scrollController,
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.fromLTRB(12, 120, 12, 150),
         itemCount: albums.length,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
@@ -178,7 +178,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
     return GridView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(12, 120, 12, 150),
       itemCount: mixedItems.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
