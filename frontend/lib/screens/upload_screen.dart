@@ -222,7 +222,7 @@ class _UploadScreenState extends State<UploadScreen> {
         height: 260,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Colors.grey[200],
+          color: Theme.of(context).colorScheme.primaryContainer,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: Colors.deepPurple.shade100),
         ),
@@ -402,7 +402,7 @@ class _UploadScreenState extends State<UploadScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: Theme.of(context).colorScheme.primaryContainer,
         borderRadius: BorderRadius.circular(12),
       ),
       child: SwitchListTile(
