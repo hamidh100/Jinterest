@@ -438,6 +438,7 @@ public class Router {
             String imageBase64 = getOptionalString(payload, "imageBase64");
             String fileName = getOptionalString(payload, "fileName");
             String path;
+            List<Category> categories = readCategories(payload);
             if (imageBase64 != null) {
                 if (fileName == null) {
                     return Response.badRequest("fileName is required with imageBase64");
@@ -446,7 +447,6 @@ public class Router {
             } else {
                 path = getRequiredString(payload, "path");
             }
-            List<Category> categories = readCategories(payload);
             Photo photo = (categories == null) ? new Photo(ownerId, path) : new Photo(ownerId, path, categories);
             String name = getOptionalString(payload, "name");
             if (name != null) {
