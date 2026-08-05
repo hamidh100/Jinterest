@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +23,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
   ExploreViewMode _viewMode = ExploreViewMode.photos;
   String _query = '';
 
+  final ScrollController _scrollController = ScrollController();
+  bool _searchVisible = true;
+  double _lastOffset = 0;
+  static const double _deltaThreshold = 20;
+
   @override
   void initState() {
     super.initState();
@@ -30,6 +36,36 @@ class _ExploreScreenState extends State<ExploreScreen> {
       context.read<PhotoProvider>().loadPhotos();
       context.read<AlbumProvider>().loadAlbums();
     });
+
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final offset = _scrollController.position.pixels;
+    final delta = offset - _lastOffset;
+
+    if (delta.abs() < _deltaThreshold) {
+      // ignore tiny moves
+      return;
+    }
+
+    if (delta > 0 && _searchVisible) {
+      // scrolled down -> hide search
+      setState(() => _searchVisible = false);
+    } else if (delta < 0 && !_searchVisible) {
+      // scrolled up -> show search
+      setState(() => _searchVisible = true);
+    }
+
+    _lastOffset = offset;
   }
 
   @override
@@ -47,14 +83,137 @@ class _ExploreScreenState extends State<ExploreScreen> {
         .where((album) => _matchesAlbumQuery(album))
         .toList();
 
+    const double toggleHeight = 56;
+    const double searchMaxHeight = 80;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Explore'), centerTitle: true),
-      body: Column(
+      body: Stack(
         children: [
-          _buildSearchBar(),
-          _buildToggle(),
-          Expanded(child: _buildContent(photos, albums)),
+          Positioned.fill(child: _buildContentWithController(photos, albums)),
+          Positioned(
+            left: 0,
+            right: 0,
+            //top: MediaQuery.of(context).padding.top,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ClipRect(
+                  child: AnimatedSize(
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeInOut,
+                    child: ConstrainedBox(
+                      constraints: _searchVisible
+                          ? BoxConstraints(maxHeight: searchMaxHeight)
+                          : const BoxConstraints(maxHeight: 0),
+                      child: Opacity(
+                        opacity: _searchVisible ? 1 : 0,
+                        child: _buildSearchBarTransparent(),
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  // make the toggle background partially transparent so photos show through
+                  color: Colors.white.withOpacity(0.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: _buildToggleAppleStyle(),
+                ),
+              ],
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildContentWithController(List<Photo> photos, List<Album> albums) {
+    if (_viewMode == ExploreViewMode.photos) {
+      if (photos.isEmpty) {
+        return const Center(child: Text('No public photos found'));
+      }
+      return GridView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(12),
+        itemCount: photos.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+        ),
+        itemBuilder: (context, index) {
+          return _ExplorePhotoTile(photo: photos[index]);
+        },
+      );
+    }
+
+    if (_viewMode == ExploreViewMode.albums) {
+      if (albums.isEmpty) {
+        return const Center(child: Text('No public albums found'));
+      }
+      return GridView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(12),
+        itemCount: albums.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+        ),
+        itemBuilder: (context, index) {
+          return _ExploreAlbumTile(album: albums[index]);
+        },
+      );
+    }
+
+    final mixedItems = [
+      ...photos.map((photo) => _ExploreMixedItem.photo(photo)),
+      ...albums.map((album) => _ExploreMixedItem.album(album)),
+    ];
+
+    mixedItems.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+    if (mixedItems.isEmpty) {
+      return const Center(child: Text('No public media found'));
+    }
+
+    return GridView.builder(
+      controller: _scrollController,
+      padding: const EdgeInsets.all(12),
+      itemCount: mixedItems.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+      ),
+      itemBuilder: (context, index) {
+        final item = mixedItems[index];
+        if (item.photo != null) return _ExplorePhotoTile(photo: item.photo!);
+        return _ExploreAlbumTile(album: item.album!);
+      },
+    );
+  }
+
+  Widget _buildSearchBarTransparent() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: TextField(
+        key: const ValueKey('explore_search_field'),
+        decoration: InputDecoration(
+          hintText: 'Search public photos and albums...',
+          prefixIcon: const Icon(Icons.search),
+          suffixIcon: const Icon(Icons.tune),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          filled: true,
+          // make it semi-transparent so content behind is visible
+          fillColor: Colors.white.withOpacity(0.9),
+        ),
+        onChanged: (value) {
+          setState(() => _query = value.trim().toLowerCase());
+        },
       ),
     );
   }
@@ -103,6 +262,145 @@ class _ExploreScreenState extends State<ExploreScreen> {
         onSelectionChanged: (selection) {
           setState(() => _viewMode = selection.first);
         },
+      ),
+    );
+  }
+
+  Widget _segment(String text, IconData icon, ExploreViewMode mode) {
+    final selected = _viewMode == mode;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: () => setState(() => _viewMode = mode),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        decoration: BoxDecoration(
+          color: selected
+              ? Theme.of(context).colorScheme.primaryContainer
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 18),
+            const SizedBox(width: 6),
+            Text(text),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildToggle2() {
+    return Center(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.9),
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: SegmentedButton<ExploreViewMode>(
+              style: ButtonStyle(
+                side: WidgetStateProperty.all(BorderSide.none),
+                elevation: WidgetStateProperty.all(0),
+                backgroundColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return Theme.of(context).colorScheme.primaryContainer;
+                  }
+                  return Colors.transparent;
+                }),
+              ),
+              segments: const [
+                ButtonSegment(
+                  value: ExploreViewMode.photos,
+                  label: Text('Photos'),
+                  icon: Icon(Icons.image),
+                ),
+                ButtonSegment(
+                  value: ExploreViewMode.albums,
+                  label: Text('Albums'),
+                  icon: Icon(Icons.photo_album),
+                ),
+                ButtonSegment(
+                  value: ExploreViewMode.mixed,
+                  label: Text('Mixed'),
+                  icon: Icon(Icons.dashboard),
+                ),
+              ],
+              selected: {_viewMode},
+              onSelectionChanged: (selection) {
+                setState(() => _viewMode = selection.first);
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildToggleAppleStyle() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(22),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.35),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _appleSegment("Photos", ExploreViewMode.photos),
+              _appleSegment("Albums", ExploreViewMode.albums),
+              _appleSegment("Mixed", ExploreViewMode.mixed),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _appleSegment(String title, ExploreViewMode mode) {
+    final selected = _viewMode == mode;
+
+    return GestureDetector(
+      onTap: () => setState(() => _viewMode = mode),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        decoration: BoxDecoration(
+          color: selected
+              ? Colors.white.withValues(alpha: 0.95)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: .08),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : [],
+        ),
+        child: AnimatedDefaultTextStyle(
+          duration: const Duration(milliseconds: 180),
+          style: TextStyle(
+            color: selected
+                ? Theme.of(context).colorScheme.primary
+                : Colors.black87,
+            fontWeight: FontWeight.w600,
+          ),
+          child: Text(title),
+        ),
       ),
     );
   }
