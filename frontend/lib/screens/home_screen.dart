@@ -20,6 +20,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  bool _showFab = true;
 
   final List<Widget> _pages = const [
     _FeedPage(),
@@ -33,13 +34,15 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       extendBody: true,
       body: _pages[_selectedIndex],
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/upload');
-        },
-        backgroundColor: Colors.deepPurple,
-        child: const Icon(Icons.add_a_photo, color: Colors.white),
-      ),
+      floatingActionButton: _showFab
+          ? FloatingActionButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/upload');
+              },
+              backgroundColor: Colors.deepPurple,
+              child: const Icon(Icons.add_a_photo, color: Colors.white),
+            )
+          : null,
       bottomNavigationBar: SafeArea(
         top: false,
         child: Padding(
@@ -97,6 +100,33 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  void showShareComingSoonSnackBar() {
+    setState(() {
+      _showFab = false;
+    });
+
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+          SnackBar(
+            content: const Text('Share feature coming soon'),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        )
+        .closed
+        .then((_) {
+          if (mounted) {
+            setState(() {
+              _showFab = true;
+            });
+          }
+        });
   }
 }
 
@@ -377,13 +407,9 @@ class _PhotoCard extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.share_outlined),
                   onPressed: () {
-                    ScaffoldMessenger.of(context).clearSnackBars();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Share feature coming soon'),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
+                    context
+                        .findAncestorStateOfType<_HomeScreenState>()
+                        ?.showShareComingSoonSnackBar();
                   },
                 ),
               ],
