@@ -18,11 +18,12 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _navigateToNextScreen() async {
+    final authProvider = context.read<AuthProvider>();
+    await authProvider.restoreSession();
     await Future.delayed(const Duration(seconds: 2));
 
     if (!mounted) return;
 
-    final authProvider = context.read<AuthProvider>();
     if (authProvider.isLoggedIn) {
       Navigator.pushReplacementNamed(context, '/home');
     } else {

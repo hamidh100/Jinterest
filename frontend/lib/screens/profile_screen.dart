@@ -253,7 +253,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 if (updatedUser == null || !context.mounted) return;
 
-                context.read<AuthProvider>().updateCurrentUser(updatedUser);
+                await context
+                    .read<AuthProvider>()
+                    .updateCurrentUser(updatedUser);
+
+                if (!context.mounted) return;
 
                 setState(() {
                   _editedUser = updatedUser;
