@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -33,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: _pages[_selectedIndex],
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -41,16 +43,61 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.deepPurple,
         child: const Icon(Icons.add_a_photo, color: Colors.white),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) => setState(() => _selectedIndex = index),
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Explore'),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Likes'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: NavigationBarTheme(
+              data: NavigationBarThemeData(
+                height: 70,
+                indicatorColor: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: .25),
+
+                labelTextStyle: WidgetStateProperty.resolveWith((states) {
+                  return TextStyle(
+                    fontSize: 12,
+                    fontWeight: states.contains(WidgetState.selected)
+                        ? FontWeight.w600
+                        : FontWeight.w500,
+                  );
+                }),
+              ),
+              child: NavigationBar(
+                backgroundColor: Colors.white.withValues(alpha: .80),
+                elevation: 0,
+                selectedIndex: _selectedIndex,
+                onDestinationSelected: (i) {
+                  setState(() => _selectedIndex = i);
+                },
+                destinations: const [
+                  NavigationDestination(
+                    icon: Icon(Icons.home_outlined),
+                    selectedIcon: Icon(Icons.home),
+                    label: 'Home',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.explore_outlined),
+                    selectedIcon: Icon(Icons.explore),
+                    label: 'Explore',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.favorite_outline),
+                    selectedIcon: Icon(Icons.favorite),
+                    label: 'Likes',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.person_outline),
+                    selectedIcon: Icon(Icons.person),
+                    label: 'Profile',
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -393,7 +440,7 @@ class _PhotoHeader extends StatelessWidget {
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: Colors.deepPurple,
+            backgroundColor: Theme.of(context).colorScheme.primary,
             child: Text(
               ownerLabel.toUpperCase(),
               style: const TextStyle(color: Colors.white),
