@@ -11,10 +11,19 @@ import '../widgets/info_chip.dart';
 import '../widgets/create_album_dialog.dart';
 import '../widgets/server_photo_image.dart';
 
-class AlbumDetailsScreen extends StatelessWidget {
+class AlbumDetailsScreen extends StatefulWidget {
   final String albumId;
 
   const AlbumDetailsScreen({super.key, required this.albumId});
+
+  @override
+  State<AlbumDetailsScreen> createState() => _AlbumDetailsScreenState();
+}
+
+enum AlbumPhotoOrder { newest, oldest, mostLiked, name }
+
+class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
+  AlbumPhotoOrder _photoOrder = AlbumPhotoOrder.newest;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +32,7 @@ class AlbumDetailsScreen extends StatelessWidget {
     final authProvider = context.watch<AuthProvider>();
 
     final currentUser = authProvider.currentUser;
-    final album = albumProvider.getAlbumById(albumId);
+    final album = albumProvider.getAlbumById(widget.albumId);
 
     if (album == null) {
       return Scaffold(
@@ -50,16 +59,38 @@ class AlbumDetailsScreen extends StatelessWidget {
       );
     }
 
-    final albumPhotos = photoProvider.photos
-        .where((photo) => album.photoIDs.contains(photo.uuid))
-        .where((photo) => isOwner || photo.isPublic)
-        .toList();
+    final albumPhotos = _sortPhotos(
+      photoProvider.photos
+          .where((photo) => album.photoIDs.contains(photo.uuid))
+          .where((photo) => isOwner || photo.isPublic)
+          .toList(),
+    );
 
     return Scaffold(
       appBar: AppBar(
         title: Text('Album'),
         centerTitle: true,
         actions: [
+          PopupMenuButton<AlbumPhotoOrder>(
+            icon: const Icon(Icons.sort),
+            tooltip: 'Sort photos',
+            onSelected: (order) => setState(() => _photoOrder = order),
+            itemBuilder: (_) => const [
+              PopupMenuItem(
+                value: AlbumPhotoOrder.newest,
+                child: Text('Newest first'),
+              ),
+              PopupMenuItem(
+                value: AlbumPhotoOrder.oldest,
+                child: Text('Oldest first'),
+              ),
+              PopupMenuItem(
+                value: AlbumPhotoOrder.mostLiked,
+                child: Text('Most liked'),
+              ),
+              PopupMenuItem(value: AlbumPhotoOrder.name, child: Text('Name')),
+            ],
+          ),
           if (isOwner)
             IconButton(
               icon: const Icon(Icons.edit_outlined),
@@ -87,12 +118,41 @@ class AlbumDetailsScreen extends StatelessWidget {
     );
   }
 
+  List<Photo> _sortPhotos(List<Photo> photos) {
+    switch (_photoOrder) {
+      case AlbumPhotoOrder.newest:
+        photos.sort(
+          (first, second) => second.photoAge.compareTo(first.photoAge),
+        );
+      case AlbumPhotoOrder.oldest:
+        photos.sort(
+          (first, second) => first.photoAge.compareTo(second.photoAge),
+        );
+      case AlbumPhotoOrder.mostLiked:
+        photos.sort(
+          (first, second) =>
+              second.likeIDs.length.compareTo(first.likeIDs.length),
+        );
+      case AlbumPhotoOrder.name:
+        photos.sort(
+          (first, second) =>
+              first.name.toLowerCase().compareTo(second.name.toLowerCase()),
+        );
+    }
+    return photos;
+  }
+
   Future<void> _editAlbum(BuildContext context, Album album) async {
-    final editedAlbum = await showEditAlbumDialog(context: context, album: album);
+    final editedAlbum = await showEditAlbumDialog(
+      context: context,
+      album: album,
+    );
 
     if (editedAlbum == null || !context.mounted) return;
 
-    final success = await context.read<AlbumProvider>().updateAlbum(editedAlbum);
+    final success = await context.read<AlbumProvider>().updateAlbum(
+      editedAlbum,
+    );
 
     if (!context.mounted) return;
 
