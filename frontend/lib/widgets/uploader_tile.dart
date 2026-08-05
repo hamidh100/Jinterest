@@ -43,14 +43,11 @@ class UploaderTile extends StatelessWidget {
         onTap: uploader == null
             ? null
             : onTap ??
-                  () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('User profile screen coming soon'),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  },
+                  () => Navigator.pushNamed(
+                    context,
+                    '/user-profile',
+                    arguments: ownerID,
+                  ),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Row(

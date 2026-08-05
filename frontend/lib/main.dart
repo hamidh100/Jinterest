@@ -8,6 +8,7 @@ import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/profile_screen.dart';
 import 'screens/upload_screen.dart';
 import 'screens/photo_details_screen.dart';
 import 'screens/album_details_screen.dart';
@@ -56,6 +57,11 @@ class MyApp extends StatelessWidget {
             '/signup': (_) => const SignupScreen(),
             '/home': (_) => const HomeScreen(),
             '/upload': (_) => const UploadScreen(),
+            '/user-profile': (context) {
+              final userId =
+                  ModalRoute.of(context)!.settings.arguments as String;
+              return ProfileScreen(userId: userId);
+            },
             '/photo-details': (context) {
               final photoId =
                   ModalRoute.of(context)!.settings.arguments as String;

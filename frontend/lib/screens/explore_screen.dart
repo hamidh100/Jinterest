@@ -430,17 +430,36 @@ class _ExplorePhotoTile extends StatelessWidget {
       onTap: () {
         Navigator.pushNamed(context, '/photo-details', arguments: photo.uuid);
       },
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: ColoredBox(
-          color: Colors.grey,
-          child: ServerPhotoImage(
-            photoId: photo.uuid,
-            //width: double.infinity,
-            //height: double.infinity,
-            fit: BoxFit.cover,
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: ColoredBox(
+              color: Colors.grey,
+              child: ServerPhotoImage(
+                photoId: photo.uuid,
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
-        ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: Material(
+              color: Colors.black54,
+              shape: const CircleBorder(),
+              child: IconButton(
+                icon: const Icon(Icons.person, color: Colors.white),
+                tooltip: 'View uploader profile',
+                onPressed: () => Navigator.pushNamed(
+                  context,
+                  '/user-profile',
+                  arguments: photo.ownerID,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

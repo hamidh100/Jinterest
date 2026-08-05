@@ -14,7 +14,9 @@ import '../widgets/server_photo_image.dart';
 enum ProfileViewMode { photos, albums }
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final String? userId;
+
+  const ProfileScreen({super.key, this.userId});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -23,14 +25,28 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   ProfileViewMode _viewMode = ProfileViewMode.photos;
   User? _editedUser;
+  User? _viewedUser;
+  bool _isLoadingUser = false;
 
   @override
   void initState() {
     super.initState();
 
-    Future.microtask(() {
+    _isLoadingUser = widget.userId != null;
+
+    Future.microtask(() async {
       context.read<PhotoProvider>().loadPhotos();
       context.read<AlbumProvider>().loadAlbums();
+
+      if (widget.userId == null) return;
+      try {
+        final user = await UserService.getUserById(widget.userId!);
+        if (!mounted) return;
+        setState(() => _viewedUser = user);
+      } catch (_) {
+      } finally {
+        if (mounted) setState(() => _isLoadingUser = false);
+      }
     });
   }
 
@@ -46,7 +62,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return const Scaffold(body: Center(child: Text('Not logged in')));
     }
 
-    final user = _editedUser?.uuid == authUser.uuid ? _editedUser! : authUser;
+    final isOwnProfile = widget.userId == null || widget.userId == authUser.uuid;
+    final user = isOwnProfile
+        ? (_editedUser?.uuid == authUser.uuid ? _editedUser! : authUser)
+        : _viewedUser;
+
+    if (user == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Profile')),
+        body: Center(
+          child: _isLoadingUser
+              ? const CircularProgressIndicator()
+              : const Text('User not found'),
+        ),
+      );
+    }
 
     final followersCount = user.followerIDs.length;
     final followingCount = user.followingIDs.length;
@@ -63,10 +93,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         elevation: 0,
         actions: [
           _buildThemeToggleButton(),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _showLogoutConfirmation(context, authProvider),
-          ),
+          if (isOwnProfile)
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () => _showLogoutConfirmation(context, authProvider),
+            ),
         ],
       ),
       body: RefreshIndicator(
@@ -93,9 +124,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               const Divider(height: 32),
 
-              _buildEditProfileButton(context),
-
-              const SizedBox(height: 20),
+              if (isOwnProfile) ...[
+                _buildEditProfileButton(context),
+                const SizedBox(height: 20),
+              ],
 
               _buildViewToggle(),
 
