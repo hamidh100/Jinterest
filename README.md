@@ -53,7 +53,7 @@ Status: `[x]` complete ast; `[ ]` yani incomplete, partial, ya moredi ke az code
 | B-06 | Socket API | Ertebat faghat ba Socket/TCP-e piade sazi shode tavasot-e khodetan bashad; library haye amade-ye REST mojaz nistand. | Lazem | [x] |
 | B-07 | Socket API | Protocol-e ekhtesasi request/response design shavad; JSON mojaz ast va GSON baraye JSON mojaz ast. | Lazem | [x] |
 | B-08 | Socket API | Server no-e request ra tashkhis dahad va be module-e marboot (database/file server) route konad. | Lazem | [x] |
-| B-09 | Socket API | Structure-e daghigh-e JSON request/response, field ha, format va example-e har operation to README/documentation mostanad shavad. | Lazem | [ ] |
+| B-09 | Socket API | Structure-e daghigh-e JSON request/response, field ha, format va example-e har operation to README/documentation mostanad shavad. | Lazem | [x] |
 | B-10 | Database | Yek module-e joda baraye negahdari state-e tamam object ha va CRUD vojood dashte bashad. | Lazem | [x] |
 | B-11 | Database | State belafasele ba har taghir to yek file JSON save shavad va dar startup-e backend restore shavad. | Lazem | [x] |
 | B-12 | Database | SQL va database haye amade mesle MySQL, MongoDB ya PostgreSQL mamnoo ast. | Lazem | [x] |
@@ -62,6 +62,92 @@ Status: `[x]` complete ast; `[ ]` yani incomplete, partial, ya moredi ke az code
 | B-15 | File server | File ha to masir-e moshakhas ruye filesystem save va modiriat shavand. | Lazem | [x] |
 
 > Note: to chand jay-e PDF be "music/audio files" eshare shode, vali title va requirement haye UI project "modiriat tasavir va album ha" hastand. Dar in checklist, file server baraye ax ha dar nazar gerefte shode.
+
+## Socket API documentation
+
+Server ruye TCP port `8800` listen mikonad. Har request yek line JSON UTF-8 ast va server ham yek line JSON response midahad. Client mitavanad baraye chand request az haman socket estefade konad. `id`, `userId`, `ownerId`, `photoId` va `albumId` hame UUID string hastand.
+
+### Envelope
+
+Request:
+
+```json
+{"method":"POST","route":"/auth/login","username":"optional","payload":{"identifier":"user@mail.com","password":"Password1"}}
+```
+
+`username` dar protocol optional ast va router-e alan az an estefade nemikonad. `payload` agar vojood nadasht bashad object-e khali dar nazar gerefte mishavad.
+
+Response:
+
+```json
+{"statusCode":200,"message":"Login successful","payload":{"user":{"id":"<user-id>","username":"user@mail.com"}}}
+```
+
+Status haye mumkin: `200` successful, `201` created, `400` request/field ghalat, `401` login ghalat, `403` user ban shode, `404` object/route peyda nashod, `405` method mojaz nist, `409` conflict, `500` server error, `501` piade sazi nashode.
+
+### Object haye response
+
+| Object | Field ha |
+| --- | --- |
+| `user` | `id`, `username`, `email`, `phone`, `fullname`, `accountAge`, `userType`, `followerIds`, `followingIds` |
+| `photo` | `id`, `ownerId`, `ownerUsername`, `name`, `path`, `isPublic`, `photoAge`, `categories`, `caption`, `likedByUserIds`, `likeCount`, `commentCount` |
+| `album` | `id`, `name`, `description`, `isPublic`, `ownerId`, `ownerUsername`, `photos`, `photoCount`, `totalLikes`, `albumAge` |
+| `comment` | `id`, `photoId`, `userId`, `username`, `text`, `time` |
+| `caption` | `id`, `text`, `time` |
+
+Field haye optional dar object ha faghat vaghti value dashte bashand bar migardand. `categories` array-i az enum haye `NATURE`, `PORTRAIT`, `LANDSCAPE`, `STREET`, `TRAVEL`, `FOOD`, `FASHION`, `SPORTS`, `WILDLIFE`, `ARCHITECTURE`, `CUTE`, `CAT`, `CAR`, `GAME`, `DAY`, `NIGHT`, `MEME`, `FUN`, `SAD`, `HAPPY`, `BOOK`, `COMPUTER`, `LINUX`, `PROGRAMMING`, `MATH`, `MOVIE`, `SPIDERMAN`, `COLOR`, `PAINTING`, `OTHERS` ast.
+
+### Operation ha
+
+`{id}` dar route yani UUID hamon object. Field haye `*` shode required hastand; baghi optional hastand.
+
+| Method | Route | Payload | Response payload / tozih |
+| --- | --- | --- | --- |
+| GET | `/ping` | `{}` | `{"pong":true}` |
+| POST | `/auth/signup` | `password*`, va daghighan yeki az `email*` ya `phone*`; `fullname` | `user` ba status `201` |
+| POST | `/auth/login` | `identifier*`, `password*` | `user` |
+| GET | `/users/{id}` | `{}` | `user` |
+| PUT | `/users/{id}` | hadaghal yeki az `username`, `password`, `fullname` | `user`; taghir `email`/`phone` fe'lan `501` ast |
+| POST | `/users/{id}/follow` | `followerId*` | `followerId`, `followedId` ba status `201` |
+| DELETE | `/users/{id}/follow` | `followerId*` | `followerId`, `followedId` |
+| GET | `/photos` | `{}` | `photos` array |
+| GET | `/photos/{id}` | `{}` | `photo` |
+| GET | `/photos/{id}/image` | `{}` | `fileName`, `imageBase64` |
+| POST | `/photos` | `ownerId*`, va ya `imageBase64*` + `fileName*` ya `path*`; `name`, `categories`, `caption`, `isPublic` | `photo` ba status `201` |
+| PUT | `/photos/{id}` | hadaghal yeki az `path`, `categories`, `caption` | `photo` |
+| DELETE | `/photos/{id}` | `{}` | response-e successful bedoon payload |
+| POST | `/photos/{id}/likes` | `userId*` | `photoId`, `likeCount` ba status `201` |
+| DELETE | `/photos/{id}/likes` | `userId*` | `photoId`, `likeCount` |
+| GET | `/photos/{id}/comments` | `{}` | `comments` array |
+| POST | `/photos/{id}/comments` | `userId*`, `text*` | `comment` ba status `201` |
+| DELETE | `/comments/{id}` | `{}` | response-e successful bedoon payload |
+| GET | `/albums` | `{}` | `albums` array |
+| GET | `/albums/{id}` | `{}` | `album` |
+| POST | `/albums` | `ownerId*`, `photoIds*` (array); `name`, `description`, `isPublic` | `album` ba status `201` |
+| PUT | `/albums/{id}` | `photoIds*` (array); `name`, `description`, `isPublic` | `album` |
+| DELETE | `/albums/{id}` | `{}` | response-e successful bedoon payload |
+| GET / POST | `/search` | `type*`, `text*` | `photos` array; `type`: `global`, `name`, `caption`, `category`, `time`, `comments` |
+
+### Example haye amal-kardi
+
+Signup:
+
+```json
+{"method":"POST","route":"/auth/signup","payload":{"email":"sara@mail.com","password":"Sara1234","fullname":"Sara Ahmadi"}}
+```
+
+Upload-e ax:
+
+```json
+{"method":"POST","route":"/photos","payload":{"ownerId":"<user-id>","fileName":"sunset.jpg","imageBase64":"<base64-data>","name":"Sunset","categories":["NATURE"],"caption":"Shab-e tabestoon","isPublic":true}}
+```
+
+Sakht-e album va search:
+
+```json
+{"method":"POST","route":"/albums","payload":{"ownerId":"<user-id>","photoIds":["<photo-id>"],"name":"Travel","isPublic":true}}
+{"method":"POST","route":"/search","payload":{"type":"caption","text":"tabestoon"}}
+```
 
 ## Delivery va evaluation requirements
 
