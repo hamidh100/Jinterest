@@ -474,34 +474,32 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
             width: double.maxFinite,
             child: ListView(
               shrinkWrap: true,
-              children: albums
-                  .map(
-                    (album) => CheckboxListTile(
-                      value: selectedAlbumIds.contains(album.uuid),
-                      title: Text(album.name),
-                      onChanged: (isSelected) {
-                        setDialogState(() {
-                          if (isSelected == true) {
-                            selectedAlbumIds.add(album.uuid);
-                          } else {
-                            selectedAlbumIds.remove(album.uuid);
-                          }
-                        });
-                      },
-                    ),
-                  )
-                  .toList()
-                ..add(const Divider())
-                ..add(
-                  ListTile(
-                    leading: const Icon(Icons.add),
-                    title: const Text('Add to new album'),
-                    onTap: () => Navigator.pop(
-                      dialogContext,
-                      const _AlbumSelection.createNew(),
-                    ),
+              children: <Widget>[
+                ...albums.map(
+                  (album) => CheckboxListTile(
+                    value: selectedAlbumIds.contains(album.uuid),
+                    title: Text(album.name),
+                    onChanged: (isSelected) {
+                      setDialogState(() {
+                        if (isSelected == true) {
+                          selectedAlbumIds.add(album.uuid);
+                        } else {
+                          selectedAlbumIds.remove(album.uuid);
+                        }
+                      });
+                    },
                   ),
                 ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.add),
+                  title: const Text('Add to new album'),
+                  onTap: () => Navigator.pop(
+                    dialogContext,
+                    const _AlbumSelection.createNew(),
+                  ),
+                ),
+              ],
             ),
           ),
           actions: [
@@ -602,9 +600,9 @@ class _AlbumSelection {
   final bool createNewAlbum;
 
   const _AlbumSelection.selected(this.selectedAlbumIds)
-      : createNewAlbum = false;
+    : createNewAlbum = false;
 
   const _AlbumSelection.createNew()
-      : selectedAlbumIds = null,
-        createNewAlbum = true;
+    : selectedAlbumIds = null,
+      createNewAlbum = true;
 }
