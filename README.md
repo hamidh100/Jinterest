@@ -15,7 +15,7 @@ Status: `[x]` complete ast; `[ ]` yani incomplete, partial, ya moredi ke az code
 | F-05 | Login / Signup | Error haye server ba toast notification neshan dade shavand; field haye naghes ya format-e ghalat ham warning-e monaseb dashte bashand. | Lazem | [x] |
 | F-06 | Login / Signup | Login ba fingerprint be jaye password. | ⭐ Emtiazi | [ ] |
 | F-07 | Home | List-e ax haye hame user ha neshan dade shavad va ba entekhab har ax, Details screen baz shavad. | Lazem | [ ] |
-| F-08 | Home | Filter va sort bar asas tarikh-e ezafe shodan, name-e file, va like shodan vojood dashte bashad. | Lazem | [ ] |
+| F-08 | Home | Filter va sort bar asas tarikh-e ezafe shodan, name-e file, va like shodan vojood dashte bashad. | Lazem | [x] |
 | F-09 | Home | Select-e chand ax, delete-e hamzaman, transfer be album, va share-e anha mojood bashad. | Lazem | [ ] |
 | F-10 | Home | Pagination-e monaseb baraye neshan dadan ax ha (pishnahad: Lazy Loading) estefade shavad. | Lazem | [ ] |
 | F-11 | Home | Download-e hame ax haye Home. | ⭐ Emtiazi | [ ] |

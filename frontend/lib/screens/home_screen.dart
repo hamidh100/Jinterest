@@ -105,6 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 enum HomeViewMode { photos, albums, mixed }
+enum HomeSortOrder { newest, oldest, name, mostLiked }
 
 class _FeedPage extends StatefulWidget {
   const _FeedPage();
@@ -115,6 +116,7 @@ class _FeedPage extends StatefulWidget {
 
 class _FeedPageState extends State<_FeedPage> {
   HomeViewMode _viewMode = HomeViewMode.photos;
+  HomeSortOrder _sortOrder = HomeSortOrder.newest;
   String _query = '';
 
   @override
@@ -143,16 +145,22 @@ class _FeedPageState extends State<_FeedPage> {
         .getUserPhotos(currentUser.uuid)
         .where(_matchesPhotoQuery)
         .toList();
+    _sortPhotos(userPhotos);
 
     final userAlbums = albumProvider
         .getUserAlbums(currentUser.uuid)
         .where(_matchesAlbumQuery)
         .toList();
+    _sortAlbums(userAlbums);
 
     final isLoading = photoProvider.isLoading || albumProvider.isLoading;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Home'), centerTitle: true),
+      appBar: AppBar(
+        title: const Text('Home'),
+        centerTitle: true,
+        actions: [_buildSortMenu()],
+      ),
       body: Column(
         children: [
           _buildSearchBar(),
@@ -215,6 +223,29 @@ class _FeedPageState extends State<_FeedPage> {
     );
   }
 
+  Widget _buildSortMenu() {
+    return PopupMenuButton<HomeSortOrder>(
+      icon: const Icon(Icons.sort),
+      tooltip: 'Sort media',
+      onSelected: (order) => setState(() => _sortOrder = order),
+      itemBuilder: (_) => const [
+        PopupMenuItem(
+          value: HomeSortOrder.newest,
+          child: Text('Newest first'),
+        ),
+        PopupMenuItem(
+          value: HomeSortOrder.oldest,
+          child: Text('Oldest first'),
+        ),
+        PopupMenuItem(value: HomeSortOrder.name, child: Text('Name')),
+        PopupMenuItem(
+          value: HomeSortOrder.mostLiked,
+          child: Text('Most liked'),
+        ),
+      ],
+    );
+  }
+
   Widget _buildContent(List<Photo> photos, List<Album> albums) {
     switch (_viewMode) {
       case HomeViewMode.photos:
@@ -255,7 +286,7 @@ class _FeedPageState extends State<_FeedPage> {
           ...albums.map((album) => _MixedMediaItem.album(album)),
         ];
 
-        mixedItems.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        _sortMixedItems(mixedItems);
 
         if (mixedItems.isEmpty) {
           return const _EmptyState(
@@ -302,12 +333,72 @@ class _FeedPageState extends State<_FeedPage> {
 
     return nameMatches || descriptionMatches;
   }
+
+  void _sortPhotos(List<Photo> photos) {
+    switch (_sortOrder) {
+      case HomeSortOrder.newest:
+        photos.sort((first, second) => second.photoAge.compareTo(first.photoAge));
+      case HomeSortOrder.oldest:
+        photos.sort((first, second) => first.photoAge.compareTo(second.photoAge));
+      case HomeSortOrder.name:
+        photos.sort(
+          (first, second) => first.name.toLowerCase().compareTo(
+            second.name.toLowerCase(),
+          ),
+        );
+      case HomeSortOrder.mostLiked:
+        photos.sort(
+          (first, second) => second.likeIDs.length.compareTo(
+            first.likeIDs.length,
+          ),
+        );
+    }
+  }
+
+  void _sortAlbums(List<Album> albums) {
+    if (_sortOrder == HomeSortOrder.name) {
+      albums.sort(
+        (first, second) => first.name.toLowerCase().compareTo(
+          second.name.toLowerCase(),
+        ),
+      );
+      return;
+    }
+
+    albums.sort(
+      (first, second) => _sortOrder == HomeSortOrder.oldest
+          ? first.albumAge.compareTo(second.albumAge)
+          : second.albumAge.compareTo(first.albumAge),
+    );
+  }
+
+  void _sortMixedItems(List<_MixedMediaItem> items) {
+    switch (_sortOrder) {
+      case HomeSortOrder.newest:
+        items.sort((first, second) => second.createdAt.compareTo(first.createdAt));
+      case HomeSortOrder.oldest:
+        items.sort((first, second) => first.createdAt.compareTo(second.createdAt));
+      case HomeSortOrder.name:
+        items.sort(
+          (first, second) => first.name.toLowerCase().compareTo(
+            second.name.toLowerCase(),
+          ),
+        );
+      case HomeSortOrder.mostLiked:
+        items.sort(
+          (first, second) => second.likeCount.compareTo(first.likeCount),
+        );
+    }
+  }
 }
 
 class _MixedMediaItem {
   final Photo? photo;
   final Album? album;
   final DateTime createdAt;
+
+  String get name => photo?.name ?? album!.name;
+  int get likeCount => photo?.likeIDs.length ?? 0;
 
   _MixedMediaItem.photo(Photo this.photo)
     : album = null,
