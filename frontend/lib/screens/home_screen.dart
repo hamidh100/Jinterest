@@ -365,12 +365,10 @@ class _PhotoCard extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.comment_outlined),
                   onPressed: () {
-                    ScaffoldMessenger.of(context).clearSnackBars();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Comment feature coming soon'),
-                        behavior: SnackBarBehavior.floating,
-                      ),
+                    Navigator.pushNamed(
+                      context,
+                      '/photo-details',
+                      arguments: photo.uuid,
                     );
                   },
                 ),
