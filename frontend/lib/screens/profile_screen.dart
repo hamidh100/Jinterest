@@ -590,13 +590,16 @@ class _ProfilePhotoTile extends StatelessWidget {
       onTap: () {
         Navigator.pushNamed(context, '/photo-details', arguments: photo.uuid);
       },
-      child: ColoredBox(
-        color: Colors.grey,
-        child: ServerPhotoImage(
-          photoId: photo.uuid,
-          width: double.infinity,
-          height: double.infinity,
-          fit: BoxFit.cover,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: ColoredBox(
+          color: Colors.grey,
+          child: ServerPhotoImage(
+            photoId: photo.uuid,
+            width: double.infinity,
+            height: double.infinity,
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );
