@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../models/comment.dart';
 import '../models/photo.dart';
+import '../providers/album_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
 import '../widgets/info_chip.dart';
@@ -25,6 +26,9 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
   bool _isLoadingComments = true;
   bool _isAddingComment = false;
   String? _commentError;
+
+  static const _deletePhotoAction = 'delete';
+  static const _changeAlbumsAction = 'change_albums';
 
   @override
   void initState() {
@@ -63,9 +67,29 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
         centerTitle: true,
         actions: [
           if (isOwner)
-            IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.red),
-              onPressed: () => _confirmDelete(context, photo),
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.edit_outlined),
+              tooltip: 'Edit photo',
+              onSelected: (action) {
+                if (action == _deletePhotoAction) {
+                  _confirmDelete(context, photo);
+                } else {
+                  _changePhotoAlbums(photo);
+                }
+              },
+              itemBuilder: (_) => const [
+                PopupMenuItem(
+                  value: _changeAlbumsAction,
+                  child: Text('Change albums'),
+                ),
+                PopupMenuItem(
+                  value: _deletePhotoAction,
+                  child: Text(
+                    'Delete photo',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              ],
             ),
         ],
       ),
@@ -149,9 +173,9 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
       await photoProvider.loadPhotos();
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not add comment: $error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Could not add comment: $error')));
     } finally {
       if (mounted) setState(() => _isAddingComment = false);
     }
@@ -162,7 +186,9 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
     try {
       await PhotoService.deleteComment(comment.uuid);
       if (!mounted) return;
-      setState(() => _comments.removeWhere((item) => item.uuid == comment.uuid));
+      setState(
+        () => _comments.removeWhere((item) => item.uuid == comment.uuid),
+      );
       await photoProvider.loadPhotos();
     } catch (error) {
       if (!mounted) return;
@@ -423,5 +449,96 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
         ),
       );
     }
+  }
+
+  Future<void> _changePhotoAlbums(Photo photo) async {
+    final albumProvider = context.read<AlbumProvider>();
+    await albumProvider.loadAlbums();
+
+    if (!mounted) return;
+
+    final albums = albumProvider.getUserAlbums(photo.ownerID);
+    final currentAlbumIds = albums
+        .where((album) => album.photoIDs.contains(photo.uuid))
+        .map((album) => album.uuid)
+        .toSet();
+    final selectedAlbumIds = Set<String>.from(currentAlbumIds);
+
+    final updatedAlbumIds = await showDialog<Set<String>>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Change albums'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView(
+              shrinkWrap: true,
+              children: albums
+                  .map(
+                    (album) => CheckboxListTile(
+                      value: selectedAlbumIds.contains(album.uuid),
+                      title: Text(album.name),
+                      onChanged: (isSelected) {
+                        setDialogState(() {
+                          if (isSelected == true) {
+                            selectedAlbumIds.add(album.uuid);
+                          } else {
+                            selectedAlbumIds.remove(album.uuid);
+                          }
+                        });
+                      },
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(
+                dialogContext,
+                Set<String>.from(selectedAlbumIds),
+              ),
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (updatedAlbumIds == null || !mounted) return;
+
+    var isSuccess = true;
+    for (final albumId in updatedAlbumIds.difference(currentAlbumIds)) {
+      final wasAdded = await albumProvider.addPhotoToAlbum(
+        albumId: albumId,
+        photoId: photo.uuid,
+      );
+      if (!wasAdded) isSuccess = false;
+    }
+    for (final albumId in currentAlbumIds.difference(updatedAlbumIds)) {
+      final wasRemoved = await albumProvider.removePhotoFromAlbum(
+        albumId: albumId,
+        photoId: photo.uuid,
+      );
+      if (!wasRemoved) isSuccess = false;
+    }
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          isSuccess
+              ? 'Albums updated'
+              : albumProvider.errorMessage ?? 'Could not update albums',
+        ),
+        backgroundColor: isSuccess ? null : Colors.red,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 }
