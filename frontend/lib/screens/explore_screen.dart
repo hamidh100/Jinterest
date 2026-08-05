@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -83,7 +82,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
         .where((album) => _matchesAlbumQuery(album))
         .toList();
 
-    const double toggleHeight = 56;
     const double searchMaxHeight = 80;
 
     return Scaffold(
@@ -262,82 +260,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
         onSelectionChanged: (selection) {
           setState(() => _viewMode = selection.first);
         },
-      ),
-    );
-  }
-
-  Widget _segment(String text, IconData icon, ExploreViewMode mode) {
-    final selected = _viewMode == mode;
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(14),
-      onTap: () => setState(() => _viewMode = mode),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-        decoration: BoxDecoration(
-          color: selected
-              ? Theme.of(context).colorScheme.primaryContainer
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 18),
-            const SizedBox(width: 6),
-            Text(text),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildToggle2() {
-    return Center(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.9),
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: SegmentedButton<ExploreViewMode>(
-              style: ButtonStyle(
-                side: WidgetStateProperty.all(BorderSide.none),
-                elevation: WidgetStateProperty.all(0),
-                backgroundColor: WidgetStateProperty.resolveWith((states) {
-                  if (states.contains(WidgetState.selected)) {
-                    return Theme.of(context).colorScheme.primaryContainer;
-                  }
-                  return Colors.transparent;
-                }),
-              ),
-              segments: const [
-                ButtonSegment(
-                  value: ExploreViewMode.photos,
-                  label: Text('Photos'),
-                  icon: Icon(Icons.image),
-                ),
-                ButtonSegment(
-                  value: ExploreViewMode.albums,
-                  label: Text('Albums'),
-                  icon: Icon(Icons.photo_album),
-                ),
-                ButtonSegment(
-                  value: ExploreViewMode.mixed,
-                  label: Text('Mixed'),
-                  icon: Icon(Icons.dashboard),
-                ),
-              ],
-              selected: {_viewMode},
-              onSelectionChanged: (selection) {
-                setState(() => _viewMode = selection.first);
-              },
-            ),
-          ),
-        ),
       ),
     );
   }
