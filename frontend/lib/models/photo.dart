@@ -9,6 +9,7 @@ class Photo {
   final List<String> likeIDs;
   final List<String> commentIDs;
   final bool isPublic;
+  final bool commentsAllowed;
 
   Photo({
     required this.uuid,
@@ -21,6 +22,7 @@ class Photo {
     this.likeIDs = const [],
     this.commentIDs = const [],
     this.isPublic = false,
+    this.commentsAllowed = true,
   });
 
   Photo copyWith({
@@ -34,6 +36,7 @@ class Photo {
     List<String>? likeIDs,
     List<String>? commentIDs,
     bool? isPublic,
+    bool? commentsAllowed,
   }) {
     return Photo(
       uuid: uuid ?? this.uuid,
@@ -46,6 +49,7 @@ class Photo {
       likeIDs: likeIDs ?? this.likeIDs,
       commentIDs: commentIDs ?? this.commentIDs,
       isPublic: isPublic ?? this.isPublic,
+      commentsAllowed: commentsAllowed ?? this.commentsAllowed,
     );
   }
 }

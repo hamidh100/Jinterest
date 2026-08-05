@@ -75,6 +75,27 @@ class PhotoProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> updateCommentsAllowed({
+    required String photoId,
+    required bool commentsAllowed,
+  }) async {
+    try {
+      _errorMessage = null;
+      final updatedPhoto = await PhotoService.updateCommentsAllowed(
+        photoId: photoId,
+        commentsAllowed: commentsAllowed,
+      );
+      final index = _photos.indexWhere((photo) => photo.uuid == photoId);
+      if (index != -1) _photos[index] = updatedPhoto;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Failed to update comment permission: $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<void> searchPhotos(String query) async {
     _setLoading(true);
 

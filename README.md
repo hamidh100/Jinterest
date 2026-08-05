@@ -29,7 +29,7 @@ Status: `[x]` complete ast; `[ ]` yani incomplete, partial, ya moredi ke az code
 | F-19 | Details | Ba entekhab ax, joloyat va etelaat-e asli ax neshan dade shavad. | Lazem | [x] |
 | F-20 | Details | Emkan-e neveshtan caption haye moteaddad va like kardan ax vojood dashte bashad. | Lazem | [ ] |
 | F-21 | Details | Sabt-e comment rooye ax haye share shode. | ⭐ Emtiazi | [x] |
-| F-22 | Details | Owner betavanad tajhizat-e share ra taein konad; mesalan mojavez-e comment baraye digaran ra. | ⭐ Emtiazi | [ ] |
+| F-22 | Details | Owner betavanad tajhizat-e share ra taein konad; mesalan mojavez-e comment baraye digaran ra. | ⭐ Emtiazi | [x] |
 | F-23 | Albums | Create, delete, va edit-e ax haye album ha vojood dashte bashad. | Lazem | [x] |
 | F-24 | Albums | List-e album ha va ax haye dakhel har album neshan dade shavad. | Lazem | [x] |
 | F-25 | Albums | Har ax betavanad dar album ha va category haye moteaddad gharar begirad. | Lazem | [x] |
@@ -90,7 +90,7 @@ Status haye mumkin: `200` successful, `201` created, `400` request/field ghalat,
 | Object | Field ha |
 | --- | --- |
 | `user` | `id`, `username`, `email`, `phone`, `fullname`, `accountAge`, `userType`, `followerIds`, `followingIds` |
-| `photo` | `id`, `ownerId`, `ownerUsername`, `name`, `path`, `isPublic`, `photoAge`, `categories`, `caption`, `likedByUserIds`, `likeCount`, `commentCount` |
+| `photo` | `id`, `ownerId`, `ownerUsername`, `name`, `path`, `isPublic`, `commentsAllowed`, `photoAge`, `categories`, `caption`, `likedByUserIds`, `likeCount`, `commentCount` |
 | `album` | `id`, `name`, `description`, `isPublic`, `ownerId`, `ownerUsername`, `photos`, `photoCount`, `totalLikes`, `albumAge` |
 | `comment` | `id`, `photoId`, `userId`, `username`, `text`, `time` |
 | `caption` | `id`, `text`, `time` |
@@ -113,13 +113,13 @@ Field haye optional dar object ha faghat vaghti value dashte bashand bar migarda
 | GET | `/photos` | `{}` | `photos` array |
 | GET | `/photos/{id}` | `{}` | `photo` |
 | GET | `/photos/{id}/image` | `{}` | `fileName`, `imageBase64` |
-| POST | `/photos` | `ownerId*`, va ya `imageBase64*` + `fileName*` ya `path*`; `name`, `categories`, `caption`, `isPublic` | `photo` ba status `201` |
-| PUT | `/photos/{id}` | hadaghal yeki az `path`, `categories`, `caption` | `photo` |
+| POST | `/photos` | `ownerId*`, va ya `imageBase64*` + `fileName*` ya `path*`; `name`, `categories`, `caption`, `isPublic` | `photo` ba status `201`; comment ha default roshan hastand |
+| PUT | `/photos/{id}` | hadaghal yeki az `path`, `categories`, `caption`, `commentsAllowed` | `photo` |
 | DELETE | `/photos/{id}` | `{}` | response-e successful bedoon payload |
 | POST | `/photos/{id}/likes` | `userId*` | `photoId`, `likeCount` ba status `201` |
 | DELETE | `/photos/{id}/likes` | `userId*` | `photoId`, `likeCount` |
 | GET | `/photos/{id}/comments` | `{}` | `comments` array |
-| POST | `/photos/{id}/comments` | `userId*`, `text*` | `comment` ba status `201` |
+| POST | `/photos/{id}/comments` | `userId*`, `text*` | `comment` ba status `201`; agar `commentsAllowed=false` bashad faghat owner mitavanad comment bezanad |
 | DELETE | `/comments/{id}` | `{}` | response-e successful bedoon payload |
 | GET | `/albums` | `{}` | `albums` array |
 | GET | `/albums/{id}` | `{}` | `album` |

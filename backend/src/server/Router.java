@@ -519,6 +519,11 @@ public class Router {
                 }
                 updated = true;
             }
+            if (payload.has("commentsAllowed") &&
+                    !payload.get("commentsAllowed").isJsonNull()) {
+                photo.setCommentsAllowed(payload.get("commentsAllowed").getAsBoolean());
+                updated = true;
+            }
             if (!updated) return Response.badRequest("No valid fields were provided for update");
             DatabaseManager.save();
             JsonObject responsePayload = new JsonObject();
@@ -681,6 +686,9 @@ public class Router {
             UUID userUuid = parseUuid(getRequiredString(payload, "userId"));
             User user = OurObjects.users.get(userUuid);
             if (user == null) return Response.notFound("User does not exist");
+            if (!photo.isCommentsAllowed() && !userUuid.equals(photo.getOwnerID())) {
+                return Response.forbidden("Comments are disabled for this photo");
+            }
             String text = getRequiredString(payload, "text");
             Comment comment = new Comment(userUuid, text);
             PhotoService.addComment(photo, comment);
@@ -1048,6 +1056,7 @@ public class Router {
         json.addProperty("name", photo.getName());
         json.addProperty("path", photo.getPath());
         json.addProperty("isPublic", photo.isPublic());
+        json.addProperty("commentsAllowed", photo.isCommentsAllowed());
         if (photo.getPhotoAge() != null) {
             json.addProperty("photoAge", photo.getPhotoAge().toString());
         }

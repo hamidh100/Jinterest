@@ -45,6 +45,7 @@ class PhotoService {
           DateTime.tryParse(json['photoAge']?.toString() ?? '') ??
           DateTime.now(),
       isPublic: json['isPublic'] as bool? ?? true,
+      commentsAllowed: json['commentsAllowed'] as bool? ?? true,
       likeIDs: (json['likedByUserIds'] as List? ?? const [])
           .map((userId) => userId.toString())
           .toList(),
@@ -107,6 +108,18 @@ class PhotoService {
 
   static Future<void> deletePhoto(String photoId) async {
     await ApiClient.instance.send(method: 'DELETE', route: '/photos/$photoId');
+  }
+
+  static Future<Photo> updateCommentsAllowed({
+    required String photoId,
+    required bool commentsAllowed,
+  }) async {
+    final response = await ApiClient.instance.send(
+      method: 'PUT',
+      route: '/photos/$photoId',
+      payload: {'commentsAllowed': commentsAllowed},
+    );
+    return _photoFromPayload(response);
   }
 
   static Future<List<Photo>> searchPhotos(String query) async {

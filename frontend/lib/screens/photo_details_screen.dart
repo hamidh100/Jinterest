@@ -30,6 +30,7 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
 
   static const _deletePhotoAction = 'delete';
   static const _changeAlbumsAction = 'change_albums';
+  static const _toggleCommentsAction = 'toggle_comments';
 
   @override
   void initState() {
@@ -74,16 +75,26 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
               onSelected: (action) {
                 if (action == _deletePhotoAction) {
                   _confirmDelete(context, photo);
-                } else {
+                } else if (action == _changeAlbumsAction) {
                   _changePhotoAlbums(photo);
+                } else {
+                  _toggleCommentsAllowed(photo);
                 }
               },
-              itemBuilder: (_) => const [
+              itemBuilder: (_) => [
                 PopupMenuItem(
                   value: _changeAlbumsAction,
-                  child: Text('Change albums'),
+                  child: const Text('Change albums'),
                 ),
                 PopupMenuItem(
+                  value: _toggleCommentsAction,
+                  child: Text(
+                    photo.commentsAllowed
+                        ? 'Disable comments'
+                        : 'Enable comments',
+                  ),
+                ),
+                const PopupMenuItem(
                   value: _deletePhotoAction,
                   child: Text(
                     'Delete photo',
@@ -117,7 +128,7 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
                 padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
                 child: const Divider(height: 32),
               ),
-              _buildCommentsSection(context),
+              _buildCommentsSection(context, photo),
             ],
           ),
         ),
@@ -334,8 +345,10 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
     );
   }
 
-  Widget _buildCommentsSection(BuildContext context) {
+  Widget _buildCommentsSection(BuildContext context, Photo photo) {
     final currentUser = context.watch<AuthProvider>().currentUser;
+    final canComment = currentUser != null &&
+        (photo.commentsAllowed || currentUser.uuid == photo.ownerID);
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -375,16 +388,18 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
               Expanded(
                 child: TextField(
                   controller: _commentController,
-                  enabled: currentUser != null && !_isAddingComment,
+                  enabled: canComment && !_isAddingComment,
                   textCapitalization: TextCapitalization.sentences,
                   onSubmitted: (_) => _addComment(),
-                  decoration: const InputDecoration(
-                    hintText: 'Write a comment',
+                  decoration: InputDecoration(
+                    hintText: canComment
+                        ? 'Write a comment'
+                        : 'Comments are disabled',
                   ),
                 ),
               ),
               IconButton(
-                onPressed: currentUser == null || _isAddingComment
+                onPressed: !canComment || _isAddingComment
                     ? null
                     : _addComment,
                 icon: _isAddingComment
@@ -399,6 +414,26 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _toggleCommentsAllowed(Photo photo) async {
+    final commentsAllowed = !photo.commentsAllowed;
+    final success = await context.read<PhotoProvider>().updateCommentsAllowed(
+      photoId: photo.uuid,
+      commentsAllowed: commentsAllowed,
+    );
+    if (!mounted) return;
+    final error = context.read<PhotoProvider>().errorMessage;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          success
+              ? 'Comments ${commentsAllowed ? 'enabled' : 'disabled'}'
+              : error ?? 'Could not update comment permission',
+        ),
+        backgroundColor: success ? null : Colors.red,
       ),
     );
   }

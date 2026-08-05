@@ -17,6 +17,7 @@ public class Photo {
     private List<UUID> commentIDs;
     private LocalDateTime photoAge;
     private boolean isPublic = true;
+    private boolean commentsAllowed = true;
 
     public Photo(UUID ownerID, String path) {
         this.ownerID = ownerID;
@@ -93,6 +94,12 @@ public class Photo {
     }
     public void setPublic(boolean isPublic) {
         this.isPublic = isPublic;
+    }
+    public boolean isCommentsAllowed() {
+        return commentsAllowed;
+    }
+    public void setCommentsAllowed(boolean commentsAllowed) {
+        this.commentsAllowed = commentsAllowed;
     }
     /* getter setter end */
 
