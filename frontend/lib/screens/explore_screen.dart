@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
 
 import '../models/album.dart';
@@ -112,8 +113,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   ),
                 ),
                 Container(
-                  // make the toggle background partially transparent so photos show through
-                  color: Colors.white.withOpacity(0.0),
+                  color: Colors.white.withValues(alpha: 0.0),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 8,
@@ -133,15 +133,13 @@ class _ExploreScreenState extends State<ExploreScreen> {
       if (photos.isEmpty) {
         return const Center(child: Text('No public photos found'));
       }
-      return GridView.builder(
+      return MasonryGridView.count(
         controller: _scrollController,
-        padding: const EdgeInsets.all(12),
+        crossAxisCount: 2,
+        mainAxisSpacing: 6,
+        crossAxisSpacing: 3,
+        padding: const EdgeInsets.fromLTRB(3, 120, 3, 150),
         itemCount: photos.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-        ),
         itemBuilder: (context, index) {
           return _ExplorePhotoTile(photo: photos[index]);
         },
@@ -438,8 +436,8 @@ class _ExplorePhotoTile extends StatelessWidget {
           color: Colors.grey,
           child: ServerPhotoImage(
             photoId: photo.uuid,
-            width: double.infinity,
-            height: double.infinity,
+            //width: double.infinity,
+            //height: double.infinity,
             fit: BoxFit.cover,
           ),
         ),
