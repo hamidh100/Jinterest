@@ -6,6 +6,7 @@ import '../models/photo.dart';
 import '../providers/album_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
+import '../providers/snackbar_fab_provider.dart';
 import '../widgets/server_photo_image.dart';
 import 'explore_screen.dart';
 import 'likes_screen.dart';
@@ -20,7 +21,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-  bool _showFab = true;
 
   final List<Widget> _pages = const [
     _FeedPage(),
@@ -31,10 +31,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final snackbarFabProvider = context.watch<SnackbarFabProvider>();
     return Scaffold(
       extendBody: true,
       body: _pages[_selectedIndex],
-      floatingActionButton: _showFab
+      floatingActionButton: snackbarFabProvider.showHomeFab
           ? FloatingActionButton(
               onPressed: () {
                 Navigator.pushNamed(context, '/upload');
@@ -100,33 +101,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-  }
-
-  void showShareComingSoonSnackBar() {
-    setState(() {
-      _showFab = false;
-    });
-
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context)
-        .showSnackBar(
-          SnackBar(
-            content: const Text('Share feature coming soon'),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            duration: const Duration(seconds: 2),
-          ),
-        )
-        .closed
-        .then((_) {
-          if (mounted) {
-            setState(() {
-              _showFab = true;
-            });
-          }
-        });
   }
 }
 
@@ -407,9 +381,17 @@ class _PhotoCard extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.share_outlined),
                   onPressed: () {
-                    context
-                        .findAncestorStateOfType<_HomeScreenState>()
-                        ?.showShareComingSoonSnackBar();
+                    context.read<SnackbarFabProvider>().showSnackBar(
+                      context,
+                      SnackBar(
+                        content: const Text('Share feature coming soon'),
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
                   },
                 ),
               ],

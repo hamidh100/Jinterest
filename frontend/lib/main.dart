@@ -4,6 +4,7 @@ import 'providers/auth_provider.dart';
 import 'providers/photo_provider.dart';
 import 'providers/album_provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/snackbar_fab_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => PhotoProvider()),
         ChangeNotifierProvider(create: (_) => AlbumProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => SnackbarFabProvider()),
       ],
       child: Consumer<ThemeProvider>(
         // Rebuilds MaterialApp when the user toggles the app theme.
