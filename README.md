@@ -66,15 +66,15 @@ Status: `[x]` complete ast; `[ ]` yani incomplete, partial, ya moredi ke az code
 ## Delivery va evaluation requirements
 
 | ID | Requirement | Noe | Status |
-| --- | --- | --- | --- |
-| D-01 | Project ba group-e 2 nafari anjam shavad. | Lazem | [ ] |
-| D-02 | Repository ruye GitHub negahdari shavad va ta akhar Private bemanad. | Lazem | [ ] |
-| D-03 | Git/GitHub dorost estefade shavad va har do ozv commit haye ghabel-e barresi dashte bashand. | Lazem | [ ] |
-| D-04 | Server ba bastan nabayad hich data-i ra az dast bedahad. | Lazem | [x] |
-| D-05 | README dar nahayat tozihat, report ha va screenshot haye project ra dashte bashad. | Lazem | [ ] |
-| D-06 | Har do ozv bayad be tamam bakhsh haye project mosallat bashand. | Lazem | [ ] |
-| D-07 | Output-e app bayad ruye device-e fiziki ya emulator run shavad. | Lazem | [x] |
-| D-08 | Quality, zibaie UI va creativity-e bishtar dar feature ha emtiaz-e ezafi darand. | ⭐ Emtiazi | [ ] |
+| --- | --- | --- |--------|
+| D-01 | Project ba group-e 2 nafari anjam shavad. | Lazem | [x]    |
+| D-02 | Repository ruye GitHub negahdari shavad va ta akhar Private bemanad. | Lazem | [x]    |
+| D-03 | Git/GitHub dorost estefade shavad va har do ozv commit haye ghabel-e barresi dashte bashand. | Lazem | [x]    |
+| D-04 | Server ba bastan nabayad hich data-i ra az dast bedahad. | Lazem | [x]    |
+| D-05 | README dar nahayat tozihat, report ha va screenshot haye project ra dashte bashad. | Lazem | [x]    |
+| D-06 | Har do ozv bayad be tamam bakhsh haye project mosallat bashand. | Lazem | [x]    |
+| D-07 | Output-e app bayad ruye device-e fiziki ya emulator run shavad. | Lazem | [x]    |
+| D-08 | Quality, zibaie UI va creativity-e bishtar dar feature ha emtiaz-e ezafi darand. | ⭐ Emtiazi | [XXXX] |
 
 TODO:\
 stable MasonryGridView\
