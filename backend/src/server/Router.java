@@ -555,6 +555,16 @@ public class Router {
             for (UUID likeId : new ArrayList<>(photo.getLikeIDs())) {
                 OurObjects.likes.remove(likeId);
             }
+            for (Album album : OurObjects.albums.values()) {
+                if (album.getPhotoIDs() != null) {
+                    album.getPhotoIDs().remove(photo.getUuid());
+                }
+            }
+            for (User user : OurObjects.users.values()) {
+                if (user.getSavedPhotoIDs() != null) {
+                    user.getSavedPhotoIDs().remove(photo.getUuid());
+                }
+            }
             OurObjects.photos.remove(photo.getUuid());
             DatabaseManager.save();
             return Response.ok("Photo deleted successfully");
