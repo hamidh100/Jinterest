@@ -13,6 +13,7 @@ public enum Category {
     ARCHITECTURE,
     CUTE,
     CAT,
+    CAR,
     GAME,
     DAY,
     NIGHT,
@@ -25,5 +26,9 @@ public enum Category {
     LINUX,
     PROGRAMMING,
     MATH,
+    MOVIE,
+    SPIDERMAN,
+    COLOR,
+    PAINTING,
     OTHERS
 }
