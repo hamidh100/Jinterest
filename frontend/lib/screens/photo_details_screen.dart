@@ -1,17 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/comment.dart';
 import '../models/photo.dart';
 import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
 import '../widgets/info_chip.dart';
 import '../widgets/uploader_tile.dart';
 import '../widgets/server_photo_image.dart';
+import '../services/photo_service.dart';
 
-class PhotoDetailsScreen extends StatelessWidget {
+class PhotoDetailsScreen extends StatefulWidget {
   final String photoId;
 
   const PhotoDetailsScreen({super.key, required this.photoId});
+
+  @override
+  State<PhotoDetailsScreen> createState() => _PhotoDetailsScreenState();
+}
+
+class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
+  List<Comment> _comments = [];
+  bool _isLoadingComments = true;
+  bool _isAddingComment = false;
+  String? _commentError;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadComments();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +37,7 @@ class PhotoDetailsScreen extends StatelessWidget {
     final authProvider = context.watch<AuthProvider>();
     final currentUser = authProvider.currentUser;
 
-    final photo = _findPhoto(photoProvider.photos, photoId);
+    final photo = _findPhoto(photoProvider.photos, widget.photoId);
 
     if (photo == null) {
       return Scaffold(
@@ -67,7 +85,7 @@ class PhotoDetailsScreen extends StatelessWidget {
                 padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
                 child: const Divider(height: 32),
               ),
-              _buildCommentsSection(context, photo),
+              _buildCommentsSection(context),
             ],
           ),
         ),
@@ -80,6 +98,95 @@ class PhotoDetailsScreen extends StatelessWidget {
       return photos.firstWhere((photo) => photo.uuid == id);
     } catch (_) {
       return null;
+    }
+  }
+
+  Future<void> _loadComments() async {
+    try {
+      final comments = await PhotoService.getComments(widget.photoId);
+      if (!mounted) return;
+      setState(() {
+        _comments = comments;
+        _isLoadingComments = false;
+        _commentError = null;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _isLoadingComments = false;
+        _commentError = 'Could not load comments: $error';
+      });
+    }
+  }
+
+  Future<void> _openAddCommentDialog() async {
+    final controller = TextEditingController();
+    final text = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Add comment'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLines: 3,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: const InputDecoration(hintText: 'Write a comment'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, controller.text),
+            child: const Text('Post'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+
+    if (!mounted || text == null || text.trim().isEmpty) return;
+    await _addComment(text);
+  }
+
+  Future<void> _addComment(String text) async {
+    final currentUser = context.read<AuthProvider>().currentUser;
+    final photoProvider = context.read<PhotoProvider>();
+    if (currentUser == null) return;
+
+    setState(() => _isAddingComment = true);
+    try {
+      final comment = await PhotoService.addComment(
+        photoId: widget.photoId,
+        userId: currentUser.uuid,
+        text: text,
+      );
+      if (!mounted) return;
+      setState(() => _comments.add(comment));
+      await photoProvider.loadPhotos();
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not add comment: $error')),
+      );
+    } finally {
+      if (mounted) setState(() => _isAddingComment = false);
+    }
+  }
+
+  Future<void> _deleteComment(Comment comment) async {
+    final photoProvider = context.read<PhotoProvider>();
+    try {
+      await PhotoService.deleteComment(comment.uuid);
+      if (!mounted) return;
+      setState(() => _comments.removeWhere((item) => item.uuid == comment.uuid));
+      await photoProvider.loadPhotos();
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not delete comment: $error')),
+      );
     }
   }
 
@@ -218,7 +325,9 @@ class PhotoDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCommentsSection(BuildContext context, Photo photo) {
+  Widget _buildCommentsSection(BuildContext context) {
+    final currentUser = context.watch<AuthProvider>().currentUser;
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -229,24 +338,35 @@ class PhotoDetailsScreen extends StatelessWidget {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          if (photo.commentIDs.isEmpty)
+          if (_isLoadingComments)
+            const Center(child: CircularProgressIndicator())
+          else if (_commentError != null)
+            Text(_commentError!, style: const TextStyle(color: Colors.red))
+          else if (_comments.isEmpty)
             const Text('No comments yet', style: TextStyle(color: Colors.grey))
           else
-            Text('${photo.commentIDs.length} comments'),
+            ..._comments.map(
+              (comment) => ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(comment.username ?? 'User'),
+                subtitle: Text(comment.text),
+                trailing: currentUser?.uuid == comment.userID
+                    ? IconButton(
+                        icon: const Icon(Icons.delete_outline),
+                        onPressed: () => _deleteComment(comment),
+                      )
+                    : null,
+              ),
+            ),
 
           const SizedBox(height: 16),
 
           OutlinedButton.icon(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Comment feature coming soon'),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            },
+            onPressed: currentUser == null || _isAddingComment
+                ? null
+                : _openAddCommentDialog,
             icon: const Icon(Icons.comment_outlined),
-            label: const Text('Add Comment'),
+            label: Text(_isAddingComment ? 'Posting...' : 'Add Comment'),
           ),
         ],
       ),
