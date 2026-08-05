@@ -8,6 +8,7 @@ import '../models/photo.dart';
 import '../providers/album_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
+import '../providers/snackbar_fab_provider.dart';
 import '../widgets/create_album_dialog.dart';
 
 class UploadScreen extends StatefulWidget {
@@ -138,12 +139,14 @@ class _UploadScreenState extends State<UploadScreen> {
   }
 
   void _showToast(String message, {bool isError = false}) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
+    context.read<SnackbarFabProvider>().showSnackBar(
+      context,
       SnackBar(
         content: Text(message),
         backgroundColor: isError ? Colors.red : null,
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -206,6 +209,7 @@ class _UploadScreenState extends State<UploadScreen> {
                 _buildPublicToggle(),
                 const SizedBox(height: 32),
                 _buildUploadButton(),
+                const SizedBox(height: 40),
               ],
             ),
           ),

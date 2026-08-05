@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/snackbar_fab_provider.dart';
 import '../utils/validators.dart';
 import 'login_screen.dart';
 
@@ -89,12 +90,14 @@ class _SignupScreenState extends State<SignupScreen> {
   }*/
 
   void _showErrorToast(String message) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
+    context.read<SnackbarFabProvider>().showSnackBar(
+      context,
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.red,
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
