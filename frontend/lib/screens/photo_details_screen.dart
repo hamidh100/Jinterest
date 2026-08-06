@@ -211,14 +211,15 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
   }
 
   Widget _buildImage(Photo photo) {
-    return SizedBox(
-      height: 350,
-      width: double.infinity,
-      child: ServerPhotoImage(
-        photoId: photo.uuid,
-        aspectRatio: photo.aspectRatio,
-        // height: 350,
-        fit: BoxFit.cover,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 3),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: ServerPhotoImage(
+          photoId: photo.uuid,
+          aspectRatio: photo.aspectRatio,
+          fit: BoxFit.cover,
+        ),
       ),
     );
   }
@@ -347,7 +348,8 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
 
   Widget _buildCommentsSection(BuildContext context, Photo photo) {
     final currentUser = context.watch<AuthProvider>().currentUser;
-    final canComment = currentUser != null &&
+    final canComment =
+        currentUser != null &&
         (photo.commentsAllowed || currentUser.uuid == photo.ownerID);
 
     return Padding(
@@ -399,9 +401,7 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
                 ),
               ),
               IconButton(
-                onPressed: !canComment || _isAddingComment
-                    ? null
-                    : _addComment,
+                onPressed: !canComment || _isAddingComment ? null : _addComment,
                 icon: _isAddingComment
                     ? const SizedBox(
                         width: 20,
