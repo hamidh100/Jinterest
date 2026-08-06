@@ -373,6 +373,13 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
             ..._comments.map(
               (comment) => ListTile(
                 contentPadding: EdgeInsets.zero,
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/user-profile',
+                    arguments: comment.userID,
+                  );
+                },
                 title: Text(comment.username ?? 'User'),
                 subtitle: Text(comment.text),
                 trailing: currentUser?.uuid == comment.userID

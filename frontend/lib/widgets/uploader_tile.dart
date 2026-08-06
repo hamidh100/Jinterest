@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
 import '../models/user.dart';
@@ -52,16 +54,26 @@ class UploaderTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 22,
-                backgroundColor: colorScheme.primary,
-                child: Text(
-                  firstLetter,
-                  style: TextStyle(
-                    color: colorScheme.onPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+              FutureBuilder<Uint8List?>(
+                future: UserService.getProfileImage(ownerID),
+                builder: (context, snapshot) {
+                  return CircleAvatar(
+                    radius: 22,
+                    backgroundColor: colorScheme.primary,
+                    backgroundImage: snapshot.hasData && snapshot.data != null
+                        ? MemoryImage(snapshot.data!)
+                        : null,
+                    child: snapshot.hasData && snapshot.data != null
+                        ? null
+                        : Text(
+                            firstLetter,
+                            style: TextStyle(
+                              color: colorScheme.onPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  );
+                },
               ),
               const SizedBox(width: 12),
               Expanded(
