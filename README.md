@@ -11,7 +11,7 @@ Status: `[x]` complete ast; `[ ]` yani incomplete, partial, ya moredi ke az code
 | F-01 | Login / Signup | User ba username va password login konad va pas az login be safhehaye asli beravad. | Lazem | [x] |
 | F-02 | Login / Signup | Session-e login save shavad ta dar execution haye badi Login screen neshan dade nashavad; Login faghat bad az install ya logout neshan dade shavad. | Lazem | [x] |
 | F-03 | Login / Signup | Signup-e user-e jadid vojood dashte bashad; username mitavanad email ya shomare mobile bashad. | Lazem | [x] |
-| F-04 | Login / Signup | Password hadaghal 8 character, shamel horoof bozorg/koochak va adad bashad; username ra nadaste bashad; validation ba Regular Expression anjam shavad. | Lazem | [x] |
+| F-04 | Login / Signup | Password hadaghal 8 character, shamel horoof bozorg/koochak va adad bashad; username ra nadaste bashad; validation ba Regular Expression anjam shavad. | Lazem | [ ] |
 | F-05 | Login / Signup | Error haye server ba toast notification neshan dade shavand; field haye naghes ya format-e ghalat ham warning-e monaseb dashte bashand. | Lazem | [x] |
 | F-06 | Login / Signup | Login ba fingerprint be jaye password. | ⭐ Emtiazi | [ ] |
 | F-07 | Home | List-e ax haye hame user ha neshan dade shavad va ba entekhab har ax, Details screen baz shavad. | Lazem | [x] |
