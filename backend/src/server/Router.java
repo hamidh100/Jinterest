@@ -50,11 +50,16 @@ public class Router {
             String method = Helper.toUpper(request.getMethod().trim());
             String route = normalizeRoute(request.getRoute());
             switch (method) {
-                case "GET": return handleGet(request, route);
-                case "POST": return handlePost(request, route);
-                case "PUT": return handlePut(request, route);
-                case "DELETE": return handleDelete(request, route);
-                default: return Response.methodNotAllowed("Unsupported method: " + method);
+                case "GET":
+                    return handleGet(request, route);
+                case "POST":
+                    return handlePost(request, route);
+                case "PUT":
+                    return handlePut(request, route);
+                case "DELETE":
+                    return handleDelete(request, route);
+                default:
+                    return Response.methodNotAllowed("Unsupported method: " + method);
             }
         } catch (Exception e) {
             System.err.println("Router error:");
@@ -65,10 +70,14 @@ public class Router {
 
     private Response handleGet(Request request, String route) {
         switch (route) {
-            case "/ping": return handlePing();
-            case "/photos": return handleGetPhotos(request);
-            case "/albums": return handleGetAlbums(request);
-            case "/search": return handleSearch(request);
+            case "/ping":
+                return handlePing();
+            case "/photos":
+                return handleGetPhotos(request);
+            case "/albums":
+                return handleGetAlbums(request);
+            case "/search":
+                return handleSearch(request);
             default:
                 /*
                     /photos/{id}/image
@@ -94,17 +103,25 @@ public class Router {
                     String userId = getPart(route, 2);
                     return handleGetUser(request, userId);
                 }
+                if (isUserImageRoute(route)) {
+                    return handleGetUserImage(getPart(route, 2));
+                }
                 return Response.notFound("Route not found: GET " + route);
         }
     }
 
     private Response handlePost(Request request, String route) {
         switch (route) {
-            case "/auth/signup": return handleSignup(request);
-            case "/auth/login": return handleLogin(request);
-            case "/photos": return handleCreatePhoto(request);
-            case "/albums": return handleCreateAlbum(request);
-            case "/search": return handleSearch(request);
+            case "/auth/signup":
+                return handleSignup(request);
+            case "/auth/login":
+                return handleLogin(request);
+            case "/photos":
+                return handleCreatePhoto(request);
+            case "/albums":
+                return handleCreateAlbum(request);
+            case "/search":
+                return handleSearch(request);
             default:
                 if (isPhotoLikesRoute(route)) {
                     String photoId = getPart(route, 2);
@@ -202,6 +219,11 @@ public class Router {
         return parts.length == 2 && parts[0].equals("users");
     }
 
+    private boolean isUserImageRoute(String route) {
+        String[] parts = splitRoute(route);
+        return parts.length == 3 && parts[0].equals("users") && parts[2].equals("image");
+    }
+
     private boolean isCommentRoute(String route) {
         String[] parts = splitRoute(route);
         return parts.length == 2 && parts[0].equals("comments");
@@ -236,7 +258,7 @@ public class Router {
     private boolean pathExists(String route) {
         return route.equals("/ping") || route.equals("/photos") || route.equals("/albums") ||
                 route.equals("/search") || route.equals("/auth/signup") || route.equals("/auth/login") ||
-                isPhotoImageRoute(route) || isPhotoRoute(route) || isAlbumRoute(route) || isUserRoute(route) || isCommentRoute(route) ||
+                isPhotoImageRoute(route) || isPhotoRoute(route) || isAlbumRoute(route) || isUserRoute(route) || isUserImageRoute(route) || isCommentRoute(route) ||
                 isPhotoLikesRoute(route) || isPhotoCommentsRoute(route) || isUserFollowRoute(route);
     }
 
@@ -351,6 +373,14 @@ public class Router {
                 DatabaseManager.save();
                 updated = true;
             }
+            if (payload.has("profileImageBase64") && !payload.get("profileImageBase64").isJsonNull()) {
+                user.setProfileImagePath(ImageStorage.saveBase64Image(
+                        getRequiredString(payload, "profileImageBase64"),
+                        getRequiredString(payload, "profileImageFileName")
+                ));
+                DatabaseManager.save();
+                updated = true;
+            }
             if (payload.has("email") || payload.has("phone")) {
                 return Response.notImplemented("Changing email or phone is not supported yet");
             }
@@ -374,6 +404,24 @@ public class Router {
             System.err.println("Unexpected update-user error:");
             e.printStackTrace();
             return Response.serverError("Internal server error");
+        }
+    }
+
+    private Response handleGetUserImage(String userId) {
+        try {
+            User user = OurObjects.users.get(parseUuid(userId));
+            if (user == null || user.getProfileImagePath() == null)
+                return Response.notFound("Profile image does not exist");
+            Path path = Path.of(user.getProfileImagePath());
+            if (!Files.exists(path) || !Files.isRegularFile(path))
+                return Response.notFound("Profile image does not exist");
+            JsonObject payload = new JsonObject();
+            payload.addProperty("imageBase64", Base64.getEncoder().encodeToString(Files.readAllBytes(path)));
+            return Response.ok("Profile image found", payload);
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest("User ID must be a valid UUID");
+        } catch (IOException e) {
+            return Response.serverError("Could not read profile image");
         }
     }
 
@@ -983,8 +1031,8 @@ public class Router {
         }
     }
 
-    private String getRequiredString( JsonObject payload, String field) {
-        if (payload == null || !payload.has(field) || payload.get(field).isJsonNull()){
+    private String getRequiredString(JsonObject payload, String field) {
+        if (payload == null || !payload.has(field) || payload.get(field).isJsonNull()) {
             throw new IllegalArgumentException("Field '" + field + "' is required");
         }
         String value = payload.get(field).getAsString().trim();
@@ -1037,6 +1085,7 @@ public class Router {
         if (user.getFullname() != null) {
             json.addProperty("fullname", user.getFullname());
         }
+        if (user.getProfileImagePath() != null) json.addProperty("profileImagePath", user.getProfileImagePath());
         if (user.getAccountAge() != null) {
             json.addProperty("accountAge", user.getAccountAge().toString());
         }
@@ -1136,7 +1185,7 @@ public class Router {
     private List<Category> readCategories(JsonObject payload) {
         List<Category> categories = new ArrayList<>();
         if (payload == null || !payload.has("categories") ||
-            payload.get("categories").isJsonNull()) {
+                payload.get("categories").isJsonNull()) {
             return categories;
         }
         JsonElement categoriesElement = payload.get("categories");

@@ -12,6 +12,7 @@ public class User {
     private LocalDateTime accountAge;
     private UserType userType = UserType.NORMAL;
     private boolean banned = false;
+    private String profileImagePath;
     private List<UUID> albumIDs = new ArrayList<UUID>();
     private List<UUID> photoIDs = new ArrayList<UUID>();
     private List<UUID> savedAlbums = new ArrayList<UUID>();
@@ -165,6 +166,8 @@ public class User {
     public void setBanned(boolean banned) {
         this.banned = banned;
     }
+    public String getProfileImagePath() { return profileImagePath; }
+    public void setProfileImagePath(String profileImagePath) { this.profileImagePath = profileImagePath; }
     /* getter setter end */
 
     @Override

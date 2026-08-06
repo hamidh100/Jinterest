@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
 import '../exceptions/exceptions.dart';
 import '../models/user.dart';
 import 'api_client.dart';
@@ -49,6 +53,30 @@ class UserService {
       route: '/users/$followedId/follow',
       payload: {'followerId': followerId},
     );
+  }
+
+  static Future<void> updateProfileImage(String userId, File image) async {
+    final bytes = await image.readAsBytes();
+    await ApiClient.instance.send(
+      method: 'PUT',
+      route: '/users/$userId',
+      payload: {
+        'profileImageBase64': base64Encode(bytes),
+        'profileImageFileName': image.path.replaceAll('\\', '/').split('/').last,
+      },
+    );
+  }
+
+  static Future<Uint8List?> getProfileImage(String userId) async {
+    try {
+      final response = await ApiClient.instance.send(method: 'GET', route: '/users/$userId/image');
+      final payload = response['payload'];
+      if (payload is! Map<String, dynamic> || payload['imageBase64'] is! String) return null;
+      return base64Decode(payload['imageBase64'] as String);
+    } on ApiException catch (error) {
+      if (error.statusCode == 404) return null;
+      rethrow;
+    }
   }
 
   static User _userFromResponse(

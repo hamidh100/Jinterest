@@ -1,4 +1,8 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../models/album.dart';
@@ -110,9 +114,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Column(
             children: [
               _buildProfileHeader(
-                fullname: user.fullname,
-                username: user.username,
-                contact: user.email ?? user.phone ?? 'No contact info',
+                user: user,
+                isOwnProfile: isOwnProfile,
               ),
 
               _buildStatsRow(
@@ -166,50 +169,73 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileHeader({
-    required String fullname,
-    required String? username,
-    required String contact,
-  }) {
-    final firstLetter = fullname.trim().isNotEmpty
-        ? fullname.trim()[0].toUpperCase()
-        : '?';
+  Widget _buildProfileHeader({required User user, required bool isOwnProfile}) {
 
     return Container(
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          CircleAvatar(
-            radius: 50,
-            backgroundColor: Colors.deepPurple,
-            child: Text(
-              firstLetter,
-              style: const TextStyle(
-                fontSize: 40,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+          Stack(
+            children: [
+              _ProfileAvatar(userId: user.uuid, fullname: user.fullname),
+              if (isOwnProfile)
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.black
+                            : Colors.white,
+                        width: 2,
+                      ),
+                    ),
+                    child: CircleAvatar(
+                      radius: 16,
+                      backgroundColor: Colors.deepPurple,
+                      child: IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.white, size: 18),
+                        onPressed: () => _pickProfileImage(user.uuid),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
 
           const SizedBox(height: 16),
 
           Text(
-            fullname.isEmpty ? 'Unknown User' : fullname,
+            user.fullname.isEmpty ? 'Unknown User' : user.fullname,
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
 
           Text(
-            username == null ? '@unknown' : '@$username',
+            user.username == null ? '@unknown' : '@${user.username}',
             style: const TextStyle(fontSize: 16, color: Colors.grey),
           ),
 
           const SizedBox(height: 8),
 
-          Text(contact, style: const TextStyle(fontSize: 14)),
+          Text(user.email ?? user.phone ?? 'No contact info', style: const TextStyle(fontSize: 14)),
         ],
       ),
     );
+  }
+
+  Future<void> _pickProfileImage(String userId) async {
+    final image = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 85);
+    if (image == null) return;
+    try {
+      await UserService.updateProfileImage(userId, File(image.path));
+      if (!mounted) return;
+      setState(() {});
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not upload profile photo: $error')));
+    }
   }
 
   Widget _buildStatsRow({
@@ -882,6 +908,29 @@ class _StatItem extends StatelessWidget {
             Text(label, style: const TextStyle(color: Colors.grey)),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ProfileAvatar extends StatelessWidget {
+  final String userId;
+  final String fullname;
+
+  const _ProfileAvatar({required this.userId, required this.fullname});
+
+  @override
+  Widget build(BuildContext context) {
+    final firstLetter = fullname.trim().isEmpty ? '?' : fullname.trim()[0].toUpperCase();
+    return FutureBuilder<Uint8List?>(
+      future: UserService.getProfileImage(userId),
+      builder: (context, snapshot) => CircleAvatar(
+        radius: 50,
+        backgroundColor: Colors.deepPurple,
+        backgroundImage: snapshot.data == null ? null : MemoryImage(snapshot.data!),
+        child: snapshot.data == null
+            ? Text(firstLetter, style: const TextStyle(fontSize: 40, color: Colors.white, fontWeight: FontWeight.bold))
+            : null,
       ),
     );
   }
