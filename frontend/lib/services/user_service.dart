@@ -45,6 +45,10 @@ class UserService {
     );
   }
 
+  static Future<void> deleteUser(String userId) async {
+    await ApiClient.instance.send(method: 'DELETE', route: '/users/$userId');
+  }
+
   static Future<void> follow({
     required String followerId,
     required String followedId,

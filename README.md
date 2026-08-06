@@ -36,7 +36,7 @@ Status: `[x]` complete ast; `[ ]` yani incomplete, partial, ya moredi ke az code
 | F-26 | Albums | Sort-e ax haye album va transfer-e ax az yek album be album-e digar vojood dashte bashad. | Lazem | [x] |
 | F-27 | Search | Search-e ax bar asas name, tarikh-e ezafe shodan, category, comment ha va tag ha. | Lazem | [x] |
 | F-28 | Profile | Username, tedad ax ha va tedad album haye user neshan dade shavad. | Lazem | [x] |
-| F-29 | Profile | Taghir username/password, delete account, logout, va taghir permission/settings-e har ax va share-e an vojood dashte bashad. | Lazem | [ ] |
+| F-29 | Profile | Taghir username/password, delete account, logout, va taghir permission/settings-e har ax va share-e an vojood dashte bashad. | Lazem | [x] |
 | F-30 | Profile | Dark mode va light mode. | ⭐ Emtiazi | [x] |
 | F-31 | Admin | Admin panel-e terminali dar Java: modiriat user ha, didan tedad album/ax har user, va ban kardan user az login. | Lazem | [x] |
 | F-32 | Admin | Admin panel-e graphical dar Java. | ⭐ Emtiazi | [ ] |

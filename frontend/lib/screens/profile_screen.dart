@@ -369,6 +369,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildEditProfileButton(BuildContext context) {
     final authUser = context.read<AuthProvider>().currentUser;
+    final authProvider = context.read<AuthProvider>();
     final user = authUser == null
         ? null
         : _editedUser?.uuid == authUser.uuid
@@ -386,9 +387,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ? null
             : () async {
                 final updatedUser = await Navigator.push<User>(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => _EditProfileScreen(user: user),
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => _EditProfileScreen(
+                        user: user,
+                        onDeleteAccount: () => _deleteAccount(authProvider),
+                      ),
                   ),
                 );
 
@@ -422,6 +426,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _deleteAccount(AuthProvider authProvider) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Delete account?'),
+        content: const Text('Your photos, albums, and account data will be deleted.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+    if (shouldDelete != true || !mounted) return;
+
+    try {
+      await UserService.deleteUser(authProvider.currentUser!.uuid);
+      await authProvider.logout();
+      if (!mounted) return;
+      Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not delete account: $error')),
+      );
+    }
   }
 
   Widget _buildViewToggle() {
@@ -544,8 +581,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
 class _EditProfileScreen extends StatefulWidget {
   final User user;
+  final Future<void> Function() onDeleteAccount;
 
-  const _EditProfileScreen({required this.user});
+  const _EditProfileScreen({
+    required this.user,
+    required this.onDeleteAccount,
+  });
 
   @override
   State<_EditProfileScreen> createState() => _EditProfileScreenState();
@@ -768,6 +809,16 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
                 },
                 icon: const Icon(Icons.lock_outline),
                 label: const Text('Change Password'),
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: widget.onDeleteAccount,
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 48),
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Delete Account'),
               ),
             ],
           ),

@@ -182,6 +182,10 @@ public class Router {
             String userId = getPart(route, 2);
             return handleUnfollowUser(request, userId);
         }
+        if (isUserRoute(route)) {
+            String userId = getPart(route, 2);
+            return handleDeleteUser(userId);
+        }
         if (isCommentRoute(route)) {
             String commentId = getPart(route, 2);
             return handleDeleteComment(request, commentId);
@@ -608,30 +612,7 @@ public class Router {
             UUID uuid = parseUuid(photoId);
             Photo photo = OurObjects.photos.get(uuid);
             if (photo == null) return Response.notFound("Photo does not exist");
-            User owner = OurObjects.users.get(photo.getOwnerID());
-            if (owner != null) {
-                owner.getPhotoIDs().remove(photo.getUuid());
-            }
-            if (photo.getCaptionID() != null) {
-                OurObjects.captions.remove(photo.getCaptionID());
-            }
-            for (UUID commentId : new ArrayList<>(photo.getCommentIDs())) {
-                OurObjects.comments.remove(commentId);
-            }
-            for (UUID likeId : new ArrayList<>(photo.getLikeIDs())) {
-                OurObjects.likes.remove(likeId);
-            }
-            for (Album album : OurObjects.albums.values()) {
-                if (album.getPhotoIDs() != null) {
-                    album.getPhotoIDs().remove(photo.getUuid());
-                }
-            }
-            for (User user : OurObjects.users.values()) {
-                if (user.getSavedPhotoIDs() != null) {
-                    user.getSavedPhotoIDs().remove(photo.getUuid());
-                }
-            }
-            OurObjects.photos.remove(photo.getUuid());
+            removePhoto(photo);
             DatabaseManager.save();
             return Response.ok("Photo deleted successfully");
         } catch (IllegalArgumentException e) {
@@ -645,6 +626,82 @@ public class Router {
             e.printStackTrace();
             return Response.serverError("Internal server error");
         }
+    }
+
+    private Response handleDeleteUser(String userId) {
+        try {
+            UUID uuid = parseUuid(userId);
+            User user = OurObjects.users.get(uuid);
+            if (user == null) return Response.notFound("User does not exist");
+
+            for (Photo photo : new ArrayList<>(OurObjects.photos.values())) {
+                if (uuid.equals(photo.getOwnerID()) || user.getPhotoIDs().contains(photo.getUuid())) {
+                    removePhoto(photo);
+                }
+            }
+            for (Album album : new ArrayList<>(OurObjects.albums.values())) {
+                if (uuid.equals(album.getOwnerID())) {
+                    OurObjects.albums.remove(album.getUuid());
+                    for (User otherUser : OurObjects.users.values()) {
+                        otherUser.getSavedAlbums().remove(album.getUuid());
+                    }
+                }
+            }
+            for (Comment comment : new ArrayList<>(OurObjects.comments.values())) {
+                if (uuid.equals(comment.getUserID())) {
+                    Photo photo = OurObjects.photos.get(comment.getPhotoID());
+                    if (photo != null) photo.getCommentIDs().remove(comment.getUuid());
+                    OurObjects.comments.remove(comment.getUuid());
+                }
+            }
+            for (Like like : new ArrayList<>(OurObjects.likes.values())) {
+                if (uuid.equals(like.getUserID())) {
+                    for (Photo photo : OurObjects.photos.values()) {
+                        photo.getLikeIDs().remove(like.getUuid());
+                    }
+                    OurObjects.likes.remove(like.getUuid());
+                }
+            }
+            for (User otherUser : OurObjects.users.values()) {
+                otherUser.getFollowerIDs().remove(uuid);
+                otherUser.getFollowingIDs().remove(uuid);
+            }
+            OurObjects.users.remove(uuid);
+            OurObjects.usersLowercase.values().removeIf(uuid::equals);
+            OurObjects.emailToUserID.values().removeIf(uuid::equals);
+            OurObjects.phoneToUserID.values().removeIf(uuid::equals);
+            DatabaseManager.save();
+            return Response.ok("Account deleted successfully");
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest("User ID must be a valid UUID");
+        } catch (IOException e) {
+            System.err.println("Could not save after deleting account:");
+            e.printStackTrace();
+            return Response.serverError("Could not delete account");
+        } catch (Exception e) {
+            System.err.println("Unexpected delete-user error:");
+            e.printStackTrace();
+            return Response.serverError("Internal server error");
+        }
+    }
+
+    private void removePhoto(Photo photo) {
+        User owner = OurObjects.users.get(photo.getOwnerID());
+        if (owner != null) owner.getPhotoIDs().remove(photo.getUuid());
+        if (photo.getCaptionID() != null) OurObjects.captions.remove(photo.getCaptionID());
+        for (UUID commentId : new ArrayList<>(photo.getCommentIDs())) {
+            OurObjects.comments.remove(commentId);
+        }
+        for (UUID likeId : new ArrayList<>(photo.getLikeIDs())) {
+            OurObjects.likes.remove(likeId);
+        }
+        for (Album album : OurObjects.albums.values()) {
+            if (album.getPhotoIDs() != null) album.getPhotoIDs().remove(photo.getUuid());
+        }
+        for (User user : OurObjects.users.values()) {
+            if (user.getSavedPhotoIDs() != null) user.getSavedPhotoIDs().remove(photo.getUuid());
+        }
+        OurObjects.photos.remove(photo.getUuid());
     }
 
     private Response handleLikePhoto(Request request, String photoId) {
