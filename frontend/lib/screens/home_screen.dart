@@ -38,16 +38,12 @@ class _HomeScreenState extends State<HomeScreen> {
       extendBody: true,
       body: _pages[_selectedIndex],
       floatingActionButton: snackbarFabProvider.showHomeFab
-          ? FloatingActionButton.small(
+          ? FloatingActionButton(
               onPressed: () {
                 Navigator.pushNamed(context, '/upload');
               },
               backgroundColor: Colors.deepPurple,
-              child: const Icon(
-                Icons.add_a_photo,
-                color: Colors.white,
-                size: 20,
-              ),
+              child: const Icon(Icons.add_a_photo, color: Colors.white),
             )
           : null,
       bottomNavigationBar: SafeArea(
