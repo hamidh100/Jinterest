@@ -216,8 +216,8 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
       width: double.infinity,
       child: ServerPhotoImage(
         photoId: photo.uuid,
-        width: double.infinity,
-        height: 350,
+        aspectRatio: photo.aspectRatio,
+        // height: 350,
         fit: BoxFit.cover,
       ),
     );

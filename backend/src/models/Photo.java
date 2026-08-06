@@ -18,6 +18,8 @@ public class Photo {
     private LocalDateTime photoAge;
     private boolean isPublic = true;
     private boolean commentsAllowed = true;
+    private int width;
+    private int height;
 
     public Photo(UUID ownerID, String path) {
         this.ownerID = ownerID;
@@ -101,6 +103,18 @@ public class Photo {
     public void setCommentsAllowed(boolean commentsAllowed) {
         this.commentsAllowed = commentsAllowed;
     }
+    public int getWidth() {
+        return width;
+    }
+    public void setWidth(int width) {
+        this.width = width;
+    }
+    public int getHeight() {
+        return height;
+    }
+    public void setHeight(int height) {
+        this.height = height;
+    }
     /* getter setter end */
 
     @Override
@@ -140,5 +154,5 @@ public class Photo {
         return res;
     }
 
-    
+
 }

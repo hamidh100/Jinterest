@@ -438,6 +438,7 @@ class _ExplorePhotoTile extends StatelessWidget {
             photoId: photo.uuid,
             //width: double.infinity,
             //height: double.infinity,
+            aspectRatio: photo.aspectRatio,
             fit: BoxFit.cover,
           ),
         ),
@@ -526,8 +527,7 @@ class _ExploreAlbumTile extends StatelessWidget {
   Widget _buildCover(Photo photo) {
     return ServerPhotoImage(
       photoId: photo.uuid,
-      width: double.infinity,
-      height: double.infinity,
+      aspectRatio: photo.aspectRatio,
       fit: BoxFit.cover,
     );
   }

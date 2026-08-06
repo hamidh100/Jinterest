@@ -100,8 +100,7 @@ class _LikedPhotoTile extends StatelessWidget {
             children: [
               ServerPhotoImage(
                 photoId: photo.uuid,
-                width: double.infinity,
-                height: double.infinity,
+                aspectRatio: photo.aspectRatio,
                 fit: BoxFit.cover,
               ),
               Positioned(

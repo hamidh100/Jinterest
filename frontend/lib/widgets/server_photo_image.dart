@@ -8,14 +8,12 @@ class ServerPhotoImage extends StatefulWidget {
   const ServerPhotoImage({
     super.key,
     required this.photoId,
-    this.width,
-    this.height,
+    this.aspectRatio = 1.0,
     this.fit = BoxFit.cover,
   });
 
   final String photoId;
-  final double? width;
-  final double? height;
+  final double aspectRatio;
   final BoxFit fit;
 
   @override
@@ -42,35 +40,38 @@ class _ServerPhotoImageState extends State<ServerPhotoImage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Uint8List>(
-      future: _imageFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return SizedBox(
-            width: widget.width,
-            height: widget.height,
-            child: const Center(child: CircularProgressIndicator()),
-          );
-        }
+    return AspectRatio(
+      aspectRatio: widget.aspectRatio > 0 ? widget.aspectRatio : 1.0,
+      child: FutureBuilder<Uint8List>(
+        future: _imageFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const ColoredBox(
+              color: Color(0xFFAAAAAA),
+              child: Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+            );
+          }
 
-        if (snapshot.hasError || !snapshot.hasData) {
-          return SizedBox(
-            width: widget.width,
-            height: widget.height,
-            child: const Center(
-              child: Icon(Icons.broken_image_outlined, size: 36),
-            ),
-          );
-        }
+          if (snapshot.hasError || !snapshot.hasData) {
+            return const ColoredBox(
+              color: Color(0xFFAAAAAA),
+              child: Center(child: Icon(Icons.broken_image_outlined)),
+            );
+          }
 
-        return Image.memory(
-          snapshot.data!,
-          width: widget.width,
-          height: widget.height,
-          fit: widget.fit,
-          gaplessPlayback: true,
-        );
-      },
+          return Image.memory(
+            snapshot.data!,
+            fit: widget.fit,
+            gaplessPlayback: true,
+          );
+        },
+      ),
     );
   }
 }

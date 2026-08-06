@@ -577,8 +577,7 @@ class _PhotoImage extends StatelessWidget {
         color: Colors.grey,
         child: ServerPhotoImage(
           photoId: photo.uuid,
-          width: double.infinity,
-          height: 300,
+          aspectRatio: photo.aspectRatio,
           fit: BoxFit.cover,
         ),
       ),
@@ -677,8 +676,7 @@ class _AlbumCoverImage extends StatelessWidget {
       color: Colors.grey,
       child: ServerPhotoImage(
         photoId: photo.uuid,
-        width: double.infinity,
-        height: double.infinity,
+        aspectRatio: photo.aspectRatio,
         fit: BoxFit.cover,
       ),
     );

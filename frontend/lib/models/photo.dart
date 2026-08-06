@@ -10,6 +10,8 @@ class Photo {
   final List<String> commentIDs;
   final bool isPublic;
   final bool commentsAllowed;
+  final int width;
+  final int height;
 
   Photo({
     required this.uuid,
@@ -23,6 +25,8 @@ class Photo {
     this.commentIDs = const [],
     this.isPublic = false,
     this.commentsAllowed = true,
+    this.width = 1,
+    this.height = 1,
   });
 
   Photo copyWith({
@@ -37,6 +41,8 @@ class Photo {
     List<String>? commentIDs,
     bool? isPublic,
     bool? commentsAllowed,
+    int? width,
+    int? height,
   }) {
     return Photo(
       uuid: uuid ?? this.uuid,
@@ -50,6 +56,15 @@ class Photo {
       commentIDs: commentIDs ?? this.commentIDs,
       isPublic: isPublic ?? this.isPublic,
       commentsAllowed: commentsAllowed ?? this.commentsAllowed,
+      width: width ?? this.width,
+      height: height ?? this.height,
     );
+  }
+
+  double get aspectRatio {
+    if (width <= 0 || height <= 0) {
+      return 1.0;
+    }
+    return width / height;
   }
 }

@@ -1,5 +1,6 @@
 package server;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,6 +10,8 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+
+import javax.imageio.ImageIO;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -448,6 +451,12 @@ public class Router {
                 path = getRequiredString(payload, "path");
             }
             Photo photo = (categories == null) ? new Photo(ownerId, path) : new Photo(ownerId, path, categories);
+            BufferedImage image = ImageIO.read(Path.of(path).toFile());
+            if (image == null) {
+                return Response.badRequest("Uploaded file is not a readable image");
+            }
+            photo.setWidth(image.getWidth());
+            photo.setHeight(image.getHeight());
             String name = getOptionalString(payload, "name");
             if (name != null) {
                 photo.setName(name);
@@ -1089,6 +1098,8 @@ public class Router {
         json.add("likedByUserIds", likedByUserIds);
         json.addProperty("likeCount", photo.getLikeIDs() == null ? 0 : photo.getLikeIDs().size());
         json.addProperty("commentCount", photo.getCommentIDs() == null ? 0 : photo.getCommentIDs().size());
+        json.addProperty("imageWidth", photo.getWidth());
+        json.addProperty("imageHeight", photo.getHeight());
         return json;
     }
 

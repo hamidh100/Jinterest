@@ -53,6 +53,8 @@ class PhotoService {
         commentCount,
         (index) => 'server-comment-$index',
       ),
+      width: json['width'] as int? ?? 1,
+      height: json['height'] as int? ?? 1,
     );
   }
 

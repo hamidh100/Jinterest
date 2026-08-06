@@ -338,8 +338,7 @@ class _AlbumPhotoTile extends StatelessWidget {
               color: Colors.grey,
               child: ServerPhotoImage(
                 photoId: photo.uuid,
-                width: double.infinity,
-                height: double.infinity,
+                aspectRatio: photo.aspectRatio,
                 fit: BoxFit.cover,
               ),
             ),
