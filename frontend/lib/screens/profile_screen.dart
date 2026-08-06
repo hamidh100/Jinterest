@@ -9,6 +9,7 @@ import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
 import '../providers/theme_provider.dart';
 import '../services/user_service.dart';
+import 'followers_screen.dart';
 import '../widgets/server_photo_image.dart';
 
 enum ProfileViewMode { photos, albums }
@@ -80,9 +81,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
-    final followersCount = user.followerIDs.length;
-    final followingCount = user.followingIDs.length;
-
     final userPhotos = photoProvider.getUserPhotos(user.uuid);
     final userAlbums = albumProvider.getUserAlbums(user.uuid);
 
@@ -118,8 +116,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
 
               _buildStatsRow(
-                followersCount: followersCount,
-                followingCount: followingCount,
+                user: user,
                 postsCount: userPhotos.length,
                 albumsCount: userAlbums.length,
               ),
@@ -216,8 +213,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildStatsRow({
-    required int followersCount,
-    required int followingCount,
+    required User user,
     required int postsCount,
     required int albumsCount,
   }) {
@@ -226,11 +222,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _StatItem(label: 'Followers', value: '$followersCount'),
-          _StatItem(label: 'Following', value: '$followingCount'),
+          _StatItem(
+            label: 'Followers',
+            value: '${user.followerIDs.length}',
+            onTap: () => _openUserList('Followers', user.followerIDs),
+          ),
+          _StatItem(
+            label: 'Following',
+            value: '${user.followingIDs.length}',
+            onTap: () => _openUserList('Following', user.followingIDs),
+          ),
           _StatItem(label: 'Photos', value: '$postsCount'),
           _StatItem(label: 'Albums', value: '$albumsCount'),
         ],
+      ),
+    );
+  }
+
+  void _openUserList(String title, List<String> userIds) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => FollowersScreen(title: title, userIds: userIds),
       ),
     );
   }
@@ -246,7 +259,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
             minimumSize: const Size(double.infinity, 48),
-            backgroundColor: isFollowing ? Colors.grey.shade300 : Colors.deepPurple,
+            backgroundColor: isFollowing
+                ? Colors.grey.shade300
+                : Colors.deepPurple,
             foregroundColor: isFollowing ? Colors.black87 : Colors.white,
           ),
           onPressed: _isUpdatingFollow ? null : onPressed,
@@ -294,7 +309,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _copyUser(currentUser, followingIDs: followingIds),
       );
       if (!mounted) return;
-      setState(() => _viewedUser = _copyUser(viewedUser, followerIDs: followerIds));
+      setState(
+        () => _viewedUser = _copyUser(viewedUser, followerIDs: followerIds),
+      );
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -845,19 +862,27 @@ class _AlbumCoverImage extends StatelessWidget {
 class _StatItem extends StatelessWidget {
   final String label;
   final String value;
+  final VoidCallback? onTap;
 
-  const _StatItem({required this.label, required this.value});
+  const _StatItem({required this.label, required this.value, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          children: [
+            Text(
+              value,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Text(label, style: const TextStyle(color: Colors.grey)),
+          ],
         ),
-        Text(label, style: const TextStyle(color: Colors.grey)),
-      ],
+      ),
     );
   }
 }
