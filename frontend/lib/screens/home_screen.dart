@@ -579,6 +579,10 @@ class _PhotoCard extends StatelessWidget {
                 Text('${photo.commentIDs.length}'),
                 const Spacer(),
                 IconButton(
+                  icon: const Icon(Icons.download_outlined),
+                  onPressed: () => _downloadPhoto(context),
+                ),
+                IconButton(
                   icon: const Icon(Icons.share_outlined),
                   onPressed: () {
                     context.read<SnackbarFabProvider>().showSnackBar(
@@ -628,6 +632,47 @@ class _PhotoCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _downloadPhoto(BuildContext context) async {
+    final snackbarProvider = context.read<SnackbarFabProvider>();
+    try {
+      await PhotoService.downloadPhoto(
+        photoId: photo.uuid,
+        photoName: photo.name,
+      );
+      if (!context.mounted) {
+        return;
+      }
+      snackbarProvider.showSnackBar(
+        context,
+        SnackBar(
+          content: const Text('Photo saved to your gallery'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.green.shade700,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) {
+        return;
+      }
+      snackbarProvider.showSnackBar(
+        context,
+        SnackBar(
+          content: Text('Download failed: $e'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.red,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 }
 

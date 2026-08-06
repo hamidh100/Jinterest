@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:gal/gal.dart';
 
 import '../exceptions/exceptions.dart';
 import '../models/comment.dart';
@@ -274,5 +275,37 @@ class PhotoService {
 
   static void clearAllPhotoImageCache() {
     _photoImageCache.clear();
+  }
+
+  static Future<void> downloadPhoto({
+    required String photoId,
+    required String photoName,
+  }) async {
+    final hasAccess = await Gal.hasAccess();
+    if (!hasAccess) {
+      final accessGranted = await Gal.requestAccess();
+      if (!accessGranted) {
+        throw StateError('Gallery permission was not granted');
+      }
+    }
+    final imageBytes = await getPhotoImage(photoId);
+    final fileName = _safeImageName(photoName);
+    await Gal.putImageBytes(imageBytes, name: fileName);
+  }
+
+  static String _safeImageName(String name) {
+    var result = name.trim();
+    if (result.isEmpty) {
+      result = 'jinterest_photo';
+    }
+    result = result.replaceAll(RegExp(r'[^\w\s-]'), '');
+    result = result.replaceAll(RegExp(r'\s+'), '_');
+    if (!result.toLowerCase().endsWith('.jpg') &&
+        !result.toLowerCase().endsWith('.jpeg') &&
+        !result.toLowerCase().endsWith('.png') &&
+        !result.toLowerCase().endsWith('.webp')) {
+      result += '.jpg';
+    }
+    return result;
   }
 }
