@@ -7,39 +7,39 @@ In document, checklist-e requiremenet haye `Proje AP Bahar 1405` ast. PDF baraye
 Status: `[x]` complete ast; `[ ]` yani incomplete, partial, ya moredi ke az code ghabel-e verify nabood.
 
 | ID | Bakhsh | Requirement | Noe | Status |
-| --- | --- | --- | --- | --- |
-| F-01 | Login / Signup | User ba username va password login konad va pas az login be safhehaye asli beravad. | Lazem | [x] |
-| F-02 | Login / Signup | Session-e login save shavad ta dar execution haye badi Login screen neshan dade nashavad; Login faghat bad az install ya logout neshan dade shavad. | Lazem | [x] |
-| F-03 | Login / Signup | Signup-e user-e jadid vojood dashte bashad; username mitavanad email ya shomare mobile bashad. | Lazem | [x] |
-| F-04 | Login / Signup | Password hadaghal 8 character, shamel horoof bozorg/koochak va adad bashad; username ra nadaste bashad; validation ba Regular Expression anjam shavad. | Lazem | [ ] |
-| F-05 | Login / Signup | Error haye server ba toast notification neshan dade shavand; field haye naghes ya format-e ghalat ham warning-e monaseb dashte bashand. | Lazem | [x] |
-| F-06 | Login / Signup | Login ba fingerprint be jaye password. | ⭐ Emtiazi | [ ] |
-| F-07 | Home | List-e ax haye hame user ha neshan dade shavad va ba entekhab har ax, Details screen baz shavad. | Lazem | [x] |
-| F-08 | Home | Filter va sort bar asas tarikh-e ezafe shodan, name-e file, va like shodan vojood dashte bashad. | Lazem | [x] |
-| F-09 | Home | Select-e chand ax, delete-e hamzaman, transfer be album, va share-e anha mojood bashad. | Lazem | [x] |
-| F-10 | Home | Pagination-e monaseb baraye neshan dadan ax ha (pishnahad: Lazy Loading) estefade shavad. | Lazem | [x] |
-| F-11 | Home | Download-e hame ax haye Home. | ⭐ Emtiazi | [ ] |
-| F-12 | Home | Estefade az Shimmer hengam load shodan ax ha. | ⭐ Emtiazi | [x] |
-| F-13 | Home | Share kardan ax ha va album ha beyn user haye mokhtalef. | ⭐ Emtiazi | [x] |
-| F-14 | Upload | Upload-e ax az device va neshan dadan result-e movafagh/namovafagh ba payam-e monaseb. | Lazem | [x] |
-| F-15 | Upload | Daryaft metadata: name, album ha, tag ha, afrad/ashya-e mojood dar ax va ...; ax-e upload shode dar Home va bakhsh haye marboot neshan dade shavad. | Lazem | [x] |
-| F-16 | Upload | Field haye name, date-e ezafe shodan, caption, tag va album baraye har ax vojood dashte bashand; value-e caption/tag/album mitavanad khali/null bashad. | Lazem | [x] |
-| F-17 | Upload | Ax haye upload shode ya gerefte shode ba camera dar hesab-e user save shavand va az device haye digar ham ghabel-e moshahede bashand. | Lazem | [x] |
-| F-18 | Upload | Gereftan ax ba camera. | ⭐ Emtiazi | [x] |
-| F-19 | Details | Ba entekhab ax, joloyat va etelaat-e asli ax neshan dade shavad. | Lazem | [x] |
-| F-20 | Details | Emkan-e neveshtan caption haye moteaddad va like kardan ax vojood dashte bashad. | Lazem | [x] |
-| F-21 | Details | Sabt-e comment rooye ax haye share shode. | ⭐ Emtiazi | [x] |
-| F-22 | Details | Owner betavanad tajhizat-e share ra taein konad; mesalan mojavez-e comment baraye digaran ra. | ⭐ Emtiazi | [x] |
-| F-23 | Albums | Create, delete, va edit-e ax haye album ha vojood dashte bashad. | Lazem | [x] |
-| F-24 | Albums | List-e album ha va ax haye dakhel har album neshan dade shavad. | Lazem | [x] |
-| F-25 | Albums | Har ax betavanad dar album ha va category haye moteaddad gharar begirad. | Lazem | [x] |
-| F-26 | Albums | Sort-e ax haye album va transfer-e ax az yek album be album-e digar vojood dashte bashad. | Lazem | [x] |
-| F-27 | Search | Search-e ax bar asas name, tarikh-e ezafe shodan, category, comment ha va tag ha. | Lazem | [x] |
-| F-28 | Profile | Username, tedad ax ha va tedad album haye user neshan dade shavad. | Lazem | [x] |
-| F-29 | Profile | Taghir username/password, delete account, logout, va taghir permission/settings-e har ax va share-e an vojood dashte bashad. | Lazem | [x] |
-| F-30 | Profile | Dark mode va light mode. | ⭐ Emtiazi | [x] |
-| F-31 | Admin | Admin panel-e terminali dar Java: modiriat user ha, didan tedad album/ax har user, va ban kardan user az login. | Lazem | [x] |
-| F-32 | Admin | Admin panel-e graphical dar Java. | ⭐ Emtiazi | [ ] |
+| --- | --- | --- | --- |--------|
+| F-01 | Login / Signup | User ba username va password login konad va pas az login be safhehaye asli beravad. | Lazem | [x]    |
+| F-02 | Login / Signup | Session-e login save shavad ta dar execution haye badi Login screen neshan dade nashavad; Login faghat bad az install ya logout neshan dade shavad. | Lazem | [x]    |
+| F-03 | Login / Signup | Signup-e user-e jadid vojood dashte bashad; username mitavanad email ya shomare mobile bashad. | Lazem | [x]    |
+| F-04 | Login / Signup | Password hadaghal 8 character, shamel horoof bozorg/koochak va adad bashad; username ra nadaste bashad; validation ba Regular Expression anjam shavad. | Lazem | [x]    |
+| F-05 | Login / Signup | Error haye server ba toast notification neshan dade shavand; field haye naghes ya format-e ghalat ham warning-e monaseb dashte bashand. | Lazem | [x]    |
+| F-06 | Login / Signup | Login ba fingerprint be jaye password. | ⭐ Emtiazi | [ ]    |
+| F-07 | Home | List-e ax haye hame user ha neshan dade shavad va ba entekhab har ax, Details screen baz shavad. | Lazem | [x]    |
+| F-08 | Home | Filter va sort bar asas tarikh-e ezafe shodan, name-e file, va like shodan vojood dashte bashad. | Lazem | [x]    |
+| F-09 | Home | Select-e chand ax, delete-e hamzaman, transfer be album, va share-e anha mojood bashad. | Lazem | [x]    |
+| F-10 | Home | Pagination-e monaseb baraye neshan dadan ax ha (pishnahad: Lazy Loading) estefade shavad. | Lazem | [x]    |
+| F-11 | Home | Download-e hame ax haye Home. | ⭐ Emtiazi | [ ]    |
+| F-12 | Home | Estefade az Shimmer hengam load shodan ax ha. | ⭐ Emtiazi | [x]    |
+| F-13 | Home | Share kardan ax ha va album ha beyn user haye mokhtalef. | ⭐ Emtiazi | [x]    |
+| F-14 | Upload | Upload-e ax az device va neshan dadan result-e movafagh/namovafagh ba payam-e monaseb. | Lazem | [x]    |
+| F-15 | Upload | Daryaft metadata: name, album ha, tag ha, afrad/ashya-e mojood dar ax va ...; ax-e upload shode dar Home va bakhsh haye marboot neshan dade shavad. | Lazem | [x]    |
+| F-16 | Upload | Field haye name, date-e ezafe shodan, caption, tag va album baraye har ax vojood dashte bashand; value-e caption/tag/album mitavanad khali/null bashad. | Lazem | [x]    |
+| F-17 | Upload | Ax haye upload shode ya gerefte shode ba camera dar hesab-e user save shavand va az device haye digar ham ghabel-e moshahede bashand. | Lazem | [x]    |
+| F-18 | Upload | Gereftan ax ba camera. | ⭐ Emtiazi | [x]    |
+| F-19 | Details | Ba entekhab ax, joloyat va etelaat-e asli ax neshan dade shavad. | Lazem | [x]    |
+| F-20 | Details | Emkan-e neveshtan caption haye moteaddad va like kardan ax vojood dashte bashad. | Lazem | [x]    |
+| F-21 | Details | Sabt-e comment rooye ax haye share shode. | ⭐ Emtiazi | [x]    |
+| F-22 | Details | Owner betavanad tajhizat-e share ra taein konad; mesalan mojavez-e comment baraye digaran ra. | ⭐ Emtiazi | [x]    |
+| F-23 | Albums | Create, delete, va edit-e ax haye album ha vojood dashte bashad. | Lazem | [x]    |
+| F-24 | Albums | List-e album ha va ax haye dakhel har album neshan dade shavad. | Lazem | [x]    |
+| F-25 | Albums | Har ax betavanad dar album ha va category haye moteaddad gharar begirad. | Lazem | [x]    |
+| F-26 | Albums | Sort-e ax haye album va transfer-e ax az yek album be album-e digar vojood dashte bashad. | Lazem | [x]    |
+| F-27 | Search | Search-e ax bar asas name, tarikh-e ezafe shodan, category, comment ha va tag ha. | Lazem | [x]    |
+| F-28 | Profile | Username, tedad ax ha va tedad album haye user neshan dade shavad. | Lazem | [x]    |
+| F-29 | Profile | Taghir username/password, delete account, logout, va taghir permission/settings-e har ax va share-e an vojood dashte bashad. | Lazem | [x]    |
+| F-30 | Profile | Dark mode va light mode. | ⭐ Emtiazi | [x]    |
+| F-31 | Admin | Admin panel-e terminali dar Java: modiriat user ha, didan tedad album/ax har user, va ban kardan user az login. | Lazem | [x]    |
+| F-32 | Admin | Admin panel-e graphical dar Java. | ⭐ Emtiazi | [ ]    |
 
 ## Backend, architecture, va data requirements
 
