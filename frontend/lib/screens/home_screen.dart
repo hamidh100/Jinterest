@@ -150,6 +150,8 @@ class _FeedPageState extends State<_FeedPage> {
   List<Photo>? _searchResults;
   bool _isSearching = false;
   int _searchRequest = 0;
+  bool _isDownloadingAll = false;
+  int _downloadedCount = 0;
 
   @override
   void initState() {
@@ -255,13 +257,27 @@ class _FeedPageState extends State<_FeedPage> {
           ),
         ),
         centerTitle: true,
-        actions: [_buildSortMenu()],
+        actions: [
+          if (_viewMode == HomeViewMode.photos)
+            _buildDownloadAllButton(userPhotos),
+          _buildSortMenu(),
+        ],
       ),
       body: Column(
         children: [
           _buildSearchBar(),
           _buildViewToggle(),
-          if (isLoading) const LinearProgressIndicator(),
+          if (isLoading || _isDownloadingAll)
+            LinearProgressIndicator(
+              value: _isDownloadingAll && userPhotos.isNotEmpty
+                  ? _downloadedCount / userPhotos.length
+                  : null,
+            ),
+          if (_isDownloadingAll)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Text('Downloading $_downloadedCount/${userPhotos.length}'),
+            ),
           Expanded(child: _buildContent(userPhotos, userAlbums)),
         ],
       ),
@@ -496,6 +512,77 @@ class _FeedPageState extends State<_FeedPage> {
         items.sort(
           (first, second) => second.likeCount.compareTo(first.likeCount),
         );
+    }
+  }
+
+  Widget _buildDownloadAllButton(List<Photo> photos) {
+    return IconButton(
+      tooltip: 'Download all visible photos',
+      onPressed: _isDownloadingAll || photos.isEmpty
+          ? null
+          : () => _downloadAllPhotos(photos),
+      icon: _isDownloadingAll
+          ? const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.download_for_offline_outlined),
+    );
+  }
+
+  Future<void> _downloadAllPhotos(List<Photo> photos) async {
+    if (_isDownloadingAll || photos.isEmpty) {
+      return;
+    }
+    setState(() {
+      _isDownloadingAll = true;
+      _downloadedCount = 0;
+    });
+    int successful = 0;
+    int failed = 0;
+    try {
+      for (final photo in photos) {
+        try {
+          await PhotoService.downloadPhoto(
+            photoId: photo.uuid,
+            photoName: photo.name,
+          );
+          successful++;
+          if (mounted) {
+            setState(() {
+              _downloadedCount = successful;
+            });
+          }
+        } catch (e) {
+          failed++;
+        }
+      }
+    } finally {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isDownloadingAll = false;
+      });
+      final message = failed == 0
+          ? 'Downloaded $successful photo${successful == 1 ? '' : 's'}'
+          : 'Downloaded $successful photo${successful == 1 ? '' : 's'}, '
+                '$failed failed';
+      context.read<SnackbarFabProvider>().showSnackBar(
+        context,
+        SnackBar(
+          content: Text(message),
+          backgroundColor: failed == 0
+              ? Colors.green.shade700
+              : Colors.orange.shade800,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 3),
+        ),
+      );
     }
   }
 }
