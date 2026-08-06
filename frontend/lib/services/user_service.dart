@@ -33,6 +33,17 @@ class UserService {
     return _userFromResponse(response, password: user.password);
   }
 
+  static Future<void> changePassword({
+    required String userId,
+    required String password,
+  }) async {
+    await ApiClient.instance.send(
+      method: 'PUT',
+      route: '/users/$userId',
+      payload: {'password': password},
+    );
+  }
+
   static Future<void> follow({
     required String followerId,
     required String followedId,
