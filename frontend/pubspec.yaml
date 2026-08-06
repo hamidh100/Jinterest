@@ -50,6 +50,9 @@ dependencies:
 
   share_plus: ^10.1.4
 
+  local_auth: ^2.3.0
+  flutter_secure_storage: ^9.2.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -61,6 +64,15 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
   # flutter_lints: ^3.0.0
+
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/logo.png"
+  adaptive_icon_background: "#7C3AED"
+  adaptive_icon_foreground: "assets/icon/logo.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
