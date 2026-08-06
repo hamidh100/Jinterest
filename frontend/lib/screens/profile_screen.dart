@@ -27,6 +27,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   User? _editedUser;
   User? _viewedUser;
   bool _isLoadingUser = false;
+  bool _isUpdatingFollow = false;
 
   @override
   void initState() {
@@ -122,6 +123,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 postsCount: userPhotos.length,
                 albumsCount: userAlbums.length,
               ),
+
+              if (!isOwnProfile) ...[
+                const SizedBox(height: 20),
+                _buildFollowButton(
+                  isFollowing: authUser.followingIDs.contains(user.uuid),
+                  onPressed: () => _toggleFollow(authUser, user),
+                ),
+              ],
 
               const Divider(height: 32),
 
@@ -223,6 +232,94 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _StatItem(label: 'Albums', value: '$albumsCount'),
         ],
       ),
+    );
+  }
+
+  Widget _buildFollowButton({
+    required bool isFollowing,
+    required VoidCallback onPressed,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 48),
+            backgroundColor: isFollowing ? Colors.grey.shade300 : Colors.deepPurple,
+            foregroundColor: isFollowing ? Colors.black87 : Colors.white,
+          ),
+          onPressed: _isUpdatingFollow ? null : onPressed,
+          child: Text(
+            _isUpdatingFollow
+                ? 'Updating...'
+                : isFollowing
+                ? 'Unfollow'
+                : 'Follow',
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _toggleFollow(User currentUser, User viewedUser) async {
+    final isFollowing = currentUser.followingIDs.contains(viewedUser.uuid);
+    setState(() => _isUpdatingFollow = true);
+
+    try {
+      if (isFollowing) {
+        await UserService.unfollow(
+          followerId: currentUser.uuid,
+          followedId: viewedUser.uuid,
+        );
+      } else {
+        await UserService.follow(
+          followerId: currentUser.uuid,
+          followedId: viewedUser.uuid,
+        );
+      }
+
+      final followingIds = List<String>.from(currentUser.followingIDs);
+      final followerIds = List<String>.from(viewedUser.followerIDs);
+      if (isFollowing) {
+        followingIds.remove(viewedUser.uuid);
+        followerIds.remove(currentUser.uuid);
+      } else {
+        followingIds.add(viewedUser.uuid);
+        followerIds.add(currentUser.uuid);
+      }
+
+      if (!mounted) return;
+      await context.read<AuthProvider>().updateCurrentUser(
+        _copyUser(currentUser, followingIDs: followingIds),
+      );
+      if (!mounted) return;
+      setState(() => _viewedUser = _copyUser(viewedUser, followerIDs: followerIds));
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not update follow: $error')),
+      );
+    } finally {
+      if (mounted) setState(() => _isUpdatingFollow = false);
+    }
+  }
+
+  User _copyUser(
+    User user, {
+    List<String>? followerIDs,
+    List<String>? followingIDs,
+  }) {
+    return User(
+      uuid: user.uuid,
+      username: user.username,
+      email: user.email,
+      phone: user.phone,
+      password: user.password,
+      fullname: user.fullname,
+      banned: user.banned,
+      followerIDs: followerIDs ?? user.followerIDs,
+      followingIDs: followingIDs ?? user.followingIDs,
     );
   }
 
