@@ -38,12 +38,16 @@ class _HomeScreenState extends State<HomeScreen> {
       extendBody: true,
       body: _pages[_selectedIndex],
       floatingActionButton: snackbarFabProvider.showHomeFab
-          ? FloatingActionButton(
+          ? FloatingActionButton.small(
               onPressed: () {
                 Navigator.pushNamed(context, '/upload');
               },
               backgroundColor: Colors.deepPurple,
-              child: const Icon(Icons.add_a_photo, color: Colors.white),
+              child: const Icon(
+                Icons.add_a_photo,
+                color: Colors.white,
+                size: 20,
+              ),
             )
           : null,
       bottomNavigationBar: SafeArea(
@@ -107,7 +111,9 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 enum HomeViewMode { photos, albums, mixed }
+
 enum HomeSortOrder { newest, oldest, name, mostLiked }
+
 enum HomeFeedSource { mine, following }
 
 class _FeedPage extends StatefulWidget {
@@ -162,7 +168,9 @@ class _FeedPageState extends State<_FeedPage> {
     final userAlbums = albumProvider.albums
         .where((album) => visibleOwnerIds.contains(album.ownerID))
         .where((album) => _feedSource == HomeFeedSource.mine || album.isPublic)
-        .where((album) => _query.isEmpty || _searchType == PhotoSearchType.global)
+        .where(
+          (album) => _query.isEmpty || _searchType == PhotoSearchType.global,
+        )
         .where(_matchesAlbumQuery)
         .toList();
     _sortAlbums(userAlbums);
@@ -307,14 +315,8 @@ class _FeedPageState extends State<_FeedPage> {
       tooltip: 'Sort media',
       onSelected: (order) => setState(() => _sortOrder = order),
       itemBuilder: (_) => const [
-        PopupMenuItem(
-          value: HomeSortOrder.newest,
-          child: Text('Newest first'),
-        ),
-        PopupMenuItem(
-          value: HomeSortOrder.oldest,
-          child: Text('Oldest first'),
-        ),
+        PopupMenuItem(value: HomeSortOrder.newest, child: Text('Newest first')),
+        PopupMenuItem(value: HomeSortOrder.oldest, child: Text('Oldest first')),
         PopupMenuItem(value: HomeSortOrder.name, child: Text('Name')),
         PopupMenuItem(
           value: HomeSortOrder.mostLiked,
@@ -403,20 +405,22 @@ class _FeedPageState extends State<_FeedPage> {
   void _sortPhotos(List<Photo> photos) {
     switch (_sortOrder) {
       case HomeSortOrder.newest:
-        photos.sort((first, second) => second.photoAge.compareTo(first.photoAge));
+        photos.sort(
+          (first, second) => second.photoAge.compareTo(first.photoAge),
+        );
       case HomeSortOrder.oldest:
-        photos.sort((first, second) => first.photoAge.compareTo(second.photoAge));
+        photos.sort(
+          (first, second) => first.photoAge.compareTo(second.photoAge),
+        );
       case HomeSortOrder.name:
         photos.sort(
-          (first, second) => first.name.toLowerCase().compareTo(
-            second.name.toLowerCase(),
-          ),
+          (first, second) =>
+              first.name.toLowerCase().compareTo(second.name.toLowerCase()),
         );
       case HomeSortOrder.mostLiked:
         photos.sort(
-          (first, second) => second.likeIDs.length.compareTo(
-            first.likeIDs.length,
-          ),
+          (first, second) =>
+              second.likeIDs.length.compareTo(first.likeIDs.length),
         );
     }
   }
@@ -424,9 +428,8 @@ class _FeedPageState extends State<_FeedPage> {
   void _sortAlbums(List<Album> albums) {
     if (_sortOrder == HomeSortOrder.name) {
       albums.sort(
-        (first, second) => first.name.toLowerCase().compareTo(
-          second.name.toLowerCase(),
-        ),
+        (first, second) =>
+            first.name.toLowerCase().compareTo(second.name.toLowerCase()),
       );
       return;
     }
@@ -441,14 +444,17 @@ class _FeedPageState extends State<_FeedPage> {
   void _sortMixedItems(List<_MixedMediaItem> items) {
     switch (_sortOrder) {
       case HomeSortOrder.newest:
-        items.sort((first, second) => second.createdAt.compareTo(first.createdAt));
+        items.sort(
+          (first, second) => second.createdAt.compareTo(first.createdAt),
+        );
       case HomeSortOrder.oldest:
-        items.sort((first, second) => first.createdAt.compareTo(second.createdAt));
+        items.sort(
+          (first, second) => first.createdAt.compareTo(second.createdAt),
+        );
       case HomeSortOrder.name:
         items.sort(
-          (first, second) => first.name.toLowerCase().compareTo(
-            second.name.toLowerCase(),
-          ),
+          (first, second) =>
+              first.name.toLowerCase().compareTo(second.name.toLowerCase()),
         );
       case HomeSortOrder.mostLiked:
         items.sort(
