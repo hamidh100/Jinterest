@@ -8,6 +8,7 @@ import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
 import '../providers/snackbar_fab_provider.dart';
 import '../services/photo_service.dart';
+import '../widgets/photo_search_field.dart';
 import '../widgets/server_photo_image.dart';
 import 'explore_screen.dart';
 import 'likes_screen.dart';
@@ -107,7 +108,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
 enum HomeViewMode { photos, albums, mixed }
 enum HomeSortOrder { newest, oldest, name, mostLiked }
-enum HomeSearchType { global, name, caption, category, time, comments }
 
 class _FeedPage extends StatefulWidget {
   const _FeedPage();
@@ -120,7 +120,7 @@ class _FeedPageState extends State<_FeedPage> {
   HomeViewMode _viewMode = HomeViewMode.photos;
   HomeSortOrder _sortOrder = HomeSortOrder.newest;
   String _query = '';
-  HomeSearchType _searchType = HomeSearchType.global;
+  PhotoSearchType _searchType = PhotoSearchType.global;
   List<Photo>? _searchResults;
   bool _isSearching = false;
   int _searchRequest = 0;
@@ -154,7 +154,7 @@ class _FeedPageState extends State<_FeedPage> {
 
     final userAlbums = albumProvider
         .getUserAlbums(currentUser.uuid)
-        .where((album) => _query.isEmpty || _searchType == HomeSearchType.global)
+        .where((album) => _query.isEmpty || _searchType == PhotoSearchType.global)
         .where(_matchesAlbumQuery)
         .toList();
     _sortAlbums(userAlbums);
@@ -180,60 +180,16 @@ class _FeedPageState extends State<_FeedPage> {
   }
 
   Widget _buildSearchBar() {
-    return Padding(
+    return PhotoSearchField(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: TextField(
-        decoration: InputDecoration(
-          hintText: _searchHint(),
-          prefixIcon: const Icon(Icons.search),
-          suffixIcon: _buildSearchTypeMenu(),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          filled: true,
-          fillColor: Colors.grey[100],
-        ),
-        onChanged: _searchPhotos,
-      ),
-    );
-  }
-
-  Widget _buildSearchTypeMenu() {
-    return PopupMenuButton<HomeSearchType>(
-      tooltip: 'Search by',
-      icon: const Icon(Icons.tune),
-      onSelected: (type) {
+      fillColor: Colors.grey[100],
+      searchType: _searchType,
+      onTypeChanged: (type) {
         setState(() => _searchType = type);
         _searchPhotos(_query);
       },
-      itemBuilder: (_) => HomeSearchType.values
-          .map(
-            (type) => PopupMenuItem(
-              value: type,
-              child: Text(_searchTypeLabel(type)),
-            ),
-          )
-          .toList(),
+      onChanged: _searchPhotos,
     );
-  }
-
-  String _searchHint() {
-    return 'Search by ${_searchTypeLabel(_searchType).toLowerCase()}...';
-  }
-
-  String _searchTypeLabel(HomeSearchType type) {
-    switch (type) {
-      case HomeSearchType.global:
-        return 'All fields';
-      case HomeSearchType.name:
-        return 'Name';
-      case HomeSearchType.caption:
-        return 'Caption';
-      case HomeSearchType.category:
-        return 'Category';
-      case HomeSearchType.time:
-        return 'Date (YYYY-MM-DD)';
-      case HomeSearchType.comments:
-        return 'Comment';
-    }
   }
 
   Future<void> _searchPhotos(String value) async {
@@ -255,7 +211,7 @@ class _FeedPageState extends State<_FeedPage> {
     try {
       final results = await PhotoService.searchPhotos(
         query,
-        type: _searchType.name,
+        type: _searchType.apiValue,
       );
       if (!mounted || request != _searchRequest) return;
       setState(() => _searchResults = results);

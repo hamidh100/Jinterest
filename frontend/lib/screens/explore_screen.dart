@@ -9,10 +9,10 @@ import '../models/photo.dart';
 import '../providers/album_provider.dart';
 import '../providers/photo_provider.dart';
 import '../services/photo_service.dart';
+import '../widgets/photo_search_field.dart';
 import '../widgets/server_photo_image.dart';
 
 enum ExploreViewMode { photos, albums, mixed }
-enum ExploreSearchType { global, name, caption, category, time, comments }
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
@@ -24,7 +24,7 @@ class ExploreScreen extends StatefulWidget {
 class _ExploreScreenState extends State<ExploreScreen> {
   ExploreViewMode _viewMode = ExploreViewMode.photos;
   String _query = '';
-  ExploreSearchType _searchType = ExploreSearchType.global;
+  PhotoSearchType _searchType = PhotoSearchType.global;
   List<Photo>? _searchResults;
   bool _isSearching = false;
   int _searchRequest = 0;
@@ -85,7 +85,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
     final albums = albumProvider
         .getPublicAlbums()
-        .where((album) => _query.isEmpty || _searchType == ExploreSearchType.global)
+        .where((album) => _query.isEmpty || _searchType == PhotoSearchType.global)
         .where((album) => _matchesAlbumQuery(album))
         .toList();
 
@@ -201,62 +201,17 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
   Widget _buildSearchBarTransparent() {
-    return Padding(
+    return PhotoSearchField(
+      fieldKey: const ValueKey('explore_search_field'),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: TextField(
-        key: const ValueKey('explore_search_field'),
-        decoration: InputDecoration(
-          hintText: _searchHint(),
-          prefixIcon: const Icon(Icons.search),
-          suffixIcon: _buildSearchTypeMenu(),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          filled: true,
-          // make it semi-transparent so content behind is visible
-          fillColor: Colors.white.withOpacity(0.9),
-        ),
-        onChanged: _searchPhotos,
-      ),
-    );
-  }
-
-  Widget _buildSearchTypeMenu() {
-    return PopupMenuButton<ExploreSearchType>(
-      tooltip: 'Search by',
-      icon: const Icon(Icons.tune),
-      onSelected: (type) {
+      fillColor: Colors.white.withOpacity(0.9),
+      searchType: _searchType,
+      onTypeChanged: (type) {
         setState(() => _searchType = type);
         _searchPhotos(_query);
       },
-      itemBuilder: (_) => ExploreSearchType.values
-          .map(
-            (type) => PopupMenuItem(
-              value: type,
-              child: Text(_searchTypeLabel(type)),
-            ),
-          )
-          .toList(),
+      onChanged: _searchPhotos,
     );
-  }
-
-  String _searchHint() {
-    return 'Search by ${_searchTypeLabel(_searchType).toLowerCase()}...';
-  }
-
-  String _searchTypeLabel(ExploreSearchType type) {
-    switch (type) {
-      case ExploreSearchType.global:
-        return 'All fields';
-      case ExploreSearchType.name:
-        return 'Name';
-      case ExploreSearchType.caption:
-        return 'Caption';
-      case ExploreSearchType.category:
-        return 'Category';
-      case ExploreSearchType.time:
-        return 'Date (YYYY-MM-DD)';
-      case ExploreSearchType.comments:
-        return 'Comment';
-    }
   }
 
   Future<void> _searchPhotos(String value) async {
@@ -278,7 +233,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
     try {
       final results = await PhotoService.searchPhotos(
         query,
-        type: _searchType.name,
+        type: _searchType.apiValue,
       );
       if (!mounted || request != _searchRequest) return;
       setState(() => _searchResults = results);
