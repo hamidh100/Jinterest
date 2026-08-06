@@ -479,18 +479,18 @@ class _ExploreAlbumTile extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          color: Colors.deepPurple.shade100,
+          color: Theme.of(context).colorScheme.primaryContainer,
           child: Stack(
             fit: StackFit.expand,
             children: [
               if (coverPhoto != null)
                 _buildCover(coverPhoto)
               else
-                const Center(
+                Center(
                   child: Icon(
                     Icons.photo_album,
                     size: 56,
-                    color: Colors.deepPurple,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               Positioned(

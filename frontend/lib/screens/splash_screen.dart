@@ -41,18 +41,18 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.image, size: 80, color: Colors.deepPurple),
+            Icon(Icons.image, size: 80, color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Jinterest',
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
-                color: Colors.deepPurple,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
             const SizedBox(height: 40),
-            const CircularProgressIndicator(color: Colors.deepPurple),
+            CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
           ],
         ),
       ),

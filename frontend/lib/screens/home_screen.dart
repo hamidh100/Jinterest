@@ -44,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () {
                 Navigator.pushNamed(context, '/upload');
               },
-              backgroundColor: Colors.deepPurple,
+              backgroundColor: Theme.of(context).colorScheme.primary,
               child: const Icon(Icons.add_a_photo, color: Colors.white),
             )
           : null,
@@ -597,9 +597,9 @@ class _PhotoCard extends StatelessWidget {
                 children: photo.categoryList.map((category) {
                   return Chip(
                     label: Text(category),
-                    backgroundColor: Colors.deepPurple[100],
-                    labelStyle: const TextStyle(
-                      color: Colors.deepPurple,
+                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                    labelStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
                       fontSize: 12,
                     ),
                   );

@@ -195,7 +195,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     child: CircleAvatar(
                       radius: 16,
-                      backgroundColor: Colors.deepPurple,
+                      backgroundColor: Theme.of(context).colorScheme.primary,
                       child: IconButton(
                         icon: const Icon(Icons.edit, color: Colors.white, size: 18),
                         onPressed: () => _pickProfileImage(user.uuid),
@@ -288,7 +288,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             minimumSize: const Size(double.infinity, 48),
             backgroundColor: isFollowing
                 ? Colors.grey.shade300
-                : Colors.deepPurple,
+                : Theme.of(context).colorScheme.primary,
             foregroundColor: isFollowing ? Colors.black87 : Colors.white,
           ),
           onPressed: _isUpdatingFollow ? null : onPressed,
@@ -381,7 +381,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           minimumSize: const Size(double.infinity, 48),
-          backgroundColor: Colors.deepPurple,
+          backgroundColor: Theme.of(context).colorScheme.primary,
         ),
         onPressed: user == null
             ? null
@@ -689,7 +689,7 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
     return Center(
       child: CircleAvatar(
         radius: 48,
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         child: Text(
           firstLetter,
           style: const TextStyle(
@@ -777,7 +777,7 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
                 onPressed: _hasChanges ? _handleSave : null,
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 48),
-                  backgroundColor: Colors.deepPurple,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   disabledBackgroundColor: Colors.grey,
                 ),
                 child: const Text(
@@ -923,7 +923,7 @@ class _ChangePasswordScreenState extends State<_ChangePasswordScreen> {
                 onPressed: _isSaving ? null : _save,
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 48),
-                  backgroundColor: Colors.deepPurple,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                 ),
                 child: Text(_isSaving ? 'Saving...' : 'Save Password'),
               ),
@@ -1031,8 +1031,8 @@ class _ProfileAlbumTile extends StatelessWidget {
 
                     Text(
                       '${album.photoIDs.length} ${album.photoIDs.length == 1 ? 'photo' : 'photos'}',
-                      style: const TextStyle(
-                        color: Colors.deepPurple,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -1106,7 +1106,7 @@ class _ProfileAvatar extends StatelessWidget {
       future: UserService.getProfileImage(userId),
       builder: (context, snapshot) => CircleAvatar(
         radius: 50,
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         backgroundImage: snapshot.data == null ? null : MemoryImage(snapshot.data!),
         child: snapshot.data == null
             ? Text(firstLetter, style: const TextStyle(fontSize: 40, color: Colors.white, fontWeight: FontWeight.bold))

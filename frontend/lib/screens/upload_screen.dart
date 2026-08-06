@@ -230,16 +230,16 @@ class _UploadScreenState extends State<UploadScreen> {
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.primaryContainer,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.deepPurple.shade100),
+          border: Border.all(color: Theme.of(context).colorScheme.primaryContainer),
         ),
         child: _selectedImage == null
-            ? const Column(
+            ? Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     Icons.add_photo_alternate,
                     size: 72,
-                    color: Colors.deepPurple,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                   SizedBox(height: 12),
                   Text('Tap to choose an image'),

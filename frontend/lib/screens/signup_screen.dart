@@ -118,7 +118,7 @@ class _SignupScreenState extends State<SignupScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 20),
-              const Icon(Icons.image, size: 80, color: Colors.deepPurple),
+              Icon(Icons.image, size: 80, color: Theme.of(context).colorScheme.primary),
               const SizedBox(height: 20),
               const Text(
                 'Join Jinterest',
@@ -211,7 +211,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 onPressed: _isLoading ? null : _handleSignup,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.deepPurple,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   disabledBackgroundColor: Colors.grey,
                 ),
                 child: _isLoading
@@ -246,10 +246,10 @@ class _SignupScreenState extends State<SignupScreen> {
                         MaterialPageRoute(builder: (_) => const LoginScreen()),
                       );
                     },
-                    child: const Text(
+                    child: Text(
                       'Login',
                       style: TextStyle(
-                        color: Colors.deepPurple,
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),

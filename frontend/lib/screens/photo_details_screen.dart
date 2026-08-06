@@ -300,8 +300,8 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
         children: photo.categoryList.map((tag) {
           return Chip(
             label: Text(tag),
-            backgroundColor: Colors.deepPurple.shade100,
-            labelStyle: const TextStyle(color: Colors.deepPurple),
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+            labelStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
           );
         }).toList(),
       ),
