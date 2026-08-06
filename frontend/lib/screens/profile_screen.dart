@@ -807,8 +807,14 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
                     );
                   }
                 },
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 48),
+                ),
                 icon: const Icon(Icons.lock_outline),
-                label: const Text('Change Password'),
+                label: const Text(
+                  'Change Password',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
               ),
               const SizedBox(height: 12),
               ElevatedButton(
@@ -818,7 +824,10 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
                   backgroundColor: Colors.red,
                   foregroundColor: Colors.white,
                 ),
-                child: const Text('Delete Account'),
+                child: const Text(
+                  'Delete Account',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),
