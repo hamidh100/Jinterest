@@ -126,12 +126,15 @@ class PhotoService {
     return _photoFromPayload(response);
   }
 
-  static Future<List<Photo>> searchPhotos(String query) async {
+  static Future<List<Photo>> searchPhotos(
+    String query, {
+    String type = 'global',
+  }) async {
     if (query.trim().isEmpty) return getAllPhotos();
     final response = await ApiClient.instance.send(
       method: 'POST',
       route: '/search',
-      payload: {'type': 'global', 'text': query.trim()},
+      payload: {'type': type, 'text': query.trim()},
     );
     return _photoListFromResponse(response);
   }

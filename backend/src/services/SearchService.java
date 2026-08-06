@@ -9,62 +9,85 @@ public class SearchService {
 
     public static List<Photo> globalSearch(String text) {
         List<Photo> result = new ArrayList<>();
-        for (var x : OurObjects.photos.entrySet()) {
-            Photo photo = x.getValue();
-            if (photo.toString().contains(text)) {
+        for (Photo photo : OurObjects.photos.values()) {
+            if (matches(photo.getName(), text) || matches(captionText(photo), text) ||
+                    matches(categoryText(photo), text) || matches(timeText(photo), text) ||
+                    matches(commentText(photo), text)) {
                 result.add(photo);
             }
         }
         return result;
     }
-    public static List<Photo> searchByName(String text){
+
+    public static List<Photo> searchByName(String text) {
         List<Photo> result = new ArrayList<>();
-        for (var x : OurObjects.photos.entrySet()) {
-            Photo photo = x.getValue();
-            if (photo.toString().split("\\|")[0].contains(text)) {
-                result.add(photo);
-            }
+        for (Photo photo : OurObjects.photos.values()) {
+            if (matches(photo.getName(), text)) result.add(photo);
         }
         return result;
     }
-    public static List<Photo> searchByCaption(String text){
+
+    public static List<Photo> searchByCaption(String text) {
         List<Photo> result = new ArrayList<>();
-        for (var x : OurObjects.photos.entrySet()) {
-            Photo photo = x.getValue();
-            if (photo.toString().split("\\|")[1].contains(text)) {
-                result.add(photo);
-            }
+        for (Photo photo : OurObjects.photos.values()) {
+            if (matches(captionText(photo), text)) result.add(photo);
         }
         return result;
     }
-    public static List<Photo> searchByCategory(String text){
+
+    public static List<Photo> searchByCategory(String text) {
         List<Photo> result = new ArrayList<>();
-        for (var x : OurObjects.photos.entrySet()) {
-            Photo photo = x.getValue();
-            if (photo.toString().split("\\|")[2].contains(text)) {
-                result.add(photo);
-            }
+        for (Photo photo : OurObjects.photos.values()) {
+            if (matches(categoryText(photo), text)) result.add(photo);
         }
         return result;
     }
-    public static List<Photo> searchByTime(String text){
+
+    public static List<Photo> searchByTime(String text) {
         List<Photo> result = new ArrayList<>();
-        for (var x : OurObjects.photos.entrySet()) {
-            Photo photo = x.getValue();
-            if (photo.toString().split("\\|")[3].contains(text)) {
-                result.add(photo);
-            }
+        for (Photo photo : OurObjects.photos.values()) {
+            if (matches(timeText(photo), text)) result.add(photo);
         }
         return result;
     }
-    public static List<Photo> searchByComments(String text){
+
+    public static List<Photo> searchByComments(String text) {
         List<Photo> result = new ArrayList<>();
-        for (var x : OurObjects.photos.entrySet()) {
-            Photo photo = x.getValue();
-            if (photo.toString().split("\\|")[4].contains(text)) {
-                result.add(photo);
-            }
+        for (Photo photo : OurObjects.photos.values()) {
+            if (matches(commentText(photo), text)) result.add(photo);
         }
         return result;
+    }
+
+    private static boolean matches(String value, String text) {
+        return value != null && text != null && value.toLowerCase().contains(text.toLowerCase());
+    }
+
+    private static String captionText(Photo photo) {
+        Caption caption = photo.getCaptionID() == null ? null : OurObjects.captions.get(photo.getCaptionID());
+        return caption == null ? "" : caption.getText();
+    }
+
+    private static String categoryText(Photo photo) {
+        StringBuilder text = new StringBuilder();
+        if (photo.getCategoryList() == null) return "";
+        for (Category category : photo.getCategoryList()) {
+            text.append(category.name()).append(' ');
+        }
+        return text.toString();
+    }
+
+    private static String timeText(Photo photo) {
+        return photo.getPhotoAge() == null ? "" : photo.getPhotoAge().toString();
+    }
+
+    private static String commentText(Photo photo) {
+        StringBuilder text = new StringBuilder();
+        if (photo.getCommentIDs() == null) return "";
+        for (var commentId : photo.getCommentIDs()) {
+            Comment comment = OurObjects.comments.get(commentId);
+            if (comment != null) text.append(comment.getText()).append(' ');
+        }
+        return text.toString();
     }
 }

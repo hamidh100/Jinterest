@@ -8,9 +8,11 @@ import '../models/album.dart';
 import '../models/photo.dart';
 import '../providers/album_provider.dart';
 import '../providers/photo_provider.dart';
+import '../services/photo_service.dart';
 import '../widgets/server_photo_image.dart';
 
 enum ExploreViewMode { photos, albums, mixed }
+enum ExploreSearchType { global, name, caption, category, time, comments }
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
@@ -22,6 +24,10 @@ class ExploreScreen extends StatefulWidget {
 class _ExploreScreenState extends State<ExploreScreen> {
   ExploreViewMode _viewMode = ExploreViewMode.photos;
   String _query = '';
+  ExploreSearchType _searchType = ExploreSearchType.global;
+  List<Photo>? _searchResults;
+  bool _isSearching = false;
+  int _searchRequest = 0;
 
   final ScrollController _scrollController = ScrollController();
   bool _searchVisible = true;
@@ -73,13 +79,13 @@ class _ExploreScreenState extends State<ExploreScreen> {
     final photoProvider = context.watch<PhotoProvider>();
     final albumProvider = context.watch<AlbumProvider>();
 
-    final photos = photoProvider.photos
+    final photos = (_searchResults ?? photoProvider.photos)
         .where((photo) => photo.isPublic)
-        .where((photo) => _matchesPhotoQuery(photo))
         .toList();
 
     final albums = albumProvider
         .getPublicAlbums()
+        .where((album) => _query.isEmpty || _searchType == ExploreSearchType.global)
         .where((album) => _matchesAlbumQuery(album))
         .toList();
 
@@ -120,6 +126,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   ),
                   child: _buildToggleAppleStyle(),
                 ),
+                if (_isSearching) const LinearProgressIndicator(),
               ],
             ),
           ),
@@ -199,38 +206,90 @@ class _ExploreScreenState extends State<ExploreScreen> {
       child: TextField(
         key: const ValueKey('explore_search_field'),
         decoration: InputDecoration(
-          hintText: 'Search public photos and albums...',
+          hintText: _searchHint(),
           prefixIcon: const Icon(Icons.search),
-          suffixIcon: const Icon(Icons.tune),
+          suffixIcon: _buildSearchTypeMenu(),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           filled: true,
           // make it semi-transparent so content behind is visible
           fillColor: Colors.white.withOpacity(0.9),
         ),
-        onChanged: (value) {
-          setState(() => _query = value.trim().toLowerCase());
-        },
+        onChanged: _searchPhotos,
       ),
     );
   }
 
-  Widget _buildSearchBar() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: TextField(
-        decoration: InputDecoration(
-          hintText: 'Search public photos and albums...',
-          prefixIcon: const Icon(Icons.search),
-          suffixIcon: const Icon(Icons.tune),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          filled: true,
-          fillColor: Colors.grey[100],
-        ),
-        onChanged: (value) {
-          setState(() => _query = value.trim().toLowerCase());
-        },
-      ),
+  Widget _buildSearchTypeMenu() {
+    return PopupMenuButton<ExploreSearchType>(
+      tooltip: 'Search by',
+      icon: const Icon(Icons.tune),
+      onSelected: (type) {
+        setState(() => _searchType = type);
+        _searchPhotos(_query);
+      },
+      itemBuilder: (_) => ExploreSearchType.values
+          .map(
+            (type) => PopupMenuItem(
+              value: type,
+              child: Text(_searchTypeLabel(type)),
+            ),
+          )
+          .toList(),
     );
+  }
+
+  String _searchHint() {
+    return 'Search by ${_searchTypeLabel(_searchType).toLowerCase()}...';
+  }
+
+  String _searchTypeLabel(ExploreSearchType type) {
+    switch (type) {
+      case ExploreSearchType.global:
+        return 'All fields';
+      case ExploreSearchType.name:
+        return 'Name';
+      case ExploreSearchType.caption:
+        return 'Caption';
+      case ExploreSearchType.category:
+        return 'Category';
+      case ExploreSearchType.time:
+        return 'Date (YYYY-MM-DD)';
+      case ExploreSearchType.comments:
+        return 'Comment';
+    }
+  }
+
+  Future<void> _searchPhotos(String value) async {
+    final query = value.trim();
+    final request = ++_searchRequest;
+    if (query.isEmpty) {
+      setState(() {
+        _query = '';
+        _searchResults = null;
+        _isSearching = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _query = query;
+      _isSearching = true;
+    });
+    try {
+      final results = await PhotoService.searchPhotos(
+        query,
+        type: _searchType.name,
+      );
+      if (!mounted || request != _searchRequest) return;
+      setState(() => _searchResults = results);
+    } catch (_) {
+      if (!mounted || request != _searchRequest) return;
+      setState(() => _searchResults = const []);
+    } finally {
+      if (mounted && request == _searchRequest) {
+        setState(() => _isSearching = false);
+      }
+    }
   }
 
   Widget _buildToggle() {
@@ -393,19 +452,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
         return _ExploreAlbumTile(album: item.album!);
       },
     );
-  }
-
-  bool _matchesPhotoQuery(Photo photo) {
-    if (_query.isEmpty) return true;
-
-    final nameMatches = photo.name.toLowerCase().contains(_query);
-    final captionMatches =
-        photo.captionText?.toLowerCase().contains(_query) ?? false;
-    final tagMatches = photo.categoryList.any(
-      (tag) => tag.toLowerCase().contains(_query),
-    );
-
-    return nameMatches || captionMatches || tagMatches;
   }
 
   bool _matchesAlbumQuery(Album album) {
