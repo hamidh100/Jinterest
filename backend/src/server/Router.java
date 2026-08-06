@@ -1098,8 +1098,8 @@ public class Router {
         json.add("likedByUserIds", likedByUserIds);
         json.addProperty("likeCount", photo.getLikeIDs() == null ? 0 : photo.getLikeIDs().size());
         json.addProperty("commentCount", photo.getCommentIDs() == null ? 0 : photo.getCommentIDs().size());
-        json.addProperty("imageWidth", photo.getWidth());
-        json.addProperty("imageHeight", photo.getHeight());
+        json.addProperty("width", photo.getWidth());
+        json.addProperty("height", photo.getHeight());
         return json;
     }
 

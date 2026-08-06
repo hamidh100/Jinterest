@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
+
 import '../exceptions/exceptions.dart';
 import '../models/comment.dart';
 import '../models/photo.dart';
@@ -31,6 +33,16 @@ class PhotoService {
 
     final caption = json['caption'];
     final commentCount = json['commentCount'] as int? ?? 0;
+
+    debugPrint('');
+    debugPrint('');
+    debugPrint('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+    debugPrint(
+      '${json['name']}: '
+      '${json['width']} x ${json['height']}',
+    );
+    debugPrint('');
+    debugPrint('');
 
     return Photo(
       uuid: json['id']?.toString() ?? '',
