@@ -108,6 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
 enum HomeViewMode { photos, albums, mixed }
 enum HomeSortOrder { newest, oldest, name, mostLiked }
+enum HomeFeedSource { mine, following }
 
 class _FeedPage extends StatefulWidget {
   const _FeedPage();
@@ -118,6 +119,7 @@ class _FeedPage extends StatefulWidget {
 
 class _FeedPageState extends State<_FeedPage> {
   HomeViewMode _viewMode = HomeViewMode.photos;
+  HomeFeedSource _feedSource = HomeFeedSource.mine;
   HomeSortOrder _sortOrder = HomeSortOrder.newest;
   String _query = '';
   PhotoSearchType _searchType = PhotoSearchType.global;
@@ -147,13 +149,19 @@ class _FeedPageState extends State<_FeedPage> {
       return const Scaffold(body: Center(child: Text('You are not logged in')));
     }
 
+    final visibleOwnerIds = _feedSource == HomeFeedSource.mine
+        ? {currentUser.uuid}
+        : currentUser.followingIDs.toSet();
+
     final userPhotos = (_searchResults ?? photoProvider.photos)
-        .where((photo) => photo.ownerID == currentUser.uuid)
+        .where((photo) => visibleOwnerIds.contains(photo.ownerID))
+        .where((photo) => _feedSource == HomeFeedSource.mine || photo.isPublic)
         .toList();
     _sortPhotos(userPhotos);
 
-    final userAlbums = albumProvider
-        .getUserAlbums(currentUser.uuid)
+    final userAlbums = albumProvider.albums
+        .where((album) => visibleOwnerIds.contains(album.ownerID))
+        .where((album) => _feedSource == HomeFeedSource.mine || album.isPublic)
         .where((album) => _query.isEmpty || _searchType == PhotoSearchType.global)
         .where(_matchesAlbumQuery)
         .toList();
@@ -164,7 +172,44 @@ class _FeedPageState extends State<_FeedPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        title: PopupMenuButton<HomeFeedSource>(
+          tooltip: 'Choose feed',
+          position: PopupMenuPosition.under,
+          offset: const Offset(0, 8),
+          color: Colors.white.withValues(alpha: .80),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          constraints: const BoxConstraints.tightFor(width: 140),
+          onSelected: (source) => setState(() => _feedSource = source),
+          itemBuilder: (_) => const [
+            PopupMenuItem(
+              value: HomeFeedSource.mine,
+              child: Center(
+                child: Text(
+                  'Your media',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+            PopupMenuItem(
+              value: HomeFeedSource.following,
+              child: Center(
+                child: Text(
+                  'Following',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+          ],
+          child: const SizedBox(
+            width: 140,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [Text('Home'), Icon(Icons.keyboard_arrow_down)],
+            ),
+          ),
+        ),
         centerTitle: true,
         actions: [_buildSortMenu()],
       ),
