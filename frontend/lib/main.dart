@@ -5,6 +5,7 @@ import 'providers/photo_provider.dart';
 import 'providers/album_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/snackbar_fab_provider.dart';
+import 'theme/app_palette.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
@@ -46,10 +47,15 @@ class MyApp extends StatelessWidget {
           ),
           // Dark colors used when dark mode is on.
           darkTheme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.deepPurple,
-              brightness: Brightness.dark,
+            colorScheme: const ColorScheme.dark(
+              primary: AppPalette.accent,
+              onPrimary: Colors.white,
+              secondary: AppPalette.surfaceHighlight,
+              surface: AppPalette.surface,
+              onSurface: Colors.white,
             ),
+            scaffoldBackgroundColor: AppPalette.background,
+            appBarTheme: const AppBarTheme(backgroundColor: AppPalette.background),
             useMaterial3: true,
           ),
           debugShowCheckedModeBanner: false,

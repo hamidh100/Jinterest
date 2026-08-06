@@ -7,6 +7,7 @@ import '../providers/album_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
 import '../providers/snackbar_fab_provider.dart';
+import '../theme/app_palette.dart';
 import '../services/photo_service.dart';
 import '../widgets/photo_search_field.dart';
 import '../widgets/server_photo_image.dart';
@@ -34,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final snackbarFabProvider = context.watch<SnackbarFabProvider>();
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       extendBody: true,
       body: _pages[_selectedIndex],
@@ -62,14 +64,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 labelTextStyle: WidgetStateProperty.resolveWith((states) {
                   return TextStyle(
                     fontSize: 12,
+                    color: isDarkMode ? Colors.white : null,
                     fontWeight: states.contains(WidgetState.selected)
                         ? FontWeight.w600
                         : FontWeight.w500,
                   );
                 }),
+                iconTheme: WidgetStatePropertyAll(
+                  IconThemeData(color: isDarkMode ? Colors.white : null),
+                ),
               ),
               child: NavigationBar(
-                backgroundColor: Colors.white.withValues(alpha: .80),
+                backgroundColor: (isDarkMode
+                        ? AppPalette.surface
+                        : Colors.white)
+                    .withValues(alpha: .80),
                 elevation: 0,
                 selectedIndex: _selectedIndex,
                 onDestinationSelected: (i) {
@@ -173,6 +182,7 @@ class _FeedPageState extends State<_FeedPage> {
 
     final isLoading =
         photoProvider.isLoading || albumProvider.isLoading || _isSearching;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -180,19 +190,24 @@ class _FeedPageState extends State<_FeedPage> {
           tooltip: 'Choose feed',
           position: PopupMenuPosition.under,
           offset: const Offset(0, 8),
-          color: Colors.white.withValues(alpha: .80),
+          color: (isDarkMode ? AppPalette.surface : Colors.white).withValues(
+            alpha: .80,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
           ),
           constraints: const BoxConstraints.tightFor(width: 140),
           onSelected: (source) => setState(() => _feedSource = source),
-          itemBuilder: (_) => const [
+          itemBuilder: (_) => [
             PopupMenuItem(
               value: HomeFeedSource.mine,
               child: Center(
                 child: Text(
                   'Your media',
-                  style: TextStyle(fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white : null,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
@@ -201,16 +216,25 @@ class _FeedPageState extends State<_FeedPage> {
               child: Center(
                 child: Text(
                   'Following',
-                  style: TextStyle(fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white : null,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
           ],
-          child: const SizedBox(
+          child: SizedBox(
             width: 140,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [Text('Home'), Icon(Icons.keyboard_arrow_down)],
+              children: [
+                Text('Home', style: TextStyle(color: isDarkMode ? Colors.white : null)),
+                Icon(
+                  Icons.keyboard_arrow_down,
+                  color: isDarkMode ? Colors.white : null,
+                ),
+              ],
             ),
           ),
         ),

@@ -10,6 +10,7 @@ import '../providers/album_provider.dart';
 import '../providers/photo_provider.dart';
 import '../services/photo_service.dart';
 import '../widgets/photo_search_field.dart';
+import '../theme/app_palette.dart';
 import '../widgets/server_photo_image.dart';
 
 enum ExploreViewMode { photos, albums, mixed }
@@ -204,7 +205,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
     return PhotoSearchField(
       fieldKey: const ValueKey('explore_search_field'),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      fillColor: Colors.white.withOpacity(0.9),
+      fillColor: Colors.white.withValues(alpha: 0.9),
       searchType: _searchType,
       onTypeChanged: (type) {
         setState(() => _searchType = type);
@@ -277,6 +278,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
   Widget _buildToggleAppleStyle() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return ClipRRect(
       borderRadius: BorderRadius.circular(22),
       child: BackdropFilter(
@@ -284,7 +286,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
         child: Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.35),
+            color: (isDarkMode ? AppPalette.surface : Colors.white).withValues(
+              alpha: 0.35,
+            ),
             borderRadius: BorderRadius.circular(22),
             border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
           ),
@@ -303,6 +307,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   Widget _appleSegment(String title, ExploreViewMode mode) {
     final selected = _viewMode == mode;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: () => setState(() => _viewMode = mode),
@@ -312,7 +317,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
         decoration: BoxDecoration(
           color: selected
-              ? Colors.white.withValues(alpha: 0.95)
+              ? (isDarkMode ? AppPalette.surfaceHighlight : Colors.white)
+                  .withValues(alpha: 0.95)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(18),
           boxShadow: selected
@@ -328,7 +334,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
         child: AnimatedDefaultTextStyle(
           duration: const Duration(milliseconds: 180),
           style: TextStyle(
-            color: selected
+            color: isDarkMode
+                ? Colors.white
+                : selected
                 ? Theme.of(context).colorScheme.primary
                 : Colors.black87,
             fontWeight: FontWeight.w600,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_palette.dart';
+
 enum PhotoSearchType { global, name, caption, category, time, comments }
 
 extension PhotoSearchTypeInfo on PhotoSearchType {
@@ -45,29 +47,41 @@ class PhotoSearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final foregroundColor = isDarkMode ? Colors.white : null;
     return Padding(
       padding: padding,
       child: TextField(
         key: fieldKey,
+        style: TextStyle(color: foregroundColor),
         decoration: InputDecoration(
           hintText: searchType.hintText,
-          prefixIcon: const Icon(Icons.search),
+          hintStyle: TextStyle(color: isDarkMode ? Colors.white70 : null),
+          prefixIcon: Icon(Icons.search, color: foregroundColor),
           suffixIcon: PopupMenuButton<PhotoSearchType>(
             tooltip: 'Search by',
-            icon: const Icon(Icons.tune),
+            color: isDarkMode
+                ? AppPalette.surface.withValues(alpha: .80)
+                : null,
+            icon: Icon(Icons.tune, color: foregroundColor),
             onSelected: onTypeChanged,
             itemBuilder: (_) => PhotoSearchType.values
                 .map(
                   (type) => PopupMenuItem(
                     value: type,
-                    child: Text(type.label),
+                    child: Text(
+                      type.label,
+                      style: TextStyle(color: foregroundColor),
+                    ),
                   ),
                 )
                 .toList(),
           ),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           filled: true,
-          fillColor: fillColor,
+          fillColor: isDarkMode
+              ? AppPalette.surfaceHighlight
+              : fillColor,
         ),
         onChanged: onChanged,
       ),
