@@ -7,6 +7,7 @@ import '../providers/album_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
 import '../providers/snackbar_fab_provider.dart';
+import '../services/photo_service.dart';
 import '../widgets/server_photo_image.dart';
 import 'explore_screen.dart';
 import 'likes_screen.dart';
@@ -106,6 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
 enum HomeViewMode { photos, albums, mixed }
 enum HomeSortOrder { newest, oldest, name, mostLiked }
+enum HomeSearchType { global, name, caption, category, time, comments }
 
 class _FeedPage extends StatefulWidget {
   const _FeedPage();
@@ -118,6 +120,10 @@ class _FeedPageState extends State<_FeedPage> {
   HomeViewMode _viewMode = HomeViewMode.photos;
   HomeSortOrder _sortOrder = HomeSortOrder.newest;
   String _query = '';
+  HomeSearchType _searchType = HomeSearchType.global;
+  List<Photo>? _searchResults;
+  bool _isSearching = false;
+  int _searchRequest = 0;
 
   @override
   void initState() {
@@ -141,19 +147,20 @@ class _FeedPageState extends State<_FeedPage> {
       return const Scaffold(body: Center(child: Text('You are not logged in')));
     }
 
-    final userPhotos = photoProvider
-        .getUserPhotos(currentUser.uuid)
-        .where(_matchesPhotoQuery)
+    final userPhotos = (_searchResults ?? photoProvider.photos)
+        .where((photo) => photo.ownerID == currentUser.uuid)
         .toList();
     _sortPhotos(userPhotos);
 
     final userAlbums = albumProvider
         .getUserAlbums(currentUser.uuid)
+        .where((album) => _query.isEmpty || _searchType == HomeSearchType.global)
         .where(_matchesAlbumQuery)
         .toList();
     _sortAlbums(userAlbums);
 
-    final isLoading = photoProvider.isLoading || albumProvider.isLoading;
+    final isLoading =
+        photoProvider.isLoading || albumProvider.isLoading || _isSearching;
 
     return Scaffold(
       appBar: AppBar(
@@ -177,19 +184,89 @@ class _FeedPageState extends State<_FeedPage> {
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: TextField(
         decoration: InputDecoration(
-          hintText: 'Search your media...',
+          hintText: _searchHint(),
           prefixIcon: const Icon(Icons.search),
+          suffixIcon: _buildSearchTypeMenu(),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           filled: true,
           fillColor: Colors.grey[100],
         ),
-        onChanged: (value) {
-          setState(() {
-            _query = value.trim().toLowerCase();
-          });
-        },
+        onChanged: _searchPhotos,
       ),
     );
+  }
+
+  Widget _buildSearchTypeMenu() {
+    return PopupMenuButton<HomeSearchType>(
+      tooltip: 'Search by',
+      icon: const Icon(Icons.tune),
+      onSelected: (type) {
+        setState(() => _searchType = type);
+        _searchPhotos(_query);
+      },
+      itemBuilder: (_) => HomeSearchType.values
+          .map(
+            (type) => PopupMenuItem(
+              value: type,
+              child: Text(_searchTypeLabel(type)),
+            ),
+          )
+          .toList(),
+    );
+  }
+
+  String _searchHint() {
+    return 'Search by ${_searchTypeLabel(_searchType).toLowerCase()}...';
+  }
+
+  String _searchTypeLabel(HomeSearchType type) {
+    switch (type) {
+      case HomeSearchType.global:
+        return 'All fields';
+      case HomeSearchType.name:
+        return 'Name';
+      case HomeSearchType.caption:
+        return 'Caption';
+      case HomeSearchType.category:
+        return 'Category';
+      case HomeSearchType.time:
+        return 'Date (YYYY-MM-DD)';
+      case HomeSearchType.comments:
+        return 'Comment';
+    }
+  }
+
+  Future<void> _searchPhotos(String value) async {
+    final query = value.trim();
+    final request = ++_searchRequest;
+    if (query.isEmpty) {
+      setState(() {
+        _query = '';
+        _searchResults = null;
+        _isSearching = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _query = query;
+      _isSearching = true;
+    });
+    try {
+      final results = await PhotoService.searchPhotos(
+        query,
+        type: _searchType.name,
+      );
+      if (!mounted || request != _searchRequest) return;
+      setState(() => _searchResults = results);
+    } catch (_) {
+      if (!mounted || request != _searchRequest) return;
+      setState(() => _searchResults = const []);
+    } finally {
+      if (mounted && request == _searchRequest) {
+        setState(() => _isSearching = false);
+      }
+    }
   }
 
   Widget _buildViewToggle() {
@@ -311,25 +388,13 @@ class _FeedPageState extends State<_FeedPage> {
     }
   }
 
-  bool _matchesPhotoQuery(Photo photo) {
-    if (_query.isEmpty) return true;
-
-    final nameMatches = photo.name.toLowerCase().contains(_query);
-    final captionMatches =
-        photo.captionText?.toLowerCase().contains(_query) ?? false;
-    final categoryMatches = photo.categoryList.any(
-      (category) => category.toLowerCase().contains(_query),
-    );
-
-    return nameMatches || captionMatches || categoryMatches;
-  }
-
   bool _matchesAlbumQuery(Album album) {
     if (_query.isEmpty) return true;
+    final query = _query.toLowerCase();
 
-    final nameMatches = album.name.toLowerCase().contains(_query);
+    final nameMatches = album.name.toLowerCase().contains(query);
     final descriptionMatches =
-        album.description?.toLowerCase().contains(_query) ?? false;
+        album.description?.toLowerCase().contains(query) ?? false;
 
     return nameMatches || descriptionMatches;
   }
