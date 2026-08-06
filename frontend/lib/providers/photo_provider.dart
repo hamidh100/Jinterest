@@ -63,6 +63,7 @@ class PhotoProvider extends ChangeNotifier {
     try {
       _errorMessage = null;
       await PhotoService.deletePhoto(photoId);
+      PhotoService.clearPhotoImageCache(photoId);
       final result = await PhotoService.getAllPhotos();
       _photos = List<Photo>.from(result);
       notifyListeners();
@@ -122,6 +123,7 @@ class PhotoProvider extends ChangeNotifier {
         photoId: photoId,
         userId: userId,
       );
+      PhotoService.clearPhotoImageCache(photoId);
 
       if (updatedPhoto == null) {
         _errorMessage = 'Photo not found';

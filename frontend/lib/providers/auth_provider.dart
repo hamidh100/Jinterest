@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 import '../services/api_client.dart';
+import '../services/photo_service.dart';
+import '../services/user_service.dart';
 import '../exceptions/exceptions.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -33,7 +35,10 @@ class AuthProvider extends ChangeNotifier {
         method: 'POST',
         route: '/auth/signup',
         payload: {
-          if (identifier.contains('@')) 'email': identifier else 'phone': identifier,
+          if (identifier.contains('@'))
+            'email': identifier
+          else
+            'phone': identifier,
           'password': password,
           'fullname': fullname,
         },
@@ -96,6 +101,8 @@ class AuthProvider extends ChangeNotifier {
     _currentUser = null;
     _isLoggedIn = false;
     _errorMessage = null;
+    PhotoService.clearAllPhotoImageCache();
+    UserService.clearAllProfileImageCache();
     await _clearSession();
     notifyListeners();
   }
@@ -119,7 +126,8 @@ class AuthProvider extends ChangeNotifier {
       phone: preferences.getString(_sessionPhoneKey),
       password: '',
       fullname: preferences.getString(_sessionFullnameKey) ?? '',
-      followerIDs: preferences.getStringList(_sessionFollowerIdsKey) ?? const [],
+      followerIDs:
+          preferences.getStringList(_sessionFollowerIdsKey) ?? const [],
       followingIDs:
           preferences.getStringList(_sessionFollowingIdsKey) ?? const [],
     );
@@ -166,8 +174,12 @@ class AuthProvider extends ChangeNotifier {
 
   User _userFromResponse(Map<String, dynamic> response, String password) {
     final payload = response['payload'];
-    if (payload is! Map<String, dynamic> || payload['user'] is! Map<String, dynamic>) {
-      throw ApiException(statusCode: 500, message: 'Server returned an invalid user');
+    if (payload is! Map<String, dynamic> ||
+        payload['user'] is! Map<String, dynamic>) {
+      throw ApiException(
+        statusCode: 500,
+        message: 'Server returned an invalid user',
+      );
     }
     final user = payload['user'] as Map<String, dynamic>;
     return User(

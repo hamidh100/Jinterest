@@ -10,6 +10,7 @@ import '../models/photo.dart';
 import 'api_client.dart';
 
 class PhotoService {
+  static final Map<String, Future<Uint8List>> _photoImageCache = {};
   static Future<List<Photo>> getAllPhotos() async {
     final response = await ApiClient.instance.send(
       method: 'GET',
@@ -235,6 +236,24 @@ class PhotoService {
   }
 
   static Future<Uint8List> getPhotoImage(String photoId) async {
+    final cached = _photoImageCache[photoId];
+
+    if (cached != null) {
+      return cached;
+    }
+
+    final future = _downloadPhotoImage(photoId);
+    _photoImageCache[photoId] = future;
+
+    try {
+      return await future;
+    } catch (_) {
+      _photoImageCache.remove(photoId);
+      rethrow;
+    }
+  }
+
+  static Future<Uint8List> _downloadPhotoImage(String photoId) async {
     final response = await ApiClient.instance.send(
       method: 'GET',
       route: '/photos/$photoId/image',
@@ -247,5 +266,13 @@ class PhotoService {
     }
 
     return base64Decode(payload['imageBase64'] as String);
+  }
+
+  static void clearPhotoImageCache(String photoId) {
+    _photoImageCache.remove(photoId);
+  }
+
+  static void clearAllPhotoImageCache() {
+    _photoImageCache.clear();
   }
 }

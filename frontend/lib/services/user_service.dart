@@ -7,6 +7,7 @@ import '../models/user.dart';
 import 'api_client.dart';
 
 class UserService {
+  static final Map<String, Future<Uint8List?>> _profileImageCache = {};
   static Future<User?> getUserById(String userId) async {
     try {
       final response = await ApiClient.instance.send(
@@ -73,21 +74,64 @@ class UserService {
       route: '/users/$userId',
       payload: {
         'profileImageBase64': base64Encode(bytes),
-        'profileImageFileName': image.path.replaceAll('\\', '/').split('/').last,
+        'profileImageFileName': image.path
+            .replaceAll('\\', '/')
+            .split('/')
+            .last,
       },
     );
+    clearProfileImageCache(userId);
   }
 
   static Future<Uint8List?> getProfileImage(String userId) async {
+    final cached = _profileImageCache[userId];
+
+    if (cached != null) {
+      return cached;
+    }
+
+    final future = _downloadProfileImage(userId);
+
+    _profileImageCache[userId] = future;
+
     try {
-      final response = await ApiClient.instance.send(method: 'GET', route: '/users/$userId/image');
-      final payload = response['payload'];
-      if (payload is! Map<String, dynamic> || payload['imageBase64'] is! String) return null;
-      return base64Decode(payload['imageBase64'] as String);
-    } on ApiException catch (error) {
-      if (error.statusCode == 404) return null;
+      return await future;
+    } catch (_) {
+      _profileImageCache.remove(userId);
       rethrow;
     }
+  }
+
+  static Future<Uint8List?> _downloadProfileImage(String userId) async {
+    try {
+      final response = await ApiClient.instance.send(
+        method: 'GET',
+        route: '/users/$userId/image',
+      );
+
+      final payload = response['payload'];
+
+      if (payload is! Map<String, dynamic> ||
+          payload['imageBase64'] is! String) {
+        return null;
+      }
+
+      return base64Decode(payload['imageBase64'] as String);
+    } on ApiException catch (error) {
+      if (error.statusCode == 404) {
+        return null;
+      }
+
+      rethrow;
+    }
+  }
+
+  static void clearProfileImageCache(String userId) {
+    _profileImageCache.remove(userId);
+  }
+
+  static void clearAllProfileImageCache() {
+    _profileImageCache.clear();
   }
 
   static User _userFromResponse(
