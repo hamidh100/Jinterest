@@ -34,16 +34,6 @@ class PhotoService {
     final caption = json['caption'];
     final commentCount = json['commentCount'] as int? ?? 0;
 
-    debugPrint('');
-    debugPrint('');
-    debugPrint('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
-    debugPrint(
-      '${json['name']}: '
-      '${json['width']} x ${json['height']}',
-    );
-    debugPrint('');
-    debugPrint('');
-
     return Photo(
       uuid: json['id']?.toString() ?? '',
       ownerID: json['ownerId']?.toString() ?? '',
