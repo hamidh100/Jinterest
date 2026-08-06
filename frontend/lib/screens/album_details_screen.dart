@@ -336,11 +336,7 @@ class _AlbumPhotoTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             child: ColoredBox(
               color: Colors.grey,
-              child: ServerPhotoImage(
-                photoId: photo.uuid,
-                aspectRatio: photo.aspectRatio,
-                fit: BoxFit.cover,
-              ),
+              child: ServerPhotoImage(photoId: photo.uuid, fit: BoxFit.cover),
             ),
           ),
         ),
