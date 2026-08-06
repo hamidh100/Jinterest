@@ -2,9 +2,17 @@ import 'package:flutter/material.dart';
 
 class SnackbarFabProvider extends ChangeNotifier {
   bool _showHomeFab = true;
+  bool _compactNavigationBar = false;
   int _snackbarNumber = 0;
 
   bool get showHomeFab => _showHomeFab;
+  bool get compactNavigationBar => _compactNavigationBar;
+
+  void setNavigationBarCompact(bool value) {
+    if (_compactNavigationBar == value) return;
+    _compactNavigationBar = value;
+    notifyListeners();
+  }
 
   void showSnackBar(BuildContext context, SnackBar snackBar) {
     final currentSnackbarNumber = ++_snackbarNumber;

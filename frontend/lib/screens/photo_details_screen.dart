@@ -302,6 +302,7 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
             label: Text(tag),
             backgroundColor: Theme.of(context).colorScheme.primaryContainer,
             labelStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
+            side: BorderSide.none,
           );
         }).toList(),
       ),

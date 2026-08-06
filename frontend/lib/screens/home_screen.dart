@@ -36,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final snackbarFabProvider = context.watch<SnackbarFabProvider>();
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final compactNavigationBar = snackbarFabProvider.compactNavigationBar;
     return Scaffold(
       extendBody: true,
       body: _pages[_selectedIndex],
@@ -50,13 +51,20 @@ class _HomeScreenState extends State<HomeScreen> {
           : null,
       bottomNavigationBar: SafeArea(
         top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        child: AnimatedPadding(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOut,
+          padding: EdgeInsets.fromLTRB(
+            16,
+            0,
+            16,
+            compactNavigationBar ? 2 : 12,
+          ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(28),
             child: NavigationBarTheme(
               data: NavigationBarThemeData(
-                height: 70,
+                height: compactNavigationBar ? 56 : 70,
                 indicatorColor: Theme.of(
                   context,
                 ).colorScheme.primary.withValues(alpha: .25),
@@ -75,16 +83,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               child: NavigationBar(
-                backgroundColor: (isDarkMode
-                        ? AppPalette.surface
-                        : Colors.white)
-                    .withValues(alpha: .80),
+                backgroundColor:
+                    (isDarkMode ? AppPalette.surface : Colors.white).withValues(
+                      alpha: .80,
+                    ),
                 elevation: 0,
+                labelBehavior: compactNavigationBar
+                    ? NavigationDestinationLabelBehavior.alwaysHide
+                    : NavigationDestinationLabelBehavior.alwaysShow,
                 selectedIndex: _selectedIndex,
                 onDestinationSelected: (i) {
+                  if (i != 1)
+                    snackbarFabProvider.setNavigationBarCompact(false);
                   setState(() => _selectedIndex = i);
                 },
-                destinations: const [
+                destinations: [
                   NavigationDestination(
                     icon: Icon(Icons.home_outlined),
                     selectedIcon: Icon(Icons.home),
@@ -229,7 +242,10 @@ class _FeedPageState extends State<_FeedPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Home', style: TextStyle(color: isDarkMode ? Colors.white : null)),
+                Text(
+                  'Home',
+                  style: TextStyle(color: isDarkMode ? Colors.white : null),
+                ),
                 Icon(
                   Icons.keyboard_arrow_down,
                   color: isDarkMode ? Colors.white : null,
@@ -490,6 +506,7 @@ class _MixedMediaItem {
   final DateTime createdAt;
 
   String get name => photo?.name ?? album!.name;
+
   int get likeCount => photo?.likeIDs.length ?? 0;
 
   _MixedMediaItem.photo(Photo this.photo)
@@ -597,7 +614,9 @@ class _PhotoCard extends StatelessWidget {
                 children: photo.categoryList.map((category) {
                   return Chip(
                     label: Text(category),
-                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer,
                     labelStyle: TextStyle(
                       color: Theme.of(context).colorScheme.primary,
                       fontSize: 12,

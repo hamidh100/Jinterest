@@ -49,6 +49,10 @@ class PhotoSearchField extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final foregroundColor = isDarkMode ? Colors.white : null;
+    final searchBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(24),
+      borderSide: BorderSide.none,
+    );
     return Padding(
       padding: padding,
       child: TextField(
@@ -63,6 +67,9 @@ class PhotoSearchField extends StatelessWidget {
             color: isDarkMode
                 ? AppPalette.surface.withValues(alpha: .80)
                 : null,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
             icon: Icon(Icons.tune, color: foregroundColor),
             onSelected: onTypeChanged,
             itemBuilder: (_) => PhotoSearchType.values
@@ -77,7 +84,9 @@ class PhotoSearchField extends StatelessWidget {
                 )
                 .toList(),
           ),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          border: searchBorder,
+          enabledBorder: searchBorder,
+          focusedBorder: searchBorder,
           filled: true,
           fillColor: isDarkMode
               ? AppPalette.surfaceHighlight

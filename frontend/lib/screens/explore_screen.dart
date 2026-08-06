@@ -8,6 +8,7 @@ import '../models/album.dart';
 import '../models/photo.dart';
 import '../providers/album_provider.dart';
 import '../providers/photo_provider.dart';
+import '../providers/snackbar_fab_provider.dart';
 import '../services/photo_service.dart';
 import '../widgets/photo_search_field.dart';
 import '../theme/app_palette.dart';
@@ -71,6 +72,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
       // scrolled up -> show search
       setState(() => _searchVisible = true);
     }
+    context.read<SnackbarFabProvider>().setNavigationBarCompact(delta > 0);
 
     _lastOffset = offset;
   }
