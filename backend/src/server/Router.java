@@ -460,6 +460,10 @@ public class Router {
                 isPublic = payload.get("isPublic").getAsBoolean();
             }
             photo.setPublic(isPublic);
+            if (payload.has("commentsAllowed") &&
+                    !payload.get("commentsAllowed").isJsonNull()) {
+                photo.setCommentsAllowed(payload.get("commentsAllowed").getAsBoolean());
+            }
             PhotoService.addPhoto(owner, photo);
             String captionText = getOptionalString(payload, "caption");
             if (captionText != null) {

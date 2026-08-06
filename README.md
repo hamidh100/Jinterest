@@ -113,7 +113,7 @@ Field haye optional dar object ha faghat vaghti value dashte bashand bar migarda
 | GET | `/photos` | `{}` | `photos` array |
 | GET | `/photos/{id}` | `{}` | `photo` |
 | GET | `/photos/{id}/image` | `{}` | `fileName`, `imageBase64` |
-| POST | `/photos` | `ownerId*`, va ya `imageBase64*` + `fileName*` ya `path*`; `name`, `categories`, `caption`, `isPublic` | `photo` ba status `201`; comment ha default roshan hastand |
+| POST | `/photos` | `ownerId*`, va ya `imageBase64*` + `fileName*` ya `path*`; `name`, `categories`, `caption`, `isPublic`, `commentsAllowed` | `photo` ba status `201`; comment ha default roshan hastand |
 | PUT | `/photos/{id}` | hadaghal yeki az `path`, `categories`, `caption`, `commentsAllowed` | `photo` |
 | DELETE | `/photos/{id}` | `{}` | response-e successful bedoon payload |
 | POST | `/photos/{id}/likes` | `userId*` | `photoId`, `likeCount` ba status `201` |

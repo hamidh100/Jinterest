@@ -28,6 +28,7 @@ class _UploadScreenState extends State<UploadScreen> {
   String _tagsText = '';
   bool _isUploading = false;
   bool _isPublic = false;
+  bool _commentsAllowed = true;
 
   final Set<String> _selectedAlbumIds = {};
 
@@ -103,6 +104,7 @@ class _UploadScreenState extends State<UploadScreen> {
         categoryList: tags,
         photoAge: DateTime.now(),
         isPublic: _isPublic,
+        commentsAllowed: _commentsAllowed,
       );
 
       final uploadedPhoto = await context.read<PhotoProvider>().addPhoto(photo);
@@ -409,21 +411,38 @@ class _UploadScreenState extends State<UploadScreen> {
         color: Theme.of(context).colorScheme.primaryContainer,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: SwitchListTile(
-        contentPadding: EdgeInsets.zero,
-        title: const Text(
-          'Public photo',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: const Text('Public photos can be shown in Explore.'),
-        value: _isPublic,
-        onChanged: _isUploading
-            ? null
-            : (value) {
-                setState(() {
-                  _isPublic = value;
-                });
-              },
+      child: Column(
+        children: [
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text(
+              'Public photo',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: const Text('Public photos can be shown in Explore.'),
+            value: _isPublic,
+            onChanged: _isUploading
+                ? null
+                : (value) {
+                    setState(() {
+                      _isPublic = value;
+                    });
+                  },
+          ),
+          const Divider(),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text(
+              'Allow comments',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: const Text('Other users can comment on this photo.'),
+            value: _commentsAllowed,
+            onChanged: _isUploading
+                ? null
+                : (value) => setState(() => _commentsAllowed = value),
+          ),
+        ],
       ),
     );
   }

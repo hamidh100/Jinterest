@@ -79,6 +79,7 @@ class PhotoService {
     required File imageFile,
     required List<String> categories,
     required bool isPublic,
+    required bool commentsAllowed,
     String? name,
     String? caption,
   }) async {
@@ -93,6 +94,7 @@ class PhotoService {
         'imageBase64': base64Encode(imageBytes),
         'categories': categories,
         'isPublic': isPublic,
+        'commentsAllowed': commentsAllowed,
         if (name != null && name.trim().isNotEmpty) 'name': name.trim(),
         if (caption != null && caption.trim().isNotEmpty)
           'caption': caption.trim(),
