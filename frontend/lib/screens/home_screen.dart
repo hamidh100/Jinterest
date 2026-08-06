@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../models/album.dart';
 import '../models/photo.dart';
@@ -671,19 +672,7 @@ class _PhotoCard extends StatelessWidget {
                 ),
                 IconButton(
                   icon: const Icon(Icons.share_outlined),
-                  onPressed: () {
-                    context.read<SnackbarFabProvider>().showSnackBar(
-                      context,
-                      SnackBar(
-                        content: const Text('Share feature coming soon'),
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
-                  },
+                  onPressed: () => _sharePhoto(context),
                 ),
               ],
             ),
@@ -760,6 +749,71 @@ class _PhotoCard extends StatelessWidget {
         ),
       );
     }
+  }
+
+  Future<void> _sharePhoto(BuildContext context) async {
+    final snackbarProvider = context.read<SnackbarFabProvider>();
+
+    try {
+      final imageBytes = await PhotoService.getPhotoImage(photo.uuid);
+
+      await Share.shareXFiles([
+        XFile.fromData(
+          imageBytes,
+          name: _shareFileName(),
+          mimeType: _shareMimeType(),
+        ),
+      ], text: _shareText());
+    } catch (e) {
+      if (!context.mounted) {
+        return;
+      }
+
+      snackbarProvider.showSnackBar(
+        context,
+        SnackBar(
+          content: Text('Could not share photo: $e'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  String _shareText() {
+    final caption = photo.captionText?.trim();
+    if (caption == null || caption.isEmpty) {
+      return photo.name;
+    }
+    return '${photo.name}\n\n$caption';
+  }
+
+  String _shareFileName() {
+    String name = photo.name.trim();
+    if (name.isEmpty) {
+      name = 'jinterest_photo';
+    }
+    name = name.replaceAll(RegExp(r'[^\w\s-]'), '');
+    name = name.replaceAll(RegExp(r'\s+'), '_');
+    if (name.isEmpty) {
+      name = 'jinterest_photo';
+    }
+    return '$name.jpg';
+  }
+
+  String _shareMimeType() {
+    final path = photo.path.toLowerCase();
+    if (path.endsWith('.png')) {
+      return 'image/png';
+    }
+    if (path.endsWith('.webp')) {
+      return 'image/webp';
+    }
+    return 'image/jpeg';
   }
 }
 
