@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../models/album.dart';
 import '../models/user.dart';
+import '../providers/snackbar_fab_provider.dart';
 
 Future<Album?> showCreateAlbumDialog({
   required BuildContext context,
@@ -64,10 +66,16 @@ class _AlbumDialogState extends State<_AlbumDialog> {
     final name = _nameController.text.trim();
 
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+      context.read<SnackbarFabProvider>().showSnackBar(
+        context,
+        SnackBar(
           content: Text('Album name is required'),
+          backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
         ),
       );
       return;

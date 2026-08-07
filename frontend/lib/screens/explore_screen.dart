@@ -88,7 +88,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
     final albums = albumProvider
         .getPublicAlbums()
-        .where((album) => _query.isEmpty || _searchType == PhotoSearchType.global)
+        .where(
+          (album) => _query.isEmpty || _searchType == PhotoSearchType.global,
+        )
         .where((album) => _matchesAlbumQuery(album))
         .toList();
 
@@ -127,7 +129,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     horizontal: 16,
                     vertical: 8,
                   ),
-                  child: _buildToggleAppleStyle(),
+                  child: _buildToggle(),
                 ),
                 if (_isSearching) const LinearProgressIndicator(),
               ],
@@ -251,35 +253,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
   Widget _buildToggle() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: SegmentedButton<ExploreViewMode>(
-        segments: const [
-          ButtonSegment(
-            value: ExploreViewMode.photos,
-            label: Text('Photos'),
-            icon: Icon(Icons.image),
-          ),
-          ButtonSegment(
-            value: ExploreViewMode.albums,
-            label: Text('Albums'),
-            icon: Icon(Icons.photo_album),
-          ),
-          ButtonSegment(
-            value: ExploreViewMode.mixed,
-            label: Text('Mixed'),
-            icon: Icon(Icons.dashboard),
-          ),
-        ],
-        selected: {_viewMode},
-        onSelectionChanged: (selection) {
-          setState(() => _viewMode = selection.first);
-        },
-      ),
-    );
-  }
-
-  Widget _buildToggleAppleStyle() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return ClipRRect(
       borderRadius: BorderRadius.circular(22),
@@ -320,7 +293,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
         decoration: BoxDecoration(
           color: selected
               ? (isDarkMode ? AppPalette.surfaceHighlight : Colors.white)
-                  .withValues(alpha: 0.95)
+                    .withValues(alpha: 0.95)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(18),
           boxShadow: selected
@@ -346,76 +319,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
           child: Text(title),
         ),
       ),
-    );
-  }
-
-  Widget _buildContent(List<Photo> photos, List<Album> albums) {
-    if (_viewMode == ExploreViewMode.photos) {
-      if (photos.isEmpty) {
-        return const Center(child: Text('No public photos found'));
-      }
-
-      return GridView.builder(
-        padding: const EdgeInsets.all(12),
-        itemCount: photos.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-        ),
-        itemBuilder: (context, index) {
-          return _ExplorePhotoTile(photo: photos[index]);
-        },
-      );
-    }
-
-    if (_viewMode == ExploreViewMode.albums) {
-      if (albums.isEmpty) {
-        return const Center(child: Text('No public albums found'));
-      }
-
-      return GridView.builder(
-        padding: const EdgeInsets.all(12),
-        itemCount: albums.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-        ),
-        itemBuilder: (context, index) {
-          return _ExploreAlbumTile(album: albums[index]);
-        },
-      );
-    }
-
-    final mixedItems = [
-      ...photos.map((photo) => _ExploreMixedItem.photo(photo)),
-      ...albums.map((album) => _ExploreMixedItem.album(album)),
-    ];
-
-    mixedItems.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-    if (mixedItems.isEmpty) {
-      return const Center(child: Text('No public media found'));
-    }
-
-    return GridView.builder(
-      padding: const EdgeInsets.all(12),
-      itemCount: mixedItems.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-      ),
-      itemBuilder: (context, index) {
-        final item = mixedItems[index];
-
-        if (item.photo != null) {
-          return _ExplorePhotoTile(photo: item.photo!);
-        }
-
-        return _ExploreAlbumTile(album: item.album!);
-      },
     );
   }
 

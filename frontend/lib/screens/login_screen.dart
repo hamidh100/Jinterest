@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isLoading = true);
 
-    ScaffoldMessenger.of(context).clearSnackBars();
+    context.read<SnackbarFabProvider>().clearSnackBars(context);
 
     try {
       final authProvider = context.read<AuthProvider>();
@@ -49,22 +49,6 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) setState(() => _isLoading = false);
     }
   }
-
-  /*void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Login Error'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }*/
 
   void _showErrorToast(String message) {
     context.read<SnackbarFabProvider>().showSnackBar(
@@ -95,7 +79,11 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 40),
-              Icon(Icons.image, size: 80, color: Theme.of(context).colorScheme.primary),
+              Icon(
+                Icons.image,
+                size: 80,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               const SizedBox(height: 40),
               const Text(
                 'Welcome Back',

@@ -7,6 +7,7 @@ import '../models/photo.dart';
 import '../providers/album_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
+import '../providers/snackbar_fab_provider.dart';
 import '../widgets/info_chip.dart';
 import '../widgets/create_album_dialog.dart';
 import '../widgets/server_photo_image.dart';
@@ -159,11 +160,15 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
     final message = success
         ? 'Album updated'
         : context.read<AlbumProvider>().errorMessage ?? 'Update failed';
-    ScaffoldMessenger.of(context).showSnackBar(
+
+    context.read<SnackbarFabProvider>().showSnackBar(
+      context,
       SnackBar(
         content: Text(message),
         backgroundColor: success ? null : Colors.red,
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -287,22 +292,31 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
     if (!context.mounted) return;
 
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+      context.read<SnackbarFabProvider>().showSnackBar(
+        context,
+        SnackBar(
           content: Text('Album deleted'),
           behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
         ),
       );
 
       Navigator.pop(context);
     } else {
       final error = context.read<AlbumProvider>().errorMessage;
-
-      ScaffoldMessenger.of(context).showSnackBar(
+      context.read<SnackbarFabProvider>().showSnackBar(
+        context,
         SnackBar(
           content: Text(error ?? 'Delete failed'),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
         ),
       );
     }

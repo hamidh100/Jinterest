@@ -1,7 +1,5 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
-import 'package:jinterest/widgets/pofile_avatar.dart';
+import 'package:jinterest/widgets/profile_avatar.dart';
 import 'package:provider/provider.dart';
 
 import '../models/comment.dart';
@@ -10,7 +8,7 @@ import '../models/user.dart';
 import '../providers/album_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
-import '../services/user_service.dart';
+import '../providers/snackbar_fab_provider.dart';
 import '../widgets/info_chip.dart';
 import '../widgets/uploader_tile.dart';
 import '../widgets/server_photo_image.dart';
@@ -191,9 +189,18 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
       await photoProvider.loadPhotos();
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
+      context.read<SnackbarFabProvider>().showSnackBar(
         context,
-      ).showSnackBar(SnackBar(content: Text('Could not add comment: $error')));
+        SnackBar(
+          content: Text('Could not add comment: $error'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
     } finally {
       if (mounted) setState(() => _isAddingComment = false);
     }
@@ -210,8 +217,17 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
       await photoProvider.loadPhotos();
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not delete comment: $error')),
+      context.read<SnackbarFabProvider>().showSnackBar(
+        context,
+        SnackBar(
+          content: Text('Could not delete comment: $error'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
       );
     }
   }
@@ -420,11 +436,6 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
     Comment comment,
     User? currentUser,
   ) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final firstLetter = (comment.username?.isNotEmpty ?? false)
-        ? comment.username![0].toUpperCase()
-        : '?';
-
     return InkWell(
       onTap: () {
         Navigator.pushNamed(
@@ -482,39 +493,6 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
     );
   }
 
-  Widget _commentTile2(
-    BuildContext context,
-    Comment comment,
-    User? currentUser,
-  ) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      onTap: () {
-        Navigator.pushNamed(
-          context,
-          '/user-profile',
-          arguments: comment.userID,
-        );
-      },
-      title: Row(
-        children: [
-          Text((comment.username ?? 'User')),
-          Text(
-            ' • ${timeAgo(comment.time)}',
-            style: TextStyle(color: Colors.grey),
-          ),
-        ],
-      ),
-      subtitle: Text(comment.text),
-      trailing: currentUser?.uuid == comment.userID
-          ? IconButton(
-              icon: const Icon(Icons.delete_outline),
-              onPressed: () => _deleteComment(comment),
-            )
-          : null,
-    );
-  }
-
   Future<void> _toggleCommentsAllowed(Photo photo) async {
     final commentsAllowed = !photo.commentsAllowed;
     final success = await context.read<PhotoProvider>().updateCommentsAllowed(
@@ -523,7 +501,8 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
     );
     if (!mounted) return;
     final error = context.read<PhotoProvider>().errorMessage;
-    ScaffoldMessenger.of(context).showSnackBar(
+    context.read<SnackbarFabProvider>().showSnackBar(
+      context,
       SnackBar(
         content: Text(
           success
@@ -531,6 +510,9 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
               : error ?? 'Could not update comment permission',
         ),
         backgroundColor: success ? null : Colors.red,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -563,22 +545,31 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
     if (!context.mounted) return;
 
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+      context.read<SnackbarFabProvider>().showSnackBar(
+        context,
+        SnackBar(
           content: Text('Photo deleted'),
           behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
         ),
       );
 
       Navigator.pop(context);
     } else {
       final error = context.read<PhotoProvider>().errorMessage;
-
-      ScaffoldMessenger.of(context).showSnackBar(
+      context.read<SnackbarFabProvider>().showSnackBar(
+        context,
         SnackBar(
           content: Text(error ?? 'Delete failed'),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
         ),
       );
     }
@@ -677,8 +668,8 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
     }
 
     if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
+    context.read<SnackbarFabProvider>().showSnackBar(
+      context,
       SnackBar(
         content: Text(
           isSuccess
@@ -687,6 +678,8 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
         ),
         backgroundColor: isSuccess ? null : Colors.red,
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -712,8 +705,8 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
     }
 
     if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
+    context.read<SnackbarFabProvider>().showSnackBar(
+      context,
       SnackBar(
         content: Text(
           wasAdded
@@ -722,6 +715,8 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
         ),
         backgroundColor: wasAdded ? null : Colors.red,
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        duration: const Duration(seconds: 2),
       ),
     );
   }

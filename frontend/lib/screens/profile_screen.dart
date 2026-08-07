@@ -1,9 +1,7 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:jinterest/widgets/pofile_avatar.dart';
 import 'package:provider/provider.dart';
 
 import '../models/album.dart';
@@ -12,10 +10,12 @@ import '../models/user.dart';
 import '../providers/album_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
+import '../providers/snackbar_fab_provider.dart';
 import '../providers/theme_provider.dart';
 import '../services/user_service.dart';
 import '../utils/validators.dart';
 import 'followers_screen.dart';
+import '../widgets/profile_avatar.dart';
 import '../widgets/server_photo_image.dart';
 
 enum ProfileViewMode { photos, albums }
@@ -252,8 +252,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {});
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not upload profile photo: $error')),
+      context.read<SnackbarFabProvider>().showSnackBar(
+        context,
+        SnackBar(
+          content: Text('Could not upload profile photo: $error'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
       );
     }
   }
@@ -360,8 +369,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not update follow: $error')),
+      context.read<SnackbarFabProvider>().showSnackBar(
+        context,
+        SnackBar(
+          content: Text('Could not update follow: $error'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
       );
     } finally {
       if (mounted) setState(() => _isUpdatingFollow = false);
@@ -427,11 +445,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _editedUser = updatedUser;
                 });
 
-                ScaffoldMessenger.of(context).clearSnackBars();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                context.read<SnackbarFabProvider>().showSnackBar(
+                  context,
+                  SnackBar(
                     content: Text('Profile saved.'),
                     behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    duration: const Duration(seconds: 2),
                   ),
                 );
               },
@@ -476,8 +498,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
       Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not delete account: $error')),
+      context.read<SnackbarFabProvider>().showSnackBar(
+        context,
+        SnackBar(
+          content: Text('Could not delete account: $error'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
       );
     }
   }
@@ -648,12 +679,16 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
       if (!mounted) return;
       Navigator.pop(context, updatedUser);
     } catch (error) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
+      context.read<SnackbarFabProvider>().showSnackBar(
+        context,
         SnackBar(
           content: Text(error.toString()),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
         ),
       );
     }
@@ -817,10 +852,16 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
                     ),
                   );
                   if (changed == true && context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
+                    context.read<SnackbarFabProvider>().showSnackBar(
+                      context,
+                      SnackBar(
                         content: Text('Password changed.'),
+                        backgroundColor: Colors.red,
                         behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        duration: const Duration(seconds: 2),
                       ),
                     );
                   }
@@ -888,8 +929,17 @@ class _ChangePasswordScreenState extends State<_ChangePasswordScreen> {
       if (mounted) Navigator.pop(context, true);
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString()), backgroundColor: Colors.red),
+      context.read<SnackbarFabProvider>().showSnackBar(
+        context,
+        SnackBar(
+          content: Text(error.toString()),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
       );
     } finally {
       if (mounted) setState(() => _isSaving = false);
