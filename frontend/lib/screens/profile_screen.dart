@@ -86,8 +86,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
-    final userPhotos = photoProvider.getUserPhotos(user.uuid);
-    final userAlbums = albumProvider.getUserAlbums(user.uuid);
+    final userPhotos = photoProvider
+        .getUserPhotos(user.uuid)
+        .where((photo) => photo.isPublic || photo.ownerID == authUser.uuid)
+        .toList();
+    final userAlbums = albumProvider
+        .getUserAlbums(user.uuid)
+        .where((album) => album.isPublic || album.ownerID == authUser.uuid)
+        .toList();
 
     final isLoading = photoProvider.isLoading || albumProvider.isLoading;
 
@@ -114,10 +120,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             children: [
-              _buildProfileHeader(
-                user: user,
-                isOwnProfile: isOwnProfile,
-              ),
+              _buildProfileHeader(user: user, isOwnProfile: isOwnProfile),
 
               _buildStatsRow(
                 user: user,
@@ -171,7 +174,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildProfileHeader({required User user, required bool isOwnProfile}) {
-
     return Container(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -197,7 +199,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       radius: 16,
                       backgroundColor: Theme.of(context).colorScheme.primary,
                       child: IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.white, size: 18),
+                        icon: const Icon(
+                          Icons.edit,
+                          color: Colors.white,
+                          size: 18,
+                        ),
                         onPressed: () => _pickProfileImage(user.uuid),
                       ),
                     ),
@@ -220,14 +226,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           const SizedBox(height: 8),
 
-          Text(user.email ?? user.phone ?? 'No contact info', style: const TextStyle(fontSize: 14)),
+          Text(
+            user.email ?? user.phone ?? 'No contact info',
+            style: const TextStyle(fontSize: 14),
+          ),
         ],
       ),
     );
   }
 
   Future<void> _pickProfileImage(String userId) async {
-    final image = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 85);
+    final image = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
     if (image == null) return;
     try {
       await UserService.updateProfileImage(userId, File(image.path));
@@ -235,7 +247,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {});
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not upload profile photo: $error')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not upload profile photo: $error')),
+      );
     }
   }
 
@@ -387,12 +401,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ? null
             : () async {
                 final updatedUser = await Navigator.push<User>(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => _EditProfileScreen(
-                        user: user,
-                        onDeleteAccount: () => _deleteAccount(authProvider),
-                      ),
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => _EditProfileScreen(
+                      user: user,
+                      onDeleteAccount: () => _deleteAccount(authProvider),
+                    ),
                   ),
                 );
 
@@ -433,7 +447,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Delete account?'),
-        content: const Text('Your photos, albums, and account data will be deleted.'),
+        content: const Text(
+          'Your photos, albums, and account data will be deleted.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -583,10 +599,7 @@ class _EditProfileScreen extends StatefulWidget {
   final User user;
   final Future<void> Function() onDeleteAccount;
 
-  const _EditProfileScreen({
-    required this.user,
-    required this.onDeleteAccount,
-  });
+  const _EditProfileScreen({required this.user, required this.onDeleteAccount});
 
   @override
   State<_EditProfileScreen> createState() => _EditProfileScreenState();
@@ -968,10 +981,16 @@ class _ProfileAlbumTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
     final photoProvider = context.watch<PhotoProvider>();
+    final authUser = authProvider.currentUser;
 
     final albumPhotos = photoProvider.photos
-        .where((photo) => album.photoIDs.contains(photo.uuid))
+        .where(
+          (photo) =>
+              album.photoIDs.contains(photo.uuid) &&
+              (photo.isPublic || photo.ownerID == authUser!.uuid),
+        )
         .toList();
 
     final coverPhoto = albumPhotos.isNotEmpty ? albumPhotos.first : null;
@@ -1030,7 +1049,7 @@ class _ProfileAlbumTile extends StatelessWidget {
                     const SizedBox(height: 8),
 
                     Text(
-                      '${album.photoIDs.length} ${album.photoIDs.length == 1 ? 'photo' : 'photos'}',
+                      '${albumPhotos.length} ${albumPhotos.length == 1 ? 'photo' : 'photos'}',
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w500,
@@ -1101,15 +1120,26 @@ class _ProfileAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final firstLetter = fullname.trim().isEmpty ? '?' : fullname.trim()[0].toUpperCase();
+    final firstLetter = fullname.trim().isEmpty
+        ? '?'
+        : fullname.trim()[0].toUpperCase();
     return FutureBuilder<Uint8List?>(
       future: UserService.getProfileImage(userId),
       builder: (context, snapshot) => CircleAvatar(
         radius: 50,
         backgroundColor: Theme.of(context).colorScheme.primary,
-        backgroundImage: snapshot.data == null ? null : MemoryImage(snapshot.data!),
+        backgroundImage: snapshot.data == null
+            ? null
+            : MemoryImage(snapshot.data!),
         child: snapshot.data == null
-            ? Text(firstLetter, style: const TextStyle(fontSize: 40, color: Colors.white, fontWeight: FontWeight.bold))
+            ? Text(
+                firstLetter,
+                style: const TextStyle(
+                  fontSize: 40,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              )
             : null,
       ),
     );
