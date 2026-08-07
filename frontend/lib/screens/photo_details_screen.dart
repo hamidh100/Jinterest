@@ -1,16 +1,22 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:jinterest/widgets/pofile_avatar.dart';
 import 'package:provider/provider.dart';
 
 import '../models/comment.dart';
 import '../models/photo.dart';
+import '../models/user.dart';
 import '../providers/album_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
+import '../services/user_service.dart';
 import '../widgets/info_chip.dart';
 import '../widgets/uploader_tile.dart';
 import '../widgets/server_photo_image.dart';
 import '../widgets/create_album_dialog.dart';
 import '../services/photo_service.dart';
+import 'home_screen.dart';
 
 class PhotoDetailsScreen extends StatefulWidget {
   final String photoId;
@@ -371,24 +377,7 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
             const Text('No comments yet', style: TextStyle(color: Colors.grey))
           else
             ..._comments.map(
-              (comment) => ListTile(
-                contentPadding: EdgeInsets.zero,
-                onTap: () {
-                  Navigator.pushNamed(
-                    context,
-                    '/user-profile',
-                    arguments: comment.userID,
-                  );
-                },
-                title: Text(comment.username ?? 'User'),
-                subtitle: Text(comment.text),
-                trailing: currentUser?.uuid == comment.userID
-                    ? IconButton(
-                        icon: const Icon(Icons.delete_outline),
-                        onPressed: () => _deleteComment(comment),
-                      )
-                    : null,
-              ),
+              (comment) => _commentTile(context, comment, currentUser),
             ),
 
           const SizedBox(height: 16),
@@ -423,6 +412,106 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _commentTile(
+    BuildContext context,
+    Comment comment,
+    User? currentUser,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final firstLetter = (comment.username?.isNotEmpty ?? false)
+        ? comment.username![0].toUpperCase()
+        : '?';
+
+    return InkWell(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          '/user-profile',
+          arguments: comment.userID,
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ProfileAvatar(
+              userId: comment.userID,
+              username: comment.username,
+              radius: 16,
+            ),
+
+            const SizedBox(width: 12),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        comment.username ?? 'User',
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        timeAgo(comment.time),
+                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 3),
+
+                  Text(comment.text),
+                ],
+              ),
+            ),
+
+            if (currentUser?.uuid == comment.userID)
+              IconButton(
+                icon: const Icon(Icons.delete_outline, size: 20),
+                onPressed: () => _deleteComment(comment),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _commentTile2(
+    BuildContext context,
+    Comment comment,
+    User? currentUser,
+  ) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          '/user-profile',
+          arguments: comment.userID,
+        );
+      },
+      title: Row(
+        children: [
+          Text((comment.username ?? 'User')),
+          Text(
+            ' • ${timeAgo(comment.time)}',
+            style: TextStyle(color: Colors.grey),
+          ),
+        ],
+      ),
+      subtitle: Text(comment.text),
+      trailing: currentUser?.uuid == comment.userID
+          ? IconButton(
+              icon: const Icon(Icons.delete_outline),
+              onPressed: () => _deleteComment(comment),
+            )
+          : null,
     );
   }
 

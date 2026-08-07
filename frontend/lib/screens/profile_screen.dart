@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:jinterest/widgets/pofile_avatar.dart';
 import 'package:provider/provider.dart';
 
 import '../models/album.dart';
@@ -180,7 +181,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           Stack(
             children: [
-              _ProfileAvatar(userId: user.uuid, fullname: user.fullname),
+              ProfileAvatar(
+                userId: user.uuid,
+                username: user.fullname,
+                radius: 50,
+              ),
               if (isOwnProfile)
                 Positioned(
                   right: 0,
@@ -1107,40 +1112,6 @@ class _StatItem extends StatelessWidget {
             Text(label, style: const TextStyle(color: Colors.grey)),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _ProfileAvatar extends StatelessWidget {
-  final String userId;
-  final String fullname;
-
-  const _ProfileAvatar({required this.userId, required this.fullname});
-
-  @override
-  Widget build(BuildContext context) {
-    final firstLetter = fullname.trim().isEmpty
-        ? '?'
-        : fullname.trim()[0].toUpperCase();
-    return FutureBuilder<Uint8List?>(
-      future: UserService.getProfileImage(userId),
-      builder: (context, snapshot) => CircleAvatar(
-        radius: 50,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        backgroundImage: snapshot.data == null
-            ? null
-            : MemoryImage(snapshot.data!),
-        child: snapshot.data == null
-            ? Text(
-                firstLetter,
-                style: const TextStyle(
-                  fontSize: 40,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              )
-            : null,
       ),
     );
   }

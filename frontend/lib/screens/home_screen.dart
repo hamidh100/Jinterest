@@ -848,7 +848,7 @@ class _PhotoHeader extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  _timeAgo(photo.photoAge),
+                  timeAgo(photo.photoAge),
                   style: TextStyle(color: Colors.grey[600], fontSize: 12),
                 ),
               ],
@@ -1001,20 +1001,25 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-String _timeAgo(DateTime dateTime) {
-  final difference = DateTime.now().difference(dateTime);
-
-  if (difference.inDays > 0) {
-    return '${difference.inDays}d ago';
+String timeAgo(DateTime dateTime) {
+  final now = DateTime.now();
+  final difference = now.difference(dateTime);
+  if (difference.isNegative) {
+    return 'Just now';
   }
-
-  if (difference.inHours > 0) {
-    return '${difference.inHours}h ago';
+  int years = now.year - dateTime.year;
+  if (now.month < dateTime.month ||
+      (now.month == dateTime.month && now.day < dateTime.day)) {
+    years--;
   }
-
-  if (difference.inMinutes > 0) {
-    return '${difference.inMinutes}m ago';
-  }
-
+  if (years > 0) return '${years}y ago';
+  int months = (now.year - dateTime.year) * 12 + (now.month - dateTime.month);
+  if (now.day < dateTime.day) months--;
+  if (months > 0) return '${months}mo ago';
+  final weeks = difference.inDays ~/ 7;
+  if (weeks > 0) return '${weeks}w ago';
+  if (difference.inDays > 0) return '${difference.inDays}d ago';
+  if (difference.inHours > 0) return '${difference.inHours}h ago';
+  if (difference.inMinutes > 0) return '${difference.inMinutes}m ago';
   return 'Just now';
 }
