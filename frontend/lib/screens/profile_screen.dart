@@ -272,6 +272,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required int postsCount,
     required int albumsCount,
   }) {
+    final authProvider = context.watch<AuthProvider>();
+    final authUser = authProvider.currentUser;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
@@ -280,12 +282,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _StatItem(
             label: 'Followers',
             value: '${user.followerIDs.length}',
-            onTap: () => _openUserList('Followers', user.followerIDs),
+            onTap: () => (authUser!.uuid == user.uuid
+                ? _openUserList('Followers', user.followerIDs)
+                : context.read<SnackbarFabProvider>().showSnackBar(
+                    context,
+                    SnackBar(
+                      content: Text('You can only see your own followers'),
+                      backgroundColor: Colors.red,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      duration: const Duration(seconds: 3),
+                    ),
+                  )),
           ),
           _StatItem(
             label: 'Following',
             value: '${user.followingIDs.length}',
-            onTap: () => _openUserList('Following', user.followingIDs),
+            onTap: () => (authUser!.uuid == user.uuid
+                ? _openUserList('Following', user.followingIDs)
+                : context.read<SnackbarFabProvider>().showSnackBar(
+                    context,
+                    SnackBar(
+                      content: Text('You can only see who you follow'),
+                      backgroundColor: Colors.red,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      duration: const Duration(seconds: 3),
+                    ),
+                  )),
           ),
           _StatItem(label: 'Photos', value: '$postsCount'),
           _StatItem(label: 'Albums', value: '$albumsCount'),
@@ -295,10 +323,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _openUserList(String title, List<String> userIds) {
+    final authUser = context.read<AuthProvider>().currentUser;
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => FollowersScreen(title: title, userIds: userIds),
+        builder: (_) => FollowersScreen(
+          title: title,
+          currentUser: authUser!,
+          userIds: userIds,
+        ),
       ),
     );
   }

@@ -66,10 +66,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
     }
 
     if (delta > 0 && _searchVisible) {
-      // scrolled down -> hide search
       setState(() => _searchVisible = false);
     } else if (delta < 0 && !_searchVisible) {
-      // scrolled up -> show search
       setState(() => _searchVisible = true);
     }
     context.read<SnackbarFabProvider>().setNavigationBarCompact(delta > 0);
