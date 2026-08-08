@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../models/user.dart';
+import '../providers/auth_provider.dart';
 import '../widgets/follow_button.dart';
 import '../widgets/user_list_tile.dart';
 import '../services/user_service.dart';
@@ -23,7 +25,6 @@ class FollowersScreen extends StatefulWidget {
 
 class _FollowersScreenState extends State<FollowersScreen> {
   late List<String> _userIds;
-  late Set<String> _followingIds;
 
   List<User> _users = [];
 
@@ -35,7 +36,6 @@ class _FollowersScreenState extends State<FollowersScreen> {
     super.initState();
 
     _userIds = List<String>.from(widget.userIds);
-    _followingIds = widget.currentUser.followingIDs.toSet();
 
     _loadUsers();
   }
@@ -61,18 +61,45 @@ class _FollowersScreenState extends State<FollowersScreen> {
     }
   }
 
-  void _onFollowChanged(String userId, bool isFollowing) {
+  Future<void> _onFollowChanged(String userId, bool isFollowing) async {
+    final authProvider = context.read<AuthProvider>();
+    final currentUser = authProvider.currentUser;
+    if (currentUser == null) return;
+    final followingIds = List<String>.from(currentUser.followingIDs);
+    if (isFollowing) {
+      if (!followingIds.contains(userId)) {
+        followingIds.add(userId);
+      }
+    } else {
+      followingIds.remove(userId);
+    }
+    final updatedUser = _copyUser(currentUser, followingIDs: followingIds);
+    await authProvider.updateCurrentUser(updatedUser);
+    if (!mounted) return;
     setState(() {
-      if (isFollowing) {
-        _followingIds.add(userId);
-      } else {
-        _followingIds.remove(userId);
-        if (widget.title.toLowerCase() == 'following') {
-          _userIds.remove(userId);
-          _users.removeWhere((user) => user.uuid == userId);
-        }
+      if (!isFollowing && widget.title.toLowerCase() == 'following') {
+        _userIds.remove(userId);
+        _users.removeWhere((user) => user.uuid == userId);
       }
     });
+  }
+
+  User _copyUser(
+    User user, {
+    List<String>? followerIDs,
+    List<String>? followingIDs,
+  }) {
+    return User(
+      uuid: user.uuid,
+      username: user.username,
+      email: user.email,
+      phone: user.phone,
+      password: user.password,
+      fullname: user.fullname,
+      banned: user.banned,
+      followerIDs: followerIDs ?? user.followerIDs,
+      followingIDs: followingIDs ?? user.followingIDs,
+    );
   }
 
   Future<void> _refresh() async {
@@ -118,18 +145,20 @@ class _FollowersScreenState extends State<FollowersScreen> {
       itemBuilder: (context, index) {
         final user = _users[index];
 
-        final isCurrentUser = user.uuid == widget.currentUser.uuid;
+        final authUser = context.watch<AuthProvider>().currentUser;
+
+        final isCurrentUser = user.uuid == authUser?.uuid;
 
         return UserListTile(
           user: user,
           trailing: isCurrentUser
               ? null
               : FollowButton(
-                  followerId: widget.currentUser.uuid,
+                  followerId: authUser!.uuid,
                   followedId: user.uuid,
-                  isFollowing: _followingIds.contains(user.uuid),
+                  isFollowing: authUser.followingIDs.contains(user.uuid),
                   onChanged: (isFollowing) {
-                    _onFollowChanged(user.uuid, isFollowing);
+                    return _onFollowChanged(user.uuid, isFollowing);
                   },
                 ),
           onTap: () {

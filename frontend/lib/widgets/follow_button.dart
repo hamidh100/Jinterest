@@ -1,9 +1,7 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:jinterest/providers/snackbar_fab_provider.dart';
 import 'package:provider/provider.dart';
-
 import '../services/user_service.dart';
 
 enum FollowButtonStyle { compact, profile }
@@ -19,51 +17,53 @@ class FollowButton extends StatefulWidget {
     this.height = 36,
     this.style = FollowButtonStyle.compact,
   });
-
   final String followerId;
   final String followedId;
   final bool isFollowing;
   final FutureOr<void> Function(bool isFollowing)? onChanged;
-
   final double width;
   final double height;
   final FollowButtonStyle style;
-
   @override
   State<FollowButton> createState() => _FollowButtonState();
 }
 
 class _FollowButtonState extends State<FollowButton> {
   bool _isLoading = false;
-
   Future<void> _toggleFollow() async {
     if (_isLoading) return;
-
     setState(() {
       _isLoading = true;
     });
-
     final newFollowingState = !widget.isFollowing;
-
     try {
+      debugPrint('FollowButton: starting request');
+      debugPrint('followerId: ${widget.followerId}');
+      debugPrint('followedId: ${widget.followedId}');
+      debugPrint('isFollowing: ${widget.isFollowing}');
       if (widget.isFollowing) {
+        debugPrint('Calling unfollow...');
         await UserService.unfollow(
           followerId: widget.followerId,
           followedId: widget.followedId,
         );
+        debugPrint('Unfollow succeeded');
       } else {
+        debugPrint('Calling follow...');
         await UserService.follow(
           followerId: widget.followerId,
           followedId: widget.followedId,
         );
+        debugPrint('Follow succeeded');
       }
-
       if (!mounted) return;
-
+      debugPrint('Calling onChanged...');
       await widget.onChanged?.call(newFollowingState);
-    } catch (error) {
+      debugPrint('onChanged completed');
+    } catch (error, stackTrace) {
+      debugPrint('FollowButton ERROR: $error');
+      debugPrint('$stackTrace');
       if (!mounted) return;
-
       context.read<SnackbarFabProvider>().showSnackBar(
         context,
         SnackBar(
@@ -88,7 +88,6 @@ class _FollowButtonState extends State<FollowButton> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     if (_isLoading) {
       return SizedBox(
         width: widget.width,
@@ -105,7 +104,6 @@ class _FollowButtonState extends State<FollowButton> {
         ),
       );
     }
-
     if (widget.style == FollowButtonStyle.profile) {
       return SizedBox(
         width: widget.width,
@@ -123,7 +121,6 @@ class _FollowButtonState extends State<FollowButton> {
         ),
       );
     }
-
     return SizedBox(
       width: widget.width,
       height: widget.height,
