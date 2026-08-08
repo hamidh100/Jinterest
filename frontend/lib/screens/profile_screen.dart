@@ -183,7 +183,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               ProfileAvatar(
                 userId: user.uuid,
-                username: user.fullname,
+                fullname: user.fullname,
                 radius: 50,
               ),
               if (isOwnProfile)

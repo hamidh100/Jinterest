@@ -8,17 +8,46 @@ import 'api_client.dart';
 
 class UserService {
   static final Map<String, Future<Uint8List?>> _profileImageCache = {};
+  static final Map<String, Future<User?>> _userCache = {};
   static Future<User?> getUserById(String userId) async {
+    final cached = _userCache[userId];
+
+    if (cached != null) {
+      return cached;
+    }
+
+    final future = _downloadUser(userId);
+
+    _userCache[userId] = future;
+
+    try {
+      return await future;
+    } catch (_) {
+      _userCache.remove(userId);
+      rethrow;
+    }
+  }
+
+  static Future<User?> _downloadUser(String userId) async {
     try {
       final response = await ApiClient.instance.send(
         method: 'GET',
         route: '/users/$userId',
       );
+
       return _userFromResponse(response);
     } on ApiException catch (error) {
       if (error.statusCode != 404) rethrow;
       return null;
     }
+  }
+
+  static void clearUserCache(String userId) {
+    _userCache.remove(userId);
+  }
+
+  static void clearAllUserCache() {
+    _userCache.clear();
   }
 
   static Future<User> updateUser({
@@ -31,7 +60,9 @@ class UserService {
       route: '/users/${user.uuid}',
       payload: {'username': username, 'fullname': fullname},
     );
-    return _userFromResponse(response, password: user.password);
+    final updatedUser = _userFromResponse(response, password: user.password);
+    _userCache[user.uuid] = Future.value(updatedUser);
+    return updatedUser;
   }
 
   static Future<void> changePassword({

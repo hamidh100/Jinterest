@@ -14,6 +14,7 @@ import '../widgets/uploader_tile.dart';
 import '../widgets/server_photo_image.dart';
 import '../widgets/create_album_dialog.dart';
 import '../services/photo_service.dart';
+import '../services/user_service.dart';
 import 'home_screen.dart';
 
 class PhotoDetailsScreen extends StatefulWidget {
@@ -449,11 +450,7 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ProfileAvatar(
-              userId: comment.userID,
-              username: comment.username,
-              radius: 16,
-            ),
+            ProfileAvatar(userId: comment.userID, radius: 16),
 
             const SizedBox(width: 12),
 

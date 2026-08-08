@@ -889,10 +889,16 @@ class _AlbumCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authUser = context.read<AuthProvider>().currentUser;
     final photoProvider = context.watch<PhotoProvider>();
 
     final albumPhotos = photoProvider.photos
-        .where((photo) => album.photoIDs.contains(photo.uuid))
+        .where(
+          (photo) =>
+              album.photoIDs.contains(photo.uuid) &&
+              (photo.isPublic ||
+                  (authUser != null && photo.ownerID == authUser.uuid)),
+        )
         .toList();
 
     final coverPhoto = albumPhotos.isNotEmpty ? albumPhotos.first : null;
@@ -944,7 +950,7 @@ class _AlbumCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '${album.photoIDs.length} ${album.photoIDs.length == 1 ? 'photo' : 'photos'}',
+                      '${albumPhotos.length} ${albumPhotos.length == 1 ? 'photo' : 'photos'}',
                       style: const TextStyle(color: Colors.grey),
                     ),
                   ],
