@@ -14,6 +14,7 @@ import '../providers/snackbar_fab_provider.dart';
 import '../providers/theme_provider.dart';
 import '../services/user_service.dart';
 import '../utils/validators.dart';
+import '../widgets/follow_button.dart';
 import 'followers_screen.dart';
 import '../widgets/profile_avatar.dart';
 import '../widgets/server_photo_image.dart';
@@ -34,7 +35,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   User? _editedUser;
   User? _viewedUser;
   bool _isLoadingUser = false;
-  bool _isUpdatingFollow = false;
 
   @override
   void initState() {
@@ -131,9 +131,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               if (!isOwnProfile) ...[
                 const SizedBox(height: 20),
-                _buildFollowButton(
-                  isFollowing: authUser.followingIDs.contains(user.uuid),
-                  onPressed: () => _toggleFollow(authUser, user),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: FollowButton(
+                    followerId: authUser.uuid,
+                    followedId: user.uuid,
+                    isFollowing: authUser.followingIDs.contains(user.uuid),
+                    width: double.infinity,
+                    height: 48,
+                    style: FollowButtonStyle.profile,
+                    onChanged: (isFollowing) async {
+                      await _onProfileFollowChanged(
+                        currentUser: authUser,
+                        viewedUser: user,
+                        isFollowing: isFollowing,
+                      );
+                    },
+                  ),
                 ),
               ],
 
@@ -163,7 +177,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Builds the app bar button that switches between light and dark mode.
+  Future<void> _onProfileFollowChanged({
+    required User currentUser,
+    required User viewedUser,
+    required bool isFollowing,
+  }) async {
+    final followingIds = List<String>.from(currentUser.followingIDs);
+    final followerIds = List<String>.from(viewedUser.followerIDs);
+    if (isFollowing) {
+      if (!followingIds.contains(viewedUser.uuid)) {
+        followingIds.add(viewedUser.uuid);
+      }
+      if (!followerIds.contains(currentUser.uuid)) {
+        followerIds.add(currentUser.uuid);
+      }
+    } else {
+      followingIds.remove(viewedUser.uuid);
+      followerIds.remove(currentUser.uuid);
+    }
+    final updatedCurrentUser = _copyUser(
+      currentUser,
+      followingIDs: followingIds,
+    );
+    final updatedViewedUser = _copyUser(viewedUser, followerIDs: followerIds);
+    if (!mounted) return;
+    await context.read<AuthProvider>().updateCurrentUser(updatedCurrentUser);
+    if (!mounted) return;
+    setState(() {
+      _viewedUser = updatedViewedUser;
+    });
+  }
+
   Widget _buildThemeToggleButton() {
     final themeProvider = context.watch<ThemeProvider>();
 
@@ -334,89 +378,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
     );
-  }
-
-  Widget _buildFollowButton({
-    required bool isFollowing,
-    required VoidCallback onPressed,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 48),
-            backgroundColor: isFollowing
-                ? Colors.grey.shade300
-                : Theme.of(context).colorScheme.primary,
-            foregroundColor: isFollowing ? Colors.black87 : Colors.white,
-          ),
-          onPressed: _isUpdatingFollow ? null : onPressed,
-          child: Text(
-            _isUpdatingFollow
-                ? 'Updating...'
-                : isFollowing
-                ? 'Unfollow'
-                : 'Follow',
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _toggleFollow(User currentUser, User viewedUser) async {
-    final isFollowing = currentUser.followingIDs.contains(viewedUser.uuid);
-    setState(() => _isUpdatingFollow = true);
-
-    try {
-      if (isFollowing) {
-        await UserService.unfollow(
-          followerId: currentUser.uuid,
-          followedId: viewedUser.uuid,
-        );
-      } else {
-        await UserService.follow(
-          followerId: currentUser.uuid,
-          followedId: viewedUser.uuid,
-        );
-      }
-
-      final followingIds = List<String>.from(currentUser.followingIDs);
-      final followerIds = List<String>.from(viewedUser.followerIDs);
-      if (isFollowing) {
-        followingIds.remove(viewedUser.uuid);
-        followerIds.remove(currentUser.uuid);
-      } else {
-        followingIds.add(viewedUser.uuid);
-        followerIds.add(currentUser.uuid);
-      }
-
-      if (!mounted) return;
-      await context.read<AuthProvider>().updateCurrentUser(
-        _copyUser(currentUser, followingIDs: followingIds),
-      );
-      if (!mounted) return;
-      setState(
-        () => _viewedUser = _copyUser(viewedUser, followerIDs: followerIds),
-      );
-    } catch (error) {
-      if (!mounted) return;
-      context.read<SnackbarFabProvider>().showSnackBar(
-        context,
-        SnackBar(
-          content: Text('Could not update follow: $error'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    } finally {
-      if (mounted) setState(() => _isUpdatingFollow = false);
-    }
   }
 
   User _copyUser(

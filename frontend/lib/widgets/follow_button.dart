@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:jinterest/providers/snackbar_fab_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../services/user_service.dart';
+
+enum FollowButtonStyle { compact, profile }
 
 class FollowButton extends StatefulWidget {
   const FollowButton({
@@ -11,12 +15,19 @@ class FollowButton extends StatefulWidget {
     required this.followedId,
     required this.isFollowing,
     this.onChanged,
+    this.width = 110,
+    this.height = 36,
+    this.style = FollowButtonStyle.compact,
   });
 
   final String followerId;
   final String followedId;
   final bool isFollowing;
-  final ValueChanged<bool>? onChanged;
+  final FutureOr<void> Function(bool isFollowing)? onChanged;
+
+  final double width;
+  final double height;
+  final FollowButtonStyle style;
 
   @override
   State<FollowButton> createState() => _FollowButtonState();
@@ -32,9 +43,9 @@ class _FollowButtonState extends State<FollowButton> {
       _isLoading = true;
     });
 
-    try {
-      final newFollowingState = !widget.isFollowing;
+    final newFollowingState = !widget.isFollowing;
 
+    try {
       if (widget.isFollowing) {
         await UserService.unfollow(
           followerId: widget.followerId,
@@ -47,14 +58,16 @@ class _FollowButtonState extends State<FollowButton> {
         );
       }
 
-      widget.onChanged?.call(newFollowingState);
-    } catch (_) {
+      if (!mounted) return;
+
+      await widget.onChanged?.call(newFollowingState);
+    } catch (error) {
       if (!mounted) return;
 
       context.read<SnackbarFabProvider>().showSnackBar(
         context,
         SnackBar(
-          content: Text('Could not update follow status'),
+          content: const Text('Could not update follow status'),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -78,12 +91,12 @@ class _FollowButtonState extends State<FollowButton> {
 
     if (_isLoading) {
       return SizedBox(
-        width: 110,
-        height: 36,
+        width: widget.width,
+        height: widget.height,
         child: Center(
           child: SizedBox(
-            width: 18,
-            height: 18,
+            width: widget.style == FollowButtonStyle.profile ? 20 : 18,
+            height: widget.style == FollowButtonStyle.profile ? 20 : 18,
             child: CircularProgressIndicator(
               strokeWidth: 2,
               color: colorScheme.primary,
@@ -93,32 +106,44 @@ class _FollowButtonState extends State<FollowButton> {
       );
     }
 
-    if (widget.isFollowing) {
+    if (widget.style == FollowButtonStyle.profile) {
       return SizedBox(
-        width: 110,
-        height: 36,
-        child: OutlinedButton(
+        width: widget.width,
+        height: widget.height,
+        child: ElevatedButton(
           onPressed: _toggleFollow,
-          style: OutlinedButton.styleFrom(
-            foregroundColor: colorScheme.onSurface,
-            side: BorderSide(color: colorScheme.outline),
+          style: ElevatedButton.styleFrom(
+            minimumSize: Size(widget.width, widget.height),
+            backgroundColor: widget.isFollowing
+                ? Colors.grey.shade300
+                : colorScheme.primary,
+            foregroundColor: widget.isFollowing ? Colors.black87 : Colors.white,
           ),
-          child: const Text('Following'),
+          child: Text(widget.isFollowing ? 'Unfollow' : 'Follow'),
         ),
       );
     }
 
     return SizedBox(
-      width: 110,
-      height: 36,
-      child: FilledButton(
-        onPressed: _toggleFollow,
-        style: FilledButton.styleFrom(
-          backgroundColor: colorScheme.primary,
-          foregroundColor: colorScheme.onPrimary,
-        ),
-        child: const Text('Follow'),
-      ),
+      width: widget.width,
+      height: widget.height,
+      child: widget.isFollowing
+          ? OutlinedButton(
+              onPressed: _toggleFollow,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: colorScheme.onSurface,
+                side: BorderSide(color: colorScheme.outline),
+              ),
+              child: const Text('Following'),
+            )
+          : FilledButton(
+              onPressed: _toggleFollow,
+              style: FilledButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+              ),
+              child: const Text('Follow'),
+            ),
     );
   }
 }
