@@ -461,7 +461,7 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
                   Row(
                     children: [
                       Text(
-                        comment.username ?? 'User',
+                        '@${comment.username ?? 'User'}',
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(width: 6),

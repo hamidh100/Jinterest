@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../models/user.dart';
 import '../services/user_service.dart';
+import 'profile_avatar.dart';
 
 class UploaderTile extends StatelessWidget {
   final String ownerID;
@@ -32,10 +33,6 @@ class UploaderTile extends StatelessWidget {
 
     final username = uploader?.username;
 
-    final firstLetter = displayName.isNotEmpty
-        ? displayName[0].toUpperCase()
-        : '?';
-
     final colorScheme = Theme.of(context).colorScheme;
 
     return Padding(
@@ -54,26 +51,10 @@ class UploaderTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Row(
             children: [
-              FutureBuilder<Uint8List?>(
-                future: UserService.getProfileImage(ownerID),
-                builder: (context, snapshot) {
-                  return CircleAvatar(
-                    radius: 22,
-                    backgroundColor: colorScheme.primary,
-                    backgroundImage: snapshot.hasData && snapshot.data != null
-                        ? MemoryImage(snapshot.data!)
-                        : null,
-                    child: snapshot.hasData && snapshot.data != null
-                        ? null
-                        : Text(
-                            firstLetter,
-                            style: TextStyle(
-                              color: colorScheme.onPrimary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                  );
-                },
+              ProfileAvatar(
+                userId: ownerID,
+                fullname: uploader?.fullname,
+                radius: 22,
               ),
               const SizedBox(width: 12),
               Expanded(
