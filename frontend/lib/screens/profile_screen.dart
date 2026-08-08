@@ -72,9 +72,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     final isOwnProfile =
         widget.userId == null || widget.userId == authUser.uuid;
-    final user = isOwnProfile
-        ? (_editedUser?.uuid == authUser.uuid ? _editedUser! : authUser)
-        : _viewedUser;
+    final user = isOwnProfile ? authUser : _viewedUser;
 
     if (user == null) {
       return Scaffold(
@@ -114,8 +112,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          await photoProvider.loadPhotos();
-          await albumProvider.loadAlbums();
+          await Future.wait([
+            photoProvider.loadPhotos(),
+            albumProvider.loadAlbums(),
+            _refreshProfileUser(),
+          ]);
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -206,6 +207,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       _viewedUser = updatedViewedUser;
     });
+  }
+
+  Future<void> _refreshProfileUser() async {
+    final authUser = context.read<AuthProvider>().currentUser;
+    if (authUser == null) return;
+    try {
+      if (widget.userId == null || widget.userId == authUser.uuid) {
+        UserService.clearUserCache(authUser.uuid);
+        final freshUser = await UserService.getUserById(authUser.uuid);
+        if (!mounted || freshUser == null) return;
+        await context.read<AuthProvider>().updateCurrentUser(freshUser);
+      } else {
+        UserService.clearUserCache(widget.userId!);
+        final freshUser = await UserService.getUserById(widget.userId!);
+        if (!mounted || freshUser == null) return;
+        setState(() {
+          _viewedUser = freshUser;
+        });
+      }
+    } catch (error) {
+      debugPrint('Profile refresh failed: $error');
+    }
   }
 
   Widget _buildThemeToggleButton() {
@@ -366,18 +389,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _openUserList(String title, List<String> userIds) {
+  void _openUserList(String title, List<String> userIds) async {
     final authUser = context.read<AuthProvider>().currentUser;
-    Navigator.push(
+    if (authUser == null) return;
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => FollowersScreen(
           title: title,
-          currentUser: authUser!,
+          currentUser: authUser,
           userIds: userIds,
         ),
       ),
     );
+    if (!mounted) return;
+    await _refreshProfileUser();
   }
 
   User _copyUser(
@@ -688,28 +714,23 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
     }
   }
 
-  // Returns the read-only contact text shown in the edit form.
   String get _contact {
     return widget.user.email ?? widget.user.phone ?? 'No contact info';
   }
 
-  // Checks whether the user changed any editable profile field.
   bool get _hasChanges {
     return _fullnameController.text.trim() != widget.user.fullname ||
         _usernameController.text.trim() != (widget.user.username ?? '');
   }
 
-  // Refreshes the save button and avatar preview when text changes.
   void _refreshSaveButton() {
     setState(() {});
   }
 
-  // Saves the form when the username field submits from the keyboard.
   void _submitFromKeyboard(String _) {
     _handleSave();
   }
 
-  // Validates the full name field before saving.
   String? _validateFullname(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Full name required';
@@ -720,7 +741,6 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
     return null;
   }
 
-  // Validates the username field before saving.
   String? _validateUsername(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Username required';
@@ -731,7 +751,6 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
     return null;
   }
 
-  // Builds the avatar preview from the current full name.
   Widget _buildAvatar(String firstLetter) {
     return Center(
       child: CircleAvatar(
@@ -754,28 +773,21 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
     final fullname = _fullnameController.text.trim();
     final firstLetter = fullname.isNotEmpty ? fullname[0].toUpperCase() : '?';
 
-    // Main edit profile page layout.
     return Scaffold(
-      // Top bar for the edit profile page.
       appBar: AppBar(
         title: const Text('Edit Profile'),
         centerTitle: true,
         elevation: 0,
       ),
-      // Scrollable page body so the form fits on small screens.
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
-        // Groups all editable profile fields for validation.
         child: Form(
           key: _formKey,
-          // Stacks the avatar, fields, and save button vertically.
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Shows a live avatar preview from the full name.
               _buildAvatar(firstLetter),
               const SizedBox(height: 28),
-              // Full name input box.
               TextFormField(
                 controller: _fullnameController,
                 textInputAction: TextInputAction.next,
@@ -790,7 +802,6 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
                 validator: _validateFullname,
               ),
               const SizedBox(height: 16),
-              // Username input box.
               TextFormField(
                 controller: _usernameController,
                 textInputAction: TextInputAction.done,
@@ -806,7 +817,6 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
                 validator: _validateUsername,
               ),
               const SizedBox(height: 16),
-              // Read-only contact box.
               TextFormField(
                 initialValue: _contact,
                 enabled: false,
@@ -819,7 +829,6 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-              // Save button for submitting valid profile changes.
               ElevatedButton(
                 onPressed: _hasChanges ? _handleSave : null,
                 style: ElevatedButton.styleFrom(

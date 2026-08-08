@@ -89,6 +89,8 @@ class UserService {
       route: '/users/$followedId/follow',
       payload: {'followerId': followerId},
     );
+    clearUserCache(followerId);
+    clearUserCache(followedId);
   }
 
   static Future<void> unfollow({
@@ -100,6 +102,8 @@ class UserService {
       route: '/users/$followedId/follow',
       payload: {'followerId': followerId},
     );
+    clearUserCache(followerId);
+    clearUserCache(followedId);
   }
 
   static Future<void> updateProfileImage(String userId, File image) async {
