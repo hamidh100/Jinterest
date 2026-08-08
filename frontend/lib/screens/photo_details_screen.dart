@@ -14,7 +14,6 @@ import '../widgets/uploader_tile.dart';
 import '../widgets/server_photo_image.dart';
 import '../widgets/create_album_dialog.dart';
 import '../services/photo_service.dart';
-import '../services/user_service.dart';
 import 'home_screen.dart';
 
 class PhotoDetailsScreen extends StatefulWidget {

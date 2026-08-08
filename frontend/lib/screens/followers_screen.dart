@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/user.dart';
 import '../services/user_service.dart';
+import '../widgets/profile_avatar.dart';
 
 class FollowersScreen extends StatefulWidget {
   final String title;
@@ -58,11 +59,12 @@ class _FollowersScreenState extends State<FollowersScreen> {
               separatorBuilder: (_, _) => const Divider(height: 1),
               itemBuilder: (context, index) {
                 final user = _users[index];
-                final firstLetter = user.fullname.trim().isEmpty
-                    ? '?'
-                    : user.fullname.trim()[0].toUpperCase();
                 return ListTile(
-                  leading: CircleAvatar(child: Text(firstLetter)),
+                  leading: ProfileAvatar(
+                    userId: user.uuid,
+                    fullname: user.fullname,
+                    radius: 22,
+                  ),
                   title: Text(
                     user.fullname.isEmpty ? 'Unknown User' : user.fullname,
                   ),
