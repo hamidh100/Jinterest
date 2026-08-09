@@ -203,6 +203,15 @@ class UserService {
           .map((id) => id.toString())
           .toList(),
       userType: userType,
+      banned: user['banned'] ?? false,
     );
+  }
+
+  static List<User> parseUserList(List<dynamic> list) {
+    return list.map((json) {
+      return _userFromResponse({
+        'payload': {'user': json},
+      });
+    }).toList();
   }
 }

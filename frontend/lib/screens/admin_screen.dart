@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'admin_users_screen.dart';
+import 'admin_photos_screen.dart';
+import 'admin_albums_screen.dart';
+import 'admin_comments_screen.dart';
+import 'admin_audit_screen.dart';
 
 class AdminScreen extends StatelessWidget {
   const AdminScreen({super.key});
@@ -14,7 +19,10 @@ class AdminScreen extends StatelessWidget {
             title: const Text('Users'),
             subtitle: const Text('Manage users and accounts'),
             onTap: () {
-              // Open users screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AdminUsersScreen()),
+              );
             },
           ),
           ListTile(
@@ -22,7 +30,10 @@ class AdminScreen extends StatelessWidget {
             title: const Text('Photos'),
             subtitle: const Text('Manage photos'),
             onTap: () {
-              // Open photos screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AdminPhotosScreen()),
+              );
             },
           ),
           ListTile(
@@ -30,7 +41,10 @@ class AdminScreen extends StatelessWidget {
             title: const Text('Albums'),
             subtitle: const Text('Manage albums'),
             onTap: () {
-              // Open albums screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AdminAlbumsScreen()),
+              );
             },
           ),
           ListTile(
@@ -38,7 +52,10 @@ class AdminScreen extends StatelessWidget {
             title: const Text('Comments'),
             subtitle: const Text('Manage comments'),
             onTap: () {
-              // Open comments screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AdminCommentsScreen()),
+              );
             },
           ),
           ListTile(
@@ -46,7 +63,10 @@ class AdminScreen extends StatelessWidget {
             title: const Text('Audit Log'),
             subtitle: const Text('View administrative actions'),
             onTap: () {
-              // Open audit log
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AdminAuditScreen()),
+              );
             },
           ),
         ],
