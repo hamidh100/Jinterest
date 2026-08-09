@@ -252,43 +252,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          Stack(
-            children: [
-              ProfileAvatar(
-                userId: user.uuid,
-                fullname: user.fullname,
-                radius: 50,
-              ),
-              if (isOwnProfile)
-                Positioned(
-                  right: 0,
-                  bottom: 0,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.black
-                            : Colors.white,
-                        width: 2,
-                      ),
-                    ),
-                    child: CircleAvatar(
-                      radius: 16,
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.edit,
-                          color: Colors.white,
-                          size: 18,
-                        ),
-                        onPressed: () => _pickProfileImage(user.uuid),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
+          ProfileAvatar(userId: user.uuid, fullname: user.fullname, radius: 50),
 
           const SizedBox(height: 16),
 
@@ -311,33 +275,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
     );
-  }
-
-  Future<void> _pickProfileImage(String userId) async {
-    final image = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 85,
-    );
-    if (image == null) return;
-    try {
-      await UserService.updateProfileImage(userId, File(image.path));
-      if (!mounted) return;
-      setState(() {});
-    } catch (error) {
-      if (!mounted) return;
-      context.read<SnackbarFabProvider>().showSnackBar(
-        context,
-        SnackBar(
-          content: Text('Could not upload profile photo: $error'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
   }
 
   Widget _buildStatsRow({
@@ -689,7 +626,6 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
     super.dispose();
   }
 
-  // Validates the form and returns the updated user to the profile screen.
   Future<void> _handleSave() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -760,19 +696,67 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
 
   Widget _buildAvatar(String firstLetter) {
     return Center(
-      child: CircleAvatar(
-        radius: 48,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        child: Text(
-          firstLetter,
-          style: const TextStyle(
-            fontSize: 36,
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+      child: Stack(
+        children: [
+          ProfileAvatar(
+            userId: widget.user.uuid,
+            fullname: firstLetter,
+            radius: 48,
+            backgroundColor: Theme.of(context).colorScheme.primary,
           ),
-        ),
+          Positioned(
+            right: 0,
+            bottom: 0,
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.black
+                      : Colors.white,
+                  width: 2,
+                ),
+              ),
+              child: CircleAvatar(
+                radius: 16,
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                child: IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.white, size: 18),
+                  onPressed: () => _pickProfileImage(widget.user.uuid),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  Future<void> _pickProfileImage(String userId) async {
+    final image = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
+    if (image == null) return;
+    try {
+      await UserService.updateProfileImage(userId, File(image.path));
+      if (!mounted) return;
+      setState(() {});
+    } catch (error) {
+      if (!mounted) return;
+      context.read<SnackbarFabProvider>().showSnackBar(
+        context,
+        SnackBar(
+          content: Text('Could not upload profile photo: $error'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   @override

@@ -26,7 +26,7 @@ class AdminScreen extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.album),
+            leading: const Icon(Icons.photo_album),
             title: const Text('Albums'),
             subtitle: const Text('Manage albums'),
             onTap: () {

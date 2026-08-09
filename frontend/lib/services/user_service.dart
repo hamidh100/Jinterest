@@ -120,6 +120,7 @@ class UserService {
       },
     );
     clearProfileImageCache(userId);
+    clearUserCache(userId);
   }
 
   static Future<Uint8List?> getProfileImage(String userId) async {
