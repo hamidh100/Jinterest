@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 
 import javax.imageio.ImageIO;
@@ -36,7 +35,9 @@ import models.Like;
 import models.OurObjects;
 import models.Photo;
 import models.User;
+import models.UserType;
 import services.AlbumService;
+import services.AuditService;
 import services.PhotoService;
 import services.SearchService;
 import services.UserService;
@@ -49,6 +50,9 @@ public class Router {
             if (request.getRoute() == null) return Response.badRequest("Route is required");
             String method = Helper.toUpper(request.getMethod().trim());
             String route = normalizeRoute(request.getRoute());
+            if (isAdminRoute(route)) {
+                return handleAdmin(request, route);
+            }
             switch (method) {
                 case "GET":
                     return handleGet(request, route);
@@ -67,6 +71,156 @@ public class Router {
             return Response.serverError("Internal server error");
         }
     }
+
+    private User getRequester(Request request) {
+        String username = request.getUsername();
+        if (username == null) return null;
+        UUID id = OurObjects.usersLowercase.get(username.toLowerCase());
+        if (id != null) return OurObjects.users.get(id);
+        id = OurObjects.emailToUserID.get(username.toLowerCase());
+        if (id != null) return OurObjects.users.get(id);
+        id = OurObjects.phoneToUserID.get(username);
+        if (id != null) return OurObjects.users.get(id);
+        return null;
+    }
+
+
+    private Response handleAdmin(Request request, String route) {
+        User requester = getRequester(request);
+        if (requester == null || requester.getUserType() != UserType.ADMIN) {
+            return Response.forbidden("Admin access required");
+        }
+        switch (route) {
+            case "/admin/users":
+                return handleAdminGetUsers();
+            case "/admin/photos":
+                return handleAdminGetPhotos();
+            case "/admin/albums":
+                return handleAdminGetAlbums();
+            case "/admin/comments":
+                return handleAdminGetComments();
+            case "/admin/audit":
+                return handleAdminGetAuditLog();
+            default:
+                if (route.startsWith("/admin/users/") && route.endsWith("/ban")) {
+                    String id = getPart(route, 3);
+                    return handleAdminBanUser(request, id);
+                }
+                if (route.startsWith("/admin/users/") && route.endsWith("/unban")) {
+                    String id = getPart(route, 3);
+                    return handleAdminUnbanUser(request, id);
+                }
+                if (route.startsWith("/admin/users/")) {
+                    String id = getPart(route, 3);
+                    return handleAdminDeleteUser(request, id);
+                }
+                if (route.startsWith("/admin/photos/")) {
+                    String id = getPart(route, 3);
+                    return handleAdminDeletePhoto(request, id);
+                }
+                if (route.startsWith("/admin/comments/")) {
+                    String id = getPart(route, 3);
+                    return handleAdminDeleteComment(request, id);
+                }
+                return Response.notFound("Admin route not found");
+        }
+    }
+
+    private Response handleAdminGetUsers() {
+        JsonArray arr = new JsonArray();
+        for (User user : OurObjects.users.values()) {
+            arr.add(userToJson(user));
+        }
+        JsonObject payload = new JsonObject();
+        payload.add("users", arr);
+        return Response.ok("All users", payload);
+    }
+
+    private Response handleAdminGetPhotos() {
+        JsonArray arr = new JsonArray();
+        for (Photo photo : OurObjects.photos.values()) {
+            arr.add(photoToJson(photo));
+        }
+        JsonObject payload = new JsonObject();
+        payload.add("photos", arr);
+        return Response.ok("All photos", payload);
+    }
+
+    private Response handleAdminGetAlbums() {
+        JsonArray arr = new JsonArray();
+        for (Album album : OurObjects.albums.values()) {
+            arr.add(albumToJson(album));
+        }
+        JsonObject payload = new JsonObject();
+        payload.add("albums", arr);
+        return Response.ok("All albums", payload);
+    }
+
+    private Response handleAdminGetComments() {
+        JsonArray arr = new JsonArray();
+        for (Comment comment : OurObjects.comments.values()) {
+            arr.add(commentToJson(comment));
+        }
+        JsonObject payload = new JsonObject();
+        payload.add("comments", arr);
+        return Response.ok("All comments", payload);
+    }
+
+    private Response handleAdminGetAuditLog() {
+        JsonArray arr = new JsonArray();
+        for (String log : AuditService.logs) {
+            arr.add(new JsonPrimitive(log));
+        }
+        JsonObject payload = new JsonObject();
+        payload.add("audit", arr);
+        return Response.ok("Audit log", payload);
+    }
+
+
+    private Response handleAdminDeleteUser(Request request, String userId) {
+        return handleDeleteUser(userId);
+    }
+
+    private Response handleAdminBanUser(Request request, String userId) {
+        UUID uuid = parseUuid(userId);
+        User user = OurObjects.users.get(uuid);
+        if (user == null) return Response.notFound("User does not exist");
+        user.setBanned(true);
+        try {
+            DatabaseManager.save();
+        } catch (Exception e) {
+            AuditService.addLog(getRequester(request).getUuid().toString(), "Couldn't ban user " + userId);
+            return Response.serverError("Couldn't ban the user");
+        }
+        AuditService.addLog(getRequester(request).getUuid().toString(), "Banned user " + userId);
+        return Response.ok("User banned");
+    }
+
+    private Response handleAdminUnbanUser(Request request, String userId) {
+        UUID uuid = parseUuid(userId);
+        User user = OurObjects.users.get(uuid);
+        if (user == null) return Response.notFound("User does not exist");
+        user.setBanned(false);
+        try {
+            DatabaseManager.save();
+        } catch (Exception e) {
+            AuditService.addLog(getRequester(request).getUuid().toString(), "Couldn't unban user " + userId);
+            return Response.serverError("Couldn't unban the user");
+        }
+        AuditService.addLog(getRequester(request).getUuid().toString(), "Unbanned user " + userId);
+        return Response.ok("User unbanned");
+    }
+
+    private Response handleAdminDeletePhoto(Request request, String photoId) {
+        AuditService.addLog(getRequester(request).getUuid().toString(), "Deleted photo " + photoId);
+        return handleDeletePhoto(request, photoId);
+    }
+
+    private Response handleAdminDeleteComment(Request request, String commentId) {
+        AuditService.addLog(getRequester(request).getUuid().toString(), "Deleted comment " + commentId);
+        return handleDeleteComment(request, commentId);
+    }
+
 
     private Response handleGet(Request request, String route) {
         switch (route) {
@@ -248,6 +402,10 @@ public class Router {
         return parts.length == 3 && parts[0].equals("users") && parts[2].equals("follow");
     }
 
+    private boolean isAdminRoute(String route) {
+        return route.startsWith("/admin");
+    }
+
     private String[] splitRoute(String route) {
         if (route.equals("/")) return new String[0];
         return route.substring(1).split("/");
@@ -263,7 +421,7 @@ public class Router {
         return route.equals("/ping") || route.equals("/photos") || route.equals("/albums") ||
                 route.equals("/search") || route.equals("/auth/signup") || route.equals("/auth/login") ||
                 isPhotoImageRoute(route) || isPhotoRoute(route) || isAlbumRoute(route) || isUserRoute(route) || isUserImageRoute(route) || isCommentRoute(route) ||
-                isPhotoLikesRoute(route) || isPhotoCommentsRoute(route) || isUserFollowRoute(route);
+                isPhotoLikesRoute(route) || isPhotoCommentsRoute(route) || isUserFollowRoute(route) || isAdminRoute(route);
     }
 
     private Response handlePing() {

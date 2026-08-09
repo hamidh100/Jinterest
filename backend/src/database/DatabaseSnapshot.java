@@ -7,7 +7,10 @@ import models.Like;
 import models.OurObjects;
 import models.Photo;
 import models.User;
+import services.AuditService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,6 +25,7 @@ public class DatabaseSnapshot {
     public Map<UUID, Like> likes = new ConcurrentHashMap<>();
     public Map<UUID, Comment> comments = new ConcurrentHashMap<>();
     public Map<UUID, Caption> captions = new ConcurrentHashMap<>();
+    public List<String> auditLogs = new ArrayList<>();
 
     public DatabaseSnapshot() {
     }
@@ -39,6 +43,7 @@ public class DatabaseSnapshot {
             snapshot.likes.putAll(OurObjects.likes);
             snapshot.comments.putAll(OurObjects.comments);
             snapshot.captions.putAll(OurObjects.captions);
+            snapshot.auditLogs.addAll(AuditService.logs);
             return snapshot;
         } finally {
             OurObjects.DATABASE_LOCK.readLock().unlock();
@@ -55,5 +60,7 @@ public class DatabaseSnapshot {
         OurObjects.likes = new ConcurrentHashMap<>(likes == null ? Map.of() : likes);
         OurObjects.comments = new ConcurrentHashMap<>(comments == null ? Map.of() : comments);
         OurObjects.captions = new ConcurrentHashMap<>(captions == null ? Map.of() : captions);
+        AuditService.logs.clear();
+        AuditService.logs.addAll(auditLogs == null ? List.of() : auditLogs);
     }
 }
