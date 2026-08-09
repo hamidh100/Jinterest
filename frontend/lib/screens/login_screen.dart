@@ -66,11 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Jinterest Login'),
-        centerTitle: true,
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text(''), centerTitle: true, elevation: 0),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Form(
@@ -79,16 +75,41 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 40),
-              Icon(
-                Icons.image,
-                size: 80,
-                color: Theme.of(context).colorScheme.primary,
+              Row(
+                children: [
+                  Expanded(child: SizedBox()),
+                  Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        fit: BoxFit.contain,
+                        image: AssetImage('assets/icon/logo.png'),
+                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(16)),
+                    ),
+                  ),
+                  Expanded(child: SizedBox()),
+                ],
               ),
-              const SizedBox(height: 40),
-              const Text(
+              const SizedBox(height: 16),
+
+              Text(
                 'Welcome Back',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 8),
+
+              Text(
+                'Log in to continue to Jinterest',
+                textAlign: TextAlign.center,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
               ),
               const SizedBox(height: 32),
 

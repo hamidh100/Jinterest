@@ -73,22 +73,6 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  /*void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Signup Error'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }*/
-
   void _showErrorToast(String message) {
     context.read<SnackbarFabProvider>().showSnackBar(
       context,
@@ -105,11 +89,7 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Account'),
-        centerTitle: true,
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text(''), centerTitle: true, elevation: 0),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Form(
@@ -118,13 +98,45 @@ class _SignupScreenState extends State<SignupScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 20),
-              Icon(Icons.image, size: 80, color: Theme.of(context).colorScheme.primary),
-              const SizedBox(height: 20),
-              const Text(
+
+              Row(
+                children: [
+                  Expanded(child: SizedBox()),
+                  Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        fit: BoxFit.contain,
+                        image: AssetImage('assets/icon/logo.png'),
+                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(16)),
+                    ),
+                  ),
+                  Expanded(child: SizedBox()),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              Text(
                 'Join Jinterest',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
+
+              const SizedBox(height: 8),
+
+              Text(
+                'Create an account and start exploring',
+                textAlign: TextAlign.center,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+              ),
+
               const SizedBox(height: 32),
 
               // Full name field

@@ -19,6 +19,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void _navigateToNextScreen() async {
     final authProvider = context.read<AuthProvider>();
+
     await authProvider.restoreSession();
     await Future.delayed(const Duration(seconds: 2));
 
@@ -36,23 +37,40 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = Theme.of(context).colorScheme.primary;
     return Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.image, size: 80, color: Theme.of(context).colorScheme.primary),
+            Row(
+              children: [
+                Expanded(child: SizedBox()),
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      fit: BoxFit.contain,
+                      image: AssetImage('assets/icon/logo.png'),
+                    ),
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                  ),
+                ),
+                Expanded(child: SizedBox()),
+              ],
+            ),
             const SizedBox(height: 20),
             Text(
               'Jinterest',
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
+                color: primaryColor,
               ),
             ),
             const SizedBox(height: 40),
-            CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
+            CircularProgressIndicator(color: primaryColor),
           ],
         ),
       ),
