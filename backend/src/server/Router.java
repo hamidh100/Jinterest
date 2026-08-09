@@ -1317,6 +1317,7 @@ public class Router {
             followingIds.add(followingId.toString());
         }
         json.add("followingIds", followingIds);
+        json.addProperty("banned", user.isBanned());
         return json;
     }
 
