@@ -155,6 +155,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const Divider(height: 32),
 
               if (isOwnProfile) ...[
+                if (authProvider.isAdmin)
+                  IconButton(
+                    onPressed: () => Navigator.pushNamed(context, '/admin'),
+                    icon: Icon(Icons.admin_panel_settings),
+                  ),
+
                 _buildEditProfileButton(context),
                 const SizedBox(height: 20),
               ],

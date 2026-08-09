@@ -14,6 +14,7 @@ import 'screens/profile_screen.dart';
 import 'screens/upload_screen.dart';
 import 'screens/photo_details_screen.dart';
 import 'screens/album_details_screen.dart';
+import 'screens/admin_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -57,7 +58,9 @@ class MyApp extends StatelessWidget {
               onSurface: Colors.white,
             ),
             scaffoldBackgroundColor: AppPalette.background,
-            appBarTheme: const AppBarTheme(backgroundColor: AppPalette.background),
+            appBarTheme: const AppBarTheme(
+              backgroundColor: AppPalette.background,
+            ),
             useMaterial3: true,
           ),
           debugShowCheckedModeBanner: false,
@@ -82,6 +85,7 @@ class MyApp extends StatelessWidget {
                   ModalRoute.of(context)!.settings.arguments as String;
               return AlbumDetailsScreen(albumId: albumId);
             },
+            '/admin': (_) => const AdminScreen(),
           },
         ),
       ),
