@@ -35,6 +35,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   User? _editedUser;
   User? _viewedUser;
   bool _isLoadingUser = false;
+  int _profileImageRefreshKey = 0;
 
   @override
   void initState() {
@@ -56,6 +57,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (mounted) setState(() => _isLoadingUser = false);
       }
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final authProvider = context.watch<AuthProvider>();
+
+    if (_editedUser != authProvider.currentUser) {
+      setState(() {
+        _profileImageRefreshKey++;
+        _editedUser = authProvider.currentUser;
+      });
+    }
   }
 
   @override
@@ -221,11 +236,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       if (widget.userId == null || widget.userId == authUser.uuid) {
         UserService.clearUserCache(authUser.uuid);
+        UserService.clearProfileImageCache(authUser.uuid);
         final freshUser = await UserService.getUserById(authUser.uuid);
         if (!mounted || freshUser == null) return;
         await context.read<AuthProvider>().updateCurrentUser(freshUser);
       } else {
         UserService.clearUserCache(widget.userId!);
+        UserService.clearProfileImageCache(authUser.uuid);
         final freshUser = await UserService.getUserById(widget.userId!);
         if (!mounted || freshUser == null) return;
         setState(() {
@@ -252,7 +269,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          ProfileAvatar(userId: user.uuid, fullname: user.fullname, radius: 50),
+          ProfileAvatar(
+            userId: user.uuid,
+            fullname: user.fullname,
+            radius: 50,
+            imageVersion: _profileImageRefreshKey,
+          ),
 
           const SizedBox(height: 16),
 
@@ -387,7 +409,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         onPressed: user == null
             ? null
             : () async {
-                final updatedUser = await Navigator.push<User>(
+                final result = await Navigator.push<_EditProfileResult>(
                   context,
                   MaterialPageRoute(
                     builder: (_) => _EditProfileScreen(
@@ -397,16 +419,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 );
 
-                if (updatedUser == null || !context.mounted) return;
+                if (result == null || !context.mounted) return;
+
+                if (result.profileImageChanged) {
+                  UserService.clearProfileImageCache(user.uuid);
+                }
 
                 await context.read<AuthProvider>().updateCurrentUser(
-                  updatedUser,
+                  result.user!,
                 );
 
                 if (!context.mounted) return;
 
                 setState(() {
-                  _editedUser = updatedUser;
+                  _editedUser = result.user;
+
+                  if (result.profileImageChanged) {
+                    _profileImageRefreshKey++;
+                  }
                 });
 
                 context.read<SnackbarFabProvider>().showSnackBar(
@@ -609,6 +639,8 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _fullnameController;
   late final TextEditingController _usernameController;
+  bool _profileImageChanged = false;
+  int _profileImageVersion = 0;
 
   @override
   void initState() {
@@ -640,7 +672,13 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
       );
 
       if (!mounted) return;
-      Navigator.pop(context, updatedUser);
+      Navigator.pop(
+        context,
+        _EditProfileResult(
+          user: updatedUser,
+          profileImageChanged: _profileImageChanged,
+        ),
+      );
     } catch (error) {
       context.read<SnackbarFabProvider>().showSnackBar(
         context,
@@ -703,6 +741,7 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
             fullname: firstLetter,
             radius: 48,
             backgroundColor: Theme.of(context).colorScheme.primary,
+            imageVersion: _profileImageVersion,
           ),
           Positioned(
             right: 0,
@@ -740,8 +779,15 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
     if (image == null) return;
     try {
       await UserService.updateProfileImage(userId, File(image.path));
-      if (!mounted) return;
-      setState(() {});
+      UserService.clearProfileImageCache(userId);
+      await context.read<AuthProvider>().updateCurrentUser(
+        widget.user.copyWith(),
+      );
+
+      setState(() {
+        _profileImageChanged = true;
+        _profileImageVersion++;
+      });
     } catch (error) {
       if (!mounted) return;
       context.read<SnackbarFabProvider>().showSnackBar(
@@ -1159,4 +1205,11 @@ class _StatItem extends StatelessWidget {
       ),
     );
   }
+}
+
+class _EditProfileResult {
+  final User? user;
+  final bool profileImageChanged;
+
+  const _EditProfileResult({this.user, this.profileImageChanged = false});
 }

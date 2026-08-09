@@ -13,6 +13,7 @@ class ProfileAvatar extends StatefulWidget {
     this.radius = 20,
     this.backgroundColor,
     this.textStyle,
+    this.imageVersion = 0,
   });
 
   final String userId;
@@ -20,6 +21,7 @@ class ProfileAvatar extends StatefulWidget {
   final double radius;
   final Color? backgroundColor;
   final TextStyle? textStyle;
+  final int imageVersion;
 
   @override
   State<ProfileAvatar> createState() => _ProfileAvatarState();
@@ -32,11 +34,16 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
   @override
   void initState() {
     super.initState();
+    _loadAvatar();
+  }
 
+  void _loadAvatar() {
     _imageFuture = UserService.getProfileImage(widget.userId);
 
     if (widget.fullname == null) {
       _userFuture = UserService.getUserById(widget.userId);
+    } else {
+      _userFuture = null;
     }
   }
 
@@ -44,15 +51,13 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
   void didUpdateWidget(ProfileAvatar oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.userId != widget.userId) {
-      _imageFuture = UserService.getProfileImage(widget.userId);
+    final userChanged = oldWidget.userId != widget.userId;
+    final imageChanged = oldWidget.imageVersion != widget.imageVersion;
+    final fullnameChanged = oldWidget.fullname != widget.fullname;
 
-      if (widget.fullname == null) {
-        _userFuture = UserService.getUserById(widget.userId);
-      } else {
-        _userFuture = null;
-      }
-    } else if (oldWidget.fullname != widget.fullname) {
+    if (userChanged || imageChanged) {
+      _loadAvatar();
+    } else if (fullnameChanged) {
       if (widget.fullname == null) {
         _userFuture = UserService.getUserById(widget.userId);
       } else {
@@ -69,10 +74,12 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
         if (widget.fullname != null) {
           return _buildAvatar(context, imageSnapshot.data, widget.fullname);
         }
+
         return FutureBuilder<User?>(
           future: _userFuture,
           builder: (context, userSnapshot) {
             final fullname = userSnapshot.data?.fullname;
+
             return _buildAvatar(context, imageSnapshot.data, fullname);
           },
         );
