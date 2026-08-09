@@ -2,7 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../exceptions/exceptions.dart';
+import '../providers/auth_provider.dart';
 
 class ApiClient {
   ApiClient._();
@@ -33,9 +36,13 @@ class ApiClient {
     try {
       socket = await Socket.connect(host, port, timeout: connectionTimeout);
 
+      final prefs = await SharedPreferences.getInstance();
+      final username = prefs.getString('session_username');
+
       final request = <String, dynamic>{
         'method': method,
         'route': route,
+        'username': username,
         'payload': payload ?? <String, dynamic>{},
       };
 
