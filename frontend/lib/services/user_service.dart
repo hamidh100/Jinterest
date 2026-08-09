@@ -183,6 +183,11 @@ class UserService {
       throw StateError('Server returned an invalid user');
     }
     final user = payload['user'] as Map<String, dynamic>;
+    final userTypeText = user['userType']?.toString().toUpperCase();
+    final userType = switch (userTypeText) {
+      'ADMIN' => UserType.admin,
+      _ => UserType.normal,
+    };
     return User(
       uuid: user['id']?.toString() ?? '',
       username: user['username']?.toString(),
@@ -196,6 +201,7 @@ class UserService {
       followingIDs: (user['followingIds'] as List? ?? const [])
           .map((id) => id.toString())
           .toList(),
+      userType: userType,
     );
   }
 }

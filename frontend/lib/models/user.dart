@@ -1,3 +1,5 @@
+enum UserType { normal, admin }
+
 class User {
   final String uuid;
   final String? username;
@@ -8,6 +10,7 @@ class User {
   final bool banned;
   final List<String> followerIDs;
   final List<String> followingIDs;
+  final UserType userType;
 
   User({
     required this.uuid,
@@ -19,5 +22,6 @@ class User {
     this.banned = false,
     this.followerIDs = const [],
     this.followingIDs = const [],
+    required this.userType,
   });
 }

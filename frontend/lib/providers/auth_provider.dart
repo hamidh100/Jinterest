@@ -14,6 +14,7 @@ class AuthProvider extends ChangeNotifier {
   static const _sessionFullnameKey = 'session_fullname';
   static const _sessionFollowerIdsKey = 'session_follower_ids';
   static const _sessionFollowingIdsKey = 'session_following_ids';
+  static const _sessionUserTypeKey = 'session_user_type';
 
   User? _currentUser;
   bool _isLoggedIn = false;
@@ -22,6 +23,7 @@ class AuthProvider extends ChangeNotifier {
   User? get currentUser => _currentUser;
   bool get isLoggedIn => _isLoggedIn;
   String? get errorMessage => _errorMessage;
+  bool get isAdmin => _currentUser?.userType == UserType.admin;
 
   Future<bool> signup({
     required String identifier,
@@ -119,6 +121,10 @@ class AuthProvider extends ChangeNotifier {
 
     if (userId == null || userId.isEmpty) return;
 
+    final userTypeText = preferences.getString(_sessionUserTypeKey);
+
+    final userType = userTypeText == 'admin' ? UserType.admin : UserType.normal;
+
     _currentUser = User(
       uuid: userId,
       username: preferences.getString(_sessionUsernameKey),
@@ -130,6 +136,7 @@ class AuthProvider extends ChangeNotifier {
           preferences.getStringList(_sessionFollowerIdsKey) ?? const [],
       followingIDs:
           preferences.getStringList(_sessionFollowingIdsKey) ?? const [],
+      userType: userType,
     );
     _isLoggedIn = true;
     notifyListeners();
@@ -147,6 +154,7 @@ class AuthProvider extends ChangeNotifier {
     await preferences.setString(_sessionFullnameKey, user.fullname);
     await preferences.setStringList(_sessionFollowerIdsKey, user.followerIDs);
     await preferences.setStringList(_sessionFollowingIdsKey, user.followingIDs);
+    await preferences.setString(_sessionUserTypeKey, user.userType.name);
   }
 
   Future<void> _clearSession() async {
@@ -158,6 +166,7 @@ class AuthProvider extends ChangeNotifier {
     await preferences.remove(_sessionFullnameKey);
     await preferences.remove(_sessionFollowerIdsKey);
     await preferences.remove(_sessionFollowingIdsKey);
+    await preferences.remove(_sessionUserTypeKey);
   }
 
   Future<void> _setOptionalString(
@@ -182,6 +191,11 @@ class AuthProvider extends ChangeNotifier {
       );
     }
     final user = payload['user'] as Map<String, dynamic>;
+    final userTypeText = user['userType']?.toString().toUpperCase();
+    final userType = switch (userTypeText) {
+      'ADMIN' => UserType.admin,
+      _ => UserType.normal,
+    };
     return User(
       uuid: user['id']?.toString() ?? '',
       username: user['username']?.toString(),
@@ -195,6 +209,7 @@ class AuthProvider extends ChangeNotifier {
       followingIDs: (user['followingIds'] as List? ?? const [])
           .map((id) => id.toString())
           .toList(),
+      userType: userType,
     );
   }
 }

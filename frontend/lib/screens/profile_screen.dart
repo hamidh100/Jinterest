@@ -421,6 +421,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       banned: user.banned,
       followerIDs: followerIDs ?? user.followerIDs,
       followingIDs: followingIDs ?? user.followingIDs,
+      userType: user.userType,
     );
   }
 
