@@ -170,13 +170,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const Divider(height: 32),
 
               if (isOwnProfile) ...[
-                if (authProvider.isAdmin)
-                  IconButton(
-                    onPressed: () => Navigator.pushNamed(context, '/admin'),
-                    icon: Icon(Icons.admin_panel_settings),
+                if (authProvider.isAdmin) ...[
+                  Stack(
+                    children: [
+                      Expanded(child: _buildEditProfileButton(context, 24)),
+                      Positioned(
+                        left: 24,
+                        child: ElevatedButton(
+                          onPressed: () =>
+                              Navigator.pushNamed(context, '/admin'),
+                          style: ElevatedButton.styleFrom(
+                            shadowColor: Colors.white,
+                            fixedSize: const Size(48, 48),
+                            minimumSize: Size.zero,
+                            padding: EdgeInsets.zero,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
+                          ),
+                          child: Icon(
+                            Icons.admin_panel_settings,
+                            size: 28,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-
-                _buildEditProfileButton(context),
+                ] else
+                  _buildEditProfileButton(context, 24),
                 const SizedBox(height: 20),
               ],
 
@@ -191,7 +213,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               else
                 _buildAlbumsSection(userAlbums),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 80),
             ],
           ),
         ),
@@ -390,7 +412,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildEditProfileButton(BuildContext context) {
+  Widget _buildEditProfileButton(BuildContext context, double leftPadding) {
     final authUser = context.read<AuthProvider>().currentUser;
     final authProvider = context.read<AuthProvider>();
     final user = authUser == null
@@ -400,7 +422,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         : authUser;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: EdgeInsets.fromLTRB(leftPadding, 0, 24, 0),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           minimumSize: const Size(double.infinity, 48),

@@ -47,7 +47,7 @@ class _LikesScreenState extends State<LikesScreen> {
           : likedPhotos.isEmpty
           ? _buildEmptyState()
           : GridView.builder(
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 150),
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 210),
               itemCount: likedPhotos.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,

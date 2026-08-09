@@ -148,7 +148,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
         crossAxisCount: 2,
         mainAxisSpacing: 3,
         crossAxisSpacing: 2,
-        padding: const EdgeInsets.fromLTRB(1, 120, 1, 150),
+        padding: const EdgeInsets.fromLTRB(1, 120, 1, 210),
         itemCount: photos.length,
         itemBuilder: (context, index) {
           return _ExplorePhotoTile(photo: photos[index]);
@@ -162,7 +162,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
       }
       return GridView.builder(
         controller: _scrollController,
-        padding: const EdgeInsets.fromLTRB(12, 120, 12, 150),
+        padding: const EdgeInsets.fromLTRB(12, 120, 12, 210),
         itemCount: albums.length,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
@@ -188,7 +188,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
     return GridView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.fromLTRB(12, 120, 12, 150),
+      padding: const EdgeInsets.fromLTRB(12, 120, 12, 210),
       itemCount: mixedItems.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,

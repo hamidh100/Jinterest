@@ -390,7 +390,7 @@ class _FeedPageState extends State<_FeedPage> {
         }
 
         return ListView.builder(
-          padding: const EdgeInsets.only(bottom: 150),
+          padding: const EdgeInsets.only(bottom: 210),
           itemCount: photos.length,
           itemBuilder: (context, index) {
             return _PhotoCard(photo: photos[index]);
@@ -406,7 +406,7 @@ class _FeedPageState extends State<_FeedPage> {
         }
 
         return ListView.builder(
-          padding: const EdgeInsets.only(bottom: 150),
+          padding: const EdgeInsets.only(bottom: 210),
           itemCount: albums.length,
           itemBuilder: (context, index) {
             return _AlbumCard(album: albums[index]);
@@ -429,7 +429,7 @@ class _FeedPageState extends State<_FeedPage> {
         }
 
         return ListView.builder(
-          padding: const EdgeInsets.only(bottom: 150),
+          padding: const EdgeInsets.only(bottom: 210),
           itemCount: mixedItems.length,
           itemBuilder: (context, index) {
             final item = mixedItems[index];
