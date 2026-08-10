@@ -18,6 +18,7 @@ import '../widgets/follow_button.dart';
 import 'followers_screen.dart';
 import '../widgets/profile_avatar.dart';
 import '../widgets/server_photo_image.dart';
+import 'settings_screen.dart';
 
 enum ProfileViewMode { photos, albums }
 
@@ -116,6 +117,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: const Text('Profile'),
         centerTitle: true,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.settings),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+            );
+          },
+        ),
         actions: [
           _buildThemeToggleButton(),
           if (isOwnProfile)

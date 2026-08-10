@@ -122,8 +122,12 @@ class AuthProvider extends ChangeNotifier {
 
     if (userId == null || userId.isEmpty) return;
 
-    final ok = await BiometricService.authenticate();
-    if (!ok) return;
+    final biometricEnabled = preferences.getBool('biometric_enabled') ?? false;
+
+    if (biometricEnabled) {
+      final ok = await BiometricService.authenticate();
+      if (!ok) return;
+    }
 
     final userTypeText = preferences.getString(_sessionUserTypeKey);
 

@@ -15,6 +15,7 @@ import 'screens/upload_screen.dart';
 import 'screens/photo_details_screen.dart';
 import 'screens/album_details_screen.dart';
 import 'screens/admin_screen.dart';
+import '/screens/settings_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -86,6 +87,7 @@ class MyApp extends StatelessWidget {
               return AlbumDetailsScreen(albumId: albumId);
             },
             '/admin': (_) => const AdminScreen(),
+            '/settings': (_) => const SettingsScreen(),
           },
         ),
       ),
