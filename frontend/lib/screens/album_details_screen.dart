@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:jinterest/widgets/uploader_tile.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../models/album.dart';
 import '../models/photo.dart';
@@ -109,7 +112,7 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _buildAlbumHeader(context, album, albumPhotos.length),
+            _buildAlbumHeader(context, album, albumPhotos.length, albumPhotos),
             Container(
               padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
               child: const Divider(height: 32),
@@ -121,37 +124,39 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
     );
   }
 
-  Future<void> _shareAlbum(BuildContext context, Album album) async {
-    final snackbarProvider = context.read<SnackbarFabProvider>();
-    final photoProvider = context.read<PhotoProvider>();
-
+  Future<void> _shareAlbum(
+    BuildContext context,
+    Album album,
+    List<Photo> sortedPhotos,
+  ) async {
+    final snackbar = context.read<SnackbarFabProvider>();
     try {
-      Photo? coverPhoto;
-      for (final p in photoProvider.photos) {
-        if (album.photoIDs.contains(p.uuid)) {
-          coverPhoto = p;
-          break;
+      if (sortedPhotos.isEmpty) {
+        await Share.share('Album: ${album.name}\n\n(No photos)');
+        return;
+      }
+      final files = <XFile>[];
+      final tempDir = await getTemporaryDirectory();
+      for (final photo in sortedPhotos) {
+        try {
+          final bytes = await PhotoService.getPhotoImage(photo.uuid);
+          final path = '${tempDir.path}/jinterest_${photo.uuid}.jpg';
+          final file = File(path);
+          await file.writeAsBytes(bytes, flush: true);
+          files.add(XFile(file.path, mimeType: 'image/jpeg'));
+        } catch (e, stack) {
+          debugPrint('SHARE ERROR: $e');
+          debugPrint('$stack');
         }
       }
-
       final text = _buildAlbumShareText(album);
-
-      if (coverPhoto == null) {
+      if (files.isEmpty) {
         await Share.share(text);
         return;
       }
-
-      final bytes = await PhotoService.getPhotoImage(coverPhoto.uuid);
-
-      await Share.shareXFiles([
-        XFile.fromData(
-          bytes,
-          name: '${album.name}.jpg',
-          mimeType: 'image/jpeg',
-        ),
-      ], text: text);
+      await Share.shareXFiles(files, text: _buildAlbumShareText(album));
     } catch (e) {
-      snackbarProvider.showSnackBar(
+      snackbar.showSnackBar(
         context,
         SnackBar(
           content: Text('Could not share album: $e'),
@@ -227,7 +232,12 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
     );
   }
 
-  Widget _buildAlbumHeader(BuildContext context, Album album, int photoCount) {
+  Widget _buildAlbumHeader(
+    BuildContext context,
+    Album album,
+    int photoCount,
+    List<Photo> albumPhotos,
+  ) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
@@ -250,7 +260,7 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
 
                 IconButton(
                   icon: const Icon(Icons.share_outlined),
-                  onPressed: () => _shareAlbum(context, album),
+                  onPressed: () => _shareAlbum(context, album, albumPhotos),
                 ),
               ],
             ),

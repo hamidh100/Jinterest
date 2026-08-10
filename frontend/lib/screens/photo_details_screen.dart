@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jinterest/widgets/profile_avatar.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../models/comment.dart';
 import '../models/photo.dart';
@@ -260,6 +261,10 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
             ),
           ),
           IconButton(
+            icon: const Icon(Icons.share_outlined),
+            onPressed: () => _sharePhoto(context, photo),
+          ),
+          IconButton(
             icon: Icon(
               isLiked ? Icons.favorite : Icons.favorite_border,
               color: isLiked ? Colors.red : null,
@@ -277,6 +282,65 @@ class _PhotoDetailsScreenState extends State<PhotoDetailsScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _sharePhoto(BuildContext context, Photo photo) async {
+    final snackbar = context.read<SnackbarFabProvider>();
+    try {
+      final bytes = await PhotoService.getPhotoImage(photo.uuid);
+      await Share.shareXFiles([
+        XFile.fromData(
+          bytes,
+          name: _shareFileName(photo),
+          mimeType: _shareMimeType(photo),
+        ),
+      ], text: _sharePhotoText(photo));
+    } catch (e) {
+      snackbar.showSnackBar(
+        context,
+        SnackBar(
+          content: Text('Could not share photo: $e'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  String _sharePhotoText(Photo photo) {
+    final caption = photo.captionText?.trim();
+    if (caption == null || caption.isEmpty) {
+      return photo.name;
+    }
+    return '${photo.name}\n\n$caption';
+  }
+
+  String _shareFileName(Photo photo) {
+    String name = photo.name.trim();
+    if (name.isEmpty) {
+      name = 'jinterest_photo';
+    }
+    name = name.replaceAll(RegExp(r'[^\w\s-]'), '');
+    name = name.replaceAll(RegExp(r'\s+'), '_');
+    if (name.isEmpty) {
+      name = 'jinterest_photo';
+    }
+    return '$name.jpg';
+  }
+
+  String _shareMimeType(Photo photo) {
+    final path = photo.path.toLowerCase();
+    if (path.endsWith('.png')) {
+      return 'image/png';
+    }
+    if (path.endsWith('.webp')) {
+      return 'image/webp';
+    }
+    return 'image/jpeg';
   }
 
   Widget _buildCaption(BuildContext context, Photo photo) {
