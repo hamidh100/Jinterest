@@ -117,15 +117,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: const Text('Profile'),
         centerTitle: true,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.settings),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const SettingsScreen()),
-            );
-          },
-        ),
+        leading: isOwnProfile
+            ? IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                  );
+                },
+              )
+            : null,
         actions: [
           _buildThemeToggleButton(),
           if (isOwnProfile)

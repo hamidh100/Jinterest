@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jinterest/widgets/uploader_tile.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../models/album.dart';
 import '../models/photo.dart';
@@ -8,6 +9,7 @@ import '../providers/album_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
 import '../providers/snackbar_fab_provider.dart';
+import '../services/photo_service.dart';
 import '../widgets/info_chip.dart';
 import '../widgets/create_album_dialog.dart';
 import '../widgets/server_photo_image.dart';
@@ -119,6 +121,58 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
     );
   }
 
+  Future<void> _shareAlbum(BuildContext context, Album album) async {
+    final snackbarProvider = context.read<SnackbarFabProvider>();
+    final photoProvider = context.read<PhotoProvider>();
+
+    try {
+      Photo? coverPhoto;
+      for (final p in photoProvider.photos) {
+        if (album.photoIDs.contains(p.uuid)) {
+          coverPhoto = p;
+          break;
+        }
+      }
+
+      final text = _buildAlbumShareText(album);
+
+      if (coverPhoto == null) {
+        await Share.share(text);
+        return;
+      }
+
+      final bytes = await PhotoService.getPhotoImage(coverPhoto.uuid);
+
+      await Share.shareXFiles([
+        XFile.fromData(
+          bytes,
+          name: '${album.name}.jpg',
+          mimeType: 'image/jpeg',
+        ),
+      ], text: text);
+    } catch (e) {
+      snackbarProvider.showSnackBar(
+        context,
+        SnackBar(
+          content: Text('Could not share album: $e'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  String _buildAlbumShareText(Album album) {
+    final desc = album.description?.trim();
+    final description = (desc == null || desc.isEmpty) ? '' : '\n\n$desc';
+
+    return 'Album: ${album.name}$description';
+  }
+
   List<Photo> _sortPhotos(List<Photo> photos) {
     switch (_photoOrder) {
       case AlbumPhotoOrder.newest:
@@ -176,50 +230,76 @@ class _AlbumDetailsScreenState extends State<AlbumDetailsScreen> {
   Widget _buildAlbumHeader(BuildContext context, Album album, int photoCount) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
+      padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            album.name,
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+          Padding(
+            padding: EdgeInsetsGeometry.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    album.name,
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+
+                IconButton(
+                  icon: const Icon(Icons.share_outlined),
+                  onPressed: () => _shareAlbum(context, album),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 10),
           UploaderTile(ownerID: album.ownerID, padding: EdgeInsets.zero),
           const SizedBox(height: 14),
-          Text(
-            album.description?.trim().isNotEmpty == true
-                ? album.description!
-                : 'No description',
-            style: TextStyle(
-              fontSize: 16,
-              color: album.description?.trim().isNotEmpty == true
-                  ? Theme.of(context).colorScheme.onSurface
-                  : Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.45),
-              height: 1.35,
+          Padding(
+            padding: EdgeInsetsGeometry.symmetric(horizontal: 16),
+            child: Text(
+              album.description?.trim().isNotEmpty == true
+                  ? album.description!
+                  : 'No description',
+              style: TextStyle(
+                fontSize: 16,
+                color: album.description?.trim().isNotEmpty == true
+                    ? Theme.of(context).colorScheme.onSurface
+                    : Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.45),
+                height: 1.35,
+              ),
             ),
           ),
-          const Divider(height: 32),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              InfoChip(
-                icon: album.isPublic ? Icons.public : Icons.lock_outline,
-                label: album.isPublic ? 'Public' : 'Private',
-              ),
-              InfoChip(
-                icon: Icons.photo_library_outlined,
-                label: '$photoCount ${photoCount == 1 ? 'photo' : 'photos'}',
-              ),
-              InfoChip(
-                icon: Icons.calendar_today_outlined,
-                label:
-                    '${album.albumAge.year}/${album.albumAge.month.toString().padLeft(2, '0')}/${album.albumAge.day.toString().padLeft(2, '0')} ${album.albumAge.hour.toString().padLeft(2, '0')}:${album.albumAge.minute.toString().padLeft(2, '0')}',
-              ),
-            ],
+          Padding(
+            padding: EdgeInsetsGeometry.symmetric(horizontal: 16),
+            child: const Divider(height: 32),
+          ),
+          Padding(
+            padding: EdgeInsetsGeometry.symmetric(horizontal: 16),
+            child: Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                InfoChip(
+                  icon: album.isPublic ? Icons.public : Icons.lock_outline,
+                  label: album.isPublic ? 'Public' : 'Private',
+                ),
+                InfoChip(
+                  icon: Icons.photo_library_outlined,
+                  label: '$photoCount ${photoCount == 1 ? 'photo' : 'photos'}',
+                ),
+                InfoChip(
+                  icon: Icons.calendar_today_outlined,
+                  label:
+                      '${album.albumAge.year}/${album.albumAge.month.toString().padLeft(2, '0')}/${album.albumAge.day.toString().padLeft(2, '0')} ${album.albumAge.hour.toString().padLeft(2, '0')}:${album.albumAge.minute.toString().padLeft(2, '0')}',
+                ),
+              ],
+            ),
           ),
         ],
       ),
