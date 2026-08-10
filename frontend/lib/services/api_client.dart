@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../exceptions/exceptions.dart';
-import '../providers/auth_provider.dart';
 
 class ApiClient {
   ApiClient._();

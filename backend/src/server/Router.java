@@ -176,9 +176,17 @@ public class Router {
         return Response.ok("Audit log", payload);
     }
 
-
     private Response handleAdminDeleteUser(Request request, String userId) {
-        return handleDeleteUser(userId);
+        Response response = handleDeleteUser(userId);
+        if (response.getStatusCode() == 200) {
+            AuditService.addLog(getRequester(request).getUuid().toString(), "Deleted user " + userId);
+            try {
+                DatabaseManager.save();
+            } catch (Exception e) {
+                return Response.serverError("Couldn't save the audit log");
+            }
+        }
+        return response;
     }
 
     private Response handleAdminBanUser(Request request, String userId) {
@@ -188,12 +196,12 @@ public class Router {
         user.setBanned(true);
         try {
             DatabaseManager.save();
+            AuditService.addLog(getRequester(request).getUuid().toString(), "Banned user " + userId);
+            DatabaseManager.save();
+            return Response.ok("User banned");
         } catch (Exception e) {
-            AuditService.addLog(getRequester(request).getUuid().toString(), "Couldn't ban user " + userId);
             return Response.serverError("Couldn't ban the user");
         }
-        AuditService.addLog(getRequester(request).getUuid().toString(), "Banned user " + userId);
-        return Response.ok("User banned");
     }
 
     private Response handleAdminUnbanUser(Request request, String userId) {
@@ -203,22 +211,38 @@ public class Router {
         user.setBanned(false);
         try {
             DatabaseManager.save();
+            AuditService.addLog(getRequester(request).getUuid().toString(), "Unbanned user " + userId);
+            DatabaseManager.save();
+            return Response.ok("User unbanned");
         } catch (Exception e) {
-            AuditService.addLog(getRequester(request).getUuid().toString(), "Couldn't unban user " + userId);
             return Response.serverError("Couldn't unban the user");
         }
-        AuditService.addLog(getRequester(request).getUuid().toString(), "Unbanned user " + userId);
-        return Response.ok("User unbanned");
     }
 
     private Response handleAdminDeletePhoto(Request request, String photoId) {
-        AuditService.addLog(getRequester(request).getUuid().toString(), "Deleted photo " + photoId);
-        return handleDeletePhoto(request, photoId);
+        Response response = handleDeletePhoto(request, photoId);
+        if (response.getStatusCode() == 200) {
+            AuditService.addLog(getRequester(request).getUuid().toString(), "Deleted photo " + photoId);
+            try {
+                DatabaseManager.save();
+            } catch (Exception e) {
+                return Response.serverError("Couldn't save the audit log");
+            }
+        }
+        return response;
     }
 
     private Response handleAdminDeleteComment(Request request, String commentId) {
-        AuditService.addLog(getRequester(request).getUuid().toString(), "Deleted comment " + commentId);
-        return handleDeleteComment(request, commentId);
+        Response response = handleDeleteComment(request, commentId);
+        if (response.getStatusCode() == 200) {
+            AuditService.addLog(getRequester(request).getUuid().toString(), "Deleted comment " + commentId);
+            try {
+                DatabaseManager.save();
+            } catch (Exception e) {
+                return Response.serverError("Couldn't save the audit log");
+            }
+        }
+        return response;
     }
 
 
