@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jinterest/services/biometric_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 import '../services/api_client.dart';
@@ -120,6 +121,9 @@ class AuthProvider extends ChangeNotifier {
     final userId = preferences.getString(_sessionUserIdKey);
 
     if (userId == null || userId.isEmpty) return;
+
+    final ok = await BiometricService.authenticate();
+    if (!ok) return;
 
     final userTypeText = preferences.getString(_sessionUserTypeKey);
 
