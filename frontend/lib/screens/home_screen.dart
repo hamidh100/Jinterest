@@ -798,10 +798,10 @@ class _PhotoCard extends StatelessWidget {
                   icon: const Icon(Icons.download_outlined),
                   onPressed: () => _downloadPhoto(context),
                 ),
-                IconButton(
+                /*IconButton(
                   icon: const Icon(Icons.share_outlined),
                   onPressed: () => _sharePhoto(context),
-                ),
+                ),*/
               ],
             ),
           ),
@@ -1056,7 +1056,7 @@ class _AlbumCard extends StatelessWidget {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -1085,32 +1085,10 @@ class _AlbumCard extends StatelessWidget {
                 ),
               ),
             ),
-            Column(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.download_outlined),
-                  onPressed: () => _downloadAlbum(context, albumPhotos),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.share_outlined),
-                  onPressed: () =>
-                      context.read<SnackbarFabProvider>().showSnackBar(
-                        context,
-                        SnackBar(
-                          content: Text('idk, should I keep this in here?'),
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          duration: const Duration(seconds: 2),
-                        ),
-                      ),
-                ),
-              ],
-            ),
-            const Padding(
-              padding: EdgeInsets.only(right: 8),
-              child: Icon(Icons.chevron_right),
+            IconButton(
+              padding: EdgeInsets.zero,
+              icon: const Icon(Icons.download_outlined),
+              onPressed: () => _downloadAlbum(context, albumPhotos),
             ),
           ],
         ),
