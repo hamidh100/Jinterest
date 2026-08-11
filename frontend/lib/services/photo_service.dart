@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:gal/gal.dart';
 
 import '../exceptions/exceptions.dart';
@@ -288,23 +289,39 @@ class PhotoService {
       }
     }
     final imageBytes = await getPhotoImage(photoId);
-    final fileName = _safeImageName(photoName);
+    final fileName = _safeImageName(photoName, photoId);
     await Gal.putImageBytes(imageBytes, name: fileName);
   }
 
-  static String _safeImageName(String name) {
-    var result = name.trim();
-    if (result.isEmpty) {
-      result = 'jinterest_photo';
-    }
+  static String _safeImageName(String name, String photoId) {
+    var result = 'jinterest_photo-${name.trim()}-${photoId.trim()}';
     result = result.replaceAll(RegExp(r'[^\w\s-]'), '');
     result = result.replaceAll(RegExp(r'\s+'), '_');
     if (!result.toLowerCase().endsWith('.jpg') &&
         !result.toLowerCase().endsWith('.jpeg') &&
         !result.toLowerCase().endsWith('.png') &&
         !result.toLowerCase().endsWith('.webp')) {
-      result += '.jpg';
+      //result += '.jpg';
     }
     return result;
+  }
+
+  static Future<void> downloadAlbum({required List<Photo> albumPhotos}) async {
+    final hasAccess = await Gal.hasAccess();
+    if (!hasAccess) {
+      final accessGranted = await Gal.requestAccess();
+      if (!accessGranted) {
+        throw StateError('Gallery permission was not granted');
+      }
+    }
+    for (final photo in albumPhotos) {
+      try {
+        final imageBytes = await getPhotoImage(photo.uuid);
+        final fileName = _safeImageName(photo.name, photo.uuid);
+        await Gal.putImageBytes(imageBytes, name: fileName);
+      } catch (e) {
+        debugPrint('Failed to download photo ${photo.uuid}: $e');
+      }
+    }
   }
 }

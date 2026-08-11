@@ -4,6 +4,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../models/album.dart';
 import '../models/photo.dart';
+import '../models/user.dart';
 import '../providers/album_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/photo_provider.dart';
@@ -151,8 +152,10 @@ class _FeedPageState extends State<_FeedPage> {
   List<Photo>? _searchResults;
   bool _isSearching = false;
   int _searchRequest = 0;
-  bool _isDownloadingAll = false;
-  int _downloadedCount = 0;
+  bool _isDownloadingAllPhotos = false;
+  bool _isDownloadingAllAlbums = false;
+  int _downloadedPhotoCount = 0;
+  int _downloadedAlbumCount = 0;
 
   @override
   void initState() {
@@ -260,7 +263,9 @@ class _FeedPageState extends State<_FeedPage> {
         centerTitle: true,
         actions: [
           if (_viewMode == HomeViewMode.photos)
-            _buildDownloadAllButton(userPhotos),
+            _buildDownloadAllPhotosButton(userPhotos),
+          if (_viewMode == HomeViewMode.albums)
+            _buildDownloadAllAlbumsButton(userAlbums, currentUser),
           _buildSortMenu(),
         ],
       ),
@@ -268,16 +273,27 @@ class _FeedPageState extends State<_FeedPage> {
         children: [
           _buildSearchBar(),
           _buildViewToggle(),
-          if (isLoading || _isDownloadingAll)
+          if (isLoading || _isDownloadingAllPhotos || _isDownloadingAllAlbums)
             LinearProgressIndicator(
-              value: _isDownloadingAll && userPhotos.isNotEmpty
-                  ? _downloadedCount / userPhotos.length
+              value: _isDownloadingAllPhotos && userPhotos.isNotEmpty
+                  ? _downloadedPhotoCount / userPhotos.length
+                  : _isDownloadingAllAlbums && userAlbums.isNotEmpty
+                  ? _downloadedAlbumCount / userAlbums.length
                   : null,
             ),
-          if (_isDownloadingAll)
+          if (_isDownloadingAllAlbums)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Text('Downloading $_downloadedCount/${userPhotos.length}'),
+              child: Text(
+                'Downloading $_downloadedAlbumCount/${userAlbums.length}',
+              ),
+            ),
+          if (_isDownloadingAllPhotos)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Text(
+                'Downloading $_downloadedPhotoCount/${userPhotos.length}',
+              ),
             ),
           Expanded(child: _buildContent(userPhotos, userAlbums)),
         ],
@@ -516,13 +532,13 @@ class _FeedPageState extends State<_FeedPage> {
     }
   }
 
-  Widget _buildDownloadAllButton(List<Photo> photos) {
+  Widget _buildDownloadAllPhotosButton(List<Photo> photos) {
     return IconButton(
       tooltip: 'Download all visible photos',
-      onPressed: _isDownloadingAll || photos.isEmpty
+      onPressed: _isDownloadingAllPhotos || photos.isEmpty
           ? null
           : () => _downloadAllPhotos(photos),
-      icon: _isDownloadingAll
+      icon: _isDownloadingAllPhotos
           ? const SizedBox(
               width: 22,
               height: 22,
@@ -533,12 +549,12 @@ class _FeedPageState extends State<_FeedPage> {
   }
 
   Future<void> _downloadAllPhotos(List<Photo> photos) async {
-    if (_isDownloadingAll || photos.isEmpty) {
+    if (_isDownloadingAllPhotos || photos.isEmpty) {
       return;
     }
     setState(() {
-      _isDownloadingAll = true;
-      _downloadedCount = 0;
+      _isDownloadingAllPhotos = true;
+      _downloadedPhotoCount = 0;
     });
     int successful = 0;
     int failed = 0;
@@ -552,7 +568,7 @@ class _FeedPageState extends State<_FeedPage> {
           successful++;
           if (mounted) {
             setState(() {
-              _downloadedCount = successful;
+              _downloadedPhotoCount = successful;
             });
           }
         } catch (e) {
@@ -564,7 +580,7 @@ class _FeedPageState extends State<_FeedPage> {
         return;
       }
       setState(() {
-        _isDownloadingAll = false;
+        _isDownloadingAllPhotos = false;
       });
       final message = failed == 0
           ? 'Downloaded $successful photo${successful == 1 ? '' : 's'}'
@@ -575,6 +591,118 @@ class _FeedPageState extends State<_FeedPage> {
         SnackBar(
           content: Text(message),
           backgroundColor: failed == 0
+              ? Colors.green.shade700
+              : Colors.orange.shade800,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
+  Widget _buildDownloadAllAlbumsButton(
+    List<Album> userAlbums,
+    User currentUser,
+  ) {
+    return IconButton(
+      tooltip: 'Download all visible albums',
+      onPressed: _isDownloadingAllAlbums || userAlbums.isEmpty
+          ? null
+          : () => _downloadAllAlbums(userAlbums, currentUser),
+      icon: _isDownloadingAllAlbums
+          ? const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.download_for_offline_outlined),
+    );
+  }
+
+  Future<void> _downloadAllAlbums(
+    List<Album> userAlbums,
+    User currentUser,
+  ) async {
+    if (_isDownloadingAllAlbums || userAlbums.isEmpty) return;
+    setState(() {
+      _isDownloadingAllAlbums = true;
+      _downloadedAlbumCount = 0;
+    });
+    int successfulAlbums = 0;
+    int failedAlbums = 0;
+    int successfulPhotos = 0;
+    int failedPhotos = 0;
+    try {
+      for (final album in userAlbums) {
+        if (album.photoIDs.isEmpty) {
+          successfulAlbums++;
+          continue;
+        }
+        try {
+          final albumPhotos = <Photo>[];
+          for (final photoId in album.photoIDs) {
+            try {
+              final photo = await PhotoService.getPhotoById(photoId);
+
+              if (photo != null) {
+                if (photo.isPublic || photo.ownerID == currentUser.uuid) {
+                  albumPhotos.add(photo);
+                }
+              } else {
+                failedPhotos++;
+              }
+            } catch (e) {
+              failedPhotos++;
+              debugPrint('Failed to get photo $photoId: $e');
+            }
+          }
+          if (albumPhotos.isEmpty) {
+            failedAlbums++;
+            continue;
+          }
+          try {
+            await PhotoService.downloadAlbum(albumPhotos: albumPhotos);
+            successfulPhotos += albumPhotos.length;
+            successfulAlbums++;
+          } catch (e) {
+            failedAlbums++;
+            debugPrint('Failed to download album ${album.uuid}: $e');
+          }
+          if (mounted) {
+            setState(() {
+              _downloadedAlbumCount = successfulAlbums;
+            });
+          }
+        } catch (e) {
+          failedAlbums++;
+          debugPrint('Failed to process album ${album.uuid}: $e');
+        }
+      }
+    } finally {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isDownloadingAllAlbums = false;
+      });
+      final message = failedAlbums == 0 && failedPhotos == 0
+          ? 'Downloaded $successfulAlbums album'
+                '${successfulAlbums == 1 ? '' : 's'} '
+                '($successfulPhotos photo'
+                '${successfulPhotos == 1 ? '' : 's'})'
+          : 'Downloaded $successfulAlbums album'
+                '${successfulAlbums == 1 ? '' : 's'}, '
+                '$successfulPhotos photo'
+                '${successfulPhotos == 1 ? '' : 's'}, '
+                '$failedPhotos failed';
+      context.read<SnackbarFabProvider>().showSnackBar(
+        context,
+        SnackBar(
+          content: Text(message),
+          backgroundColor: failedAlbums == 0 && failedPhotos == 0
               ? Colors.green.shade700
               : Colors.orange.shade800,
           behavior: SnackBarBehavior.floating,
@@ -957,6 +1085,29 @@ class _AlbumCard extends StatelessWidget {
                 ),
               ),
             ),
+            Column(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.download_outlined),
+                  onPressed: () => _downloadAlbum(context, albumPhotos),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.share_outlined),
+                  onPressed: () =>
+                      context.read<SnackbarFabProvider>().showSnackBar(
+                        context,
+                        SnackBar(
+                          content: Text('idk, should I keep this in here?'),
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      ),
+                ),
+              ],
+            ),
             const Padding(
               padding: EdgeInsets.only(right: 8),
               child: Icon(Icons.chevron_right),
@@ -965,6 +1116,50 @@ class _AlbumCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _downloadAlbum(
+    BuildContext context,
+    List<Photo> albumPhotos,
+  ) async {
+    final snackbarProvider = context.read<SnackbarFabProvider>();
+    try {
+      await PhotoService.downloadAlbum(albumPhotos: albumPhotos);
+      if (!context.mounted) {
+        return;
+      }
+      snackbarProvider.showSnackBar(
+        context,
+        SnackBar(
+          content: Text(
+            'Album downloaded (${albumPhotos.length} '
+            'photo${albumPhotos.length == 1 ? '' : 's'})',
+          ),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.green.shade700,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) {
+        return;
+      }
+      snackbarProvider.showSnackBar(
+        context,
+        SnackBar(
+          content: Text('Album download failed: $e'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.red,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 }
 
