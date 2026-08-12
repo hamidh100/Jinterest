@@ -20,6 +20,7 @@ public class OurObjects {
     public static Map<UUID, Like> likes = new ConcurrentHashMap<>();
     public static Map<UUID, Comment> comments = new ConcurrentHashMap<>();
     public static Map<UUID, Caption> captions = new ConcurrentHashMap<>();
+    public static Map<UUID, Session> sessions = new ConcurrentHashMap<>();
     static {
         try {
             DatabaseManager.load();
