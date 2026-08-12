@@ -5,7 +5,6 @@ class User {
   final String? username;
   final String? email;
   final String? phone;
-  final String password;
   final String fullname;
   final bool banned;
   final List<String> followerIDs;
@@ -17,7 +16,6 @@ class User {
     this.username,
     this.email,
     this.phone,
-    required this.password,
     this.fullname = '',
     this.banned = false,
     this.followerIDs = const [],
@@ -42,7 +40,6 @@ class User {
       username: username ?? this.username,
       email: email ?? this.email,
       phone: phone ?? this.phone,
-      password: password ?? this.password,
       fullname: fullname ?? this.fullname,
       banned: banned ?? this.banned,
       followerIDs: followerIDs ?? List<String>.from(this.followerIDs),

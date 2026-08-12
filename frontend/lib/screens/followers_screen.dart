@@ -94,7 +94,6 @@ class _FollowersScreenState extends State<FollowersScreen> {
       username: user.username,
       email: user.email,
       phone: user.phone,
-      password: user.password,
       fullname: user.fullname,
       banned: user.banned,
       followerIDs: followerIDs ?? user.followerIDs,

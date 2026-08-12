@@ -60,7 +60,7 @@ class UserService {
       route: '/users/${user.uuid}',
       payload: {'username': username, 'fullname': fullname},
     );
-    final updatedUser = _userFromResponse(response, password: user.password);
+    final updatedUser = _userFromResponse(response);
     _userCache[user.uuid] = Future.value(updatedUser);
     return updatedUser;
   }
@@ -194,7 +194,6 @@ class UserService {
       username: user['username']?.toString(),
       email: user['email']?.toString(),
       phone: user['phone']?.toString(),
-      password: password,
       fullname: user['fullname']?.toString() ?? '',
       followerIDs: (user['followerIds'] as List? ?? const [])
           .map((id) => id.toString())

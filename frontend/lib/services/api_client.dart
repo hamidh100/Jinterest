@@ -37,11 +37,15 @@ class ApiClient {
 
       final prefs = await SharedPreferences.getInstance();
       final username = prefs.getString('session_username');
+      final sessionToken = prefs.getString('session_token');
 
       final request = <String, dynamic>{
         'method': method,
         'route': route,
         'username': username,
+
+        'sessionToken': sessionToken,
+
         'payload': payload ?? <String, dynamic>{},
       };
 

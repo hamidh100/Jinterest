@@ -40,6 +40,7 @@ import services.AlbumService;
 import services.AuditService;
 import services.PhotoService;
 import services.SearchService;
+import services.SessionService;
 import services.UserService;
 
 public class Router {
@@ -89,6 +90,9 @@ public class Router {
         User requester = getRequester(request);
         if (requester == null || requester.getUserType() != UserType.ADMIN) {
             return Response.forbidden("Admin access required");
+        }
+        if (!requester.getUuid().equals(SessionService.getUserId(request.getSessionToken()))){
+            return Response.forbidden("Invalid Credentials");
         }
         switch (route) {
             case "/admin/users":
@@ -282,7 +286,7 @@ public class Router {
                     return handleGetUser(request, userId);
                 }
                 if (isUserImageRoute(route)) {
-                    return handleGetUserImage(getPart(route, 2));
+                    return handleGetUserImage(request, getPart(route, 2));
                 }
                 return Response.notFound("Route not found: GET " + route);
         }
@@ -471,6 +475,8 @@ public class Router {
             UserService.signup(user);
             JsonObject responsePayload = new JsonObject();
             responsePayload.add("user", userToJson(user));
+            UUID sessionToken = SessionService.createSession(user.getUuid());
+            responsePayload.addProperty("sessionToken", sessionToken.toString());
             return Response.created("Account created successfully", responsePayload);
         } catch (InvalidSignupMethod e) {
             return Response.badRequest("Invalid signup method");
@@ -501,6 +507,8 @@ public class Router {
             if (user == null) return Response.serverError("Logged-in user could not be found");
             JsonObject responsePayload = new JsonObject();
             responsePayload.add("user", userToJson(user));
+            UUID sessionToken = SessionService.createSession(user.getUuid());
+            responsePayload.addProperty("sessionToken", sessionToken.toString());
             return Response.ok("Login successful", responsePayload);
         } catch (InvalidLoginMethod e) {
             return Response.badRequest("Invalid login method");
@@ -539,6 +547,9 @@ public class Router {
     private Response handleUpdateUser(Request request, String userId) {
         try {
             UUID uuid = parseUuid(userId);
+            if (!uuid.equals(SessionService.getUserId(request.getSessionToken()))){
+                return Response.forbidden("Invalid Credentials");
+            }
             User user = OurObjects.users.get(uuid);
             if (user == null) return Response.notFound("User does not exist");
             JsonObject payload = request.getPayload();
@@ -593,11 +604,14 @@ public class Router {
         }
     }
 
-    private Response handleGetUserImage(String userId) {
+    private Response handleGetUserImage(Request request, String userId) {
         try {
             User user = OurObjects.users.get(parseUuid(userId));
             if (user == null || user.getProfileImagePath() == null)
                 return Response.notFound("Profile image does not exist");
+            if (!user.getUuid().equals(SessionService.getUserId(request.getSessionToken()))){
+                return Response.forbidden("Invalid Credentials");
+            }
             Path path = Path.of(user.getProfileImagePath());
             if (!Files.exists(path) || !Files.isRegularFile(path))
                 return Response.notFound("Profile image does not exist");
@@ -626,6 +640,8 @@ public class Router {
             UUID photoUuid = parseUuid(photoId);
             Photo photo = OurObjects.photos.get(photoUuid);
             if (photo == null) return Response.notFound("Photo does not exist");
+            //if (!photo.isPublic() && !photo.getOwnerID().equals())
+            // TODO
             String imagePath = photo.getPath();
             if (imagePath == null || imagePath.isBlank()) {
                 return Response.notFound("Photo image does not exist");
@@ -893,6 +909,9 @@ public class Router {
             if (photo == null) return Response.notFound("Photo does not exist");
             String userIdText = getRequiredString(request.getPayload(), "userId");
             UUID userUuid = parseUuid(userIdText);
+            if (!userUuid.equals(SessionService.getUserId(request.getSessionToken()))){
+                return Response.forbidden("Invalid Credentials");
+            }
             User user = OurObjects.users.get(userUuid);
             if (user == null) return Response.notFound("User does not exist");
             if (PhotoService.isLikedBy(photo, user)) {

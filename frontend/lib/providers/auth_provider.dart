@@ -16,7 +16,9 @@ class AuthProvider extends ChangeNotifier {
   static const _sessionFollowerIdsKey = 'session_follower_ids';
   static const _sessionFollowingIdsKey = 'session_following_ids';
   static const _sessionUserTypeKey = 'session_user_type';
+  static const _sessionTokenKey = 'session_token';
 
+  String? _sessionToken;
   User? _currentUser;
   bool _isLoggedIn = false;
   String? _errorMessage;
@@ -25,6 +27,7 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoggedIn => _isLoggedIn;
   String? get errorMessage => _errorMessage;
   bool get isAdmin => _currentUser?.userType == UserType.admin;
+  String? get sessionToken => _sessionToken;
 
   Future<bool> signup({
     required String identifier,
@@ -46,6 +49,21 @@ class AuthProvider extends ChangeNotifier {
           'fullname': fullname,
         },
       );
+      final payload = response['payload'];
+      if (payload is! Map<String, dynamic>) {
+        throw ApiException(
+          statusCode: 500,
+          message: 'Server returned an invalid login response',
+        );
+      }
+      final sessionToken = response['payload']['sessionToken']?.toString();
+      if (sessionToken == null || sessionToken.isEmpty) {
+        throw ApiException(
+          statusCode: 500,
+          message: 'Server did not return a session token',
+        );
+      }
+      _sessionToken = sessionToken;
       _currentUser = _userFromResponse(response, password);
       _isLoggedIn = true;
       await _saveSession();
@@ -79,6 +97,21 @@ class AuthProvider extends ChangeNotifier {
         route: '/auth/login',
         payload: {'identifier': identifier, 'password': password},
       );
+      final payload = response['payload'];
+      if (payload is! Map<String, dynamic>) {
+        throw ApiException(
+          statusCode: 500,
+          message: 'Server returned an invalid login response',
+        );
+      }
+      final sessionToken = response['payload']['sessionToken']?.toString();
+      if (sessionToken == null || sessionToken.isEmpty) {
+        throw ApiException(
+          statusCode: 500,
+          message: 'Server did not return a session token',
+        );
+      }
+      _sessionToken = sessionToken;
       _currentUser = _userFromResponse(response, password);
       _isLoggedIn = true;
       await _saveSession();
@@ -104,6 +137,7 @@ class AuthProvider extends ChangeNotifier {
     _currentUser = null;
     _isLoggedIn = false;
     _errorMessage = null;
+    _sessionToken = null;
     PhotoService.clearAllPhotoImageCache();
     UserService.clearAllProfileImageCache();
     await _clearSession();
@@ -119,8 +153,11 @@ class AuthProvider extends ChangeNotifier {
   Future<void> restoreSession() async {
     final preferences = await SharedPreferences.getInstance();
     final userId = preferences.getString(_sessionUserIdKey);
+    final token = preferences.getString(_sessionTokenKey);
 
-    if (userId == null || userId.isEmpty) return;
+    if (userId == null || userId.isEmpty || token == null || token.isEmpty) {
+      return;
+    }
 
     final biometricEnabled = preferences.getBool('biometric_enabled') ?? false;
 
@@ -128,6 +165,8 @@ class AuthProvider extends ChangeNotifier {
       final ok = await BiometricService.authenticate();
       if (!ok) return;
     }
+
+    _sessionToken = token;
 
     final userTypeText = preferences.getString(_sessionUserTypeKey);
 
@@ -138,7 +177,6 @@ class AuthProvider extends ChangeNotifier {
       username: preferences.getString(_sessionUsernameKey),
       email: preferences.getString(_sessionEmailKey),
       phone: preferences.getString(_sessionPhoneKey),
-      password: '',
       fullname: preferences.getString(_sessionFullnameKey) ?? '',
       followerIDs:
           preferences.getStringList(_sessionFollowerIdsKey) ?? const [],
@@ -152,7 +190,8 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> _saveSession() async {
     final user = _currentUser;
-    if (user == null) return;
+    final token = _sessionToken;
+    if (user == null || token == null) return;
 
     final preferences = await SharedPreferences.getInstance();
     await preferences.setString(_sessionUserIdKey, user.uuid);
@@ -163,6 +202,7 @@ class AuthProvider extends ChangeNotifier {
     await preferences.setStringList(_sessionFollowerIdsKey, user.followerIDs);
     await preferences.setStringList(_sessionFollowingIdsKey, user.followingIDs);
     await preferences.setString(_sessionUserTypeKey, user.userType.name);
+    await preferences.setString(_sessionTokenKey, token);
   }
 
   Future<void> _clearSession() async {
@@ -175,6 +215,7 @@ class AuthProvider extends ChangeNotifier {
     await preferences.remove(_sessionFollowerIdsKey);
     await preferences.remove(_sessionFollowingIdsKey);
     await preferences.remove(_sessionUserTypeKey);
+    await preferences.remove(_sessionTokenKey);
   }
 
   Future<void> _setOptionalString(
@@ -209,7 +250,6 @@ class AuthProvider extends ChangeNotifier {
       username: user['username']?.toString(),
       email: user['email']?.toString(),
       phone: user['phone']?.toString(),
-      password: password,
       fullname: user['fullname']?.toString() ?? '',
       followerIDs: (user['followerIds'] as List? ?? const [])
           .map((id) => id.toString())

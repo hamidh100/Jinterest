@@ -1,5 +1,7 @@
 package server;
 
+import java.util.UUID;
+
 import com.google.gson.JsonObject;
 
 public class Request {
@@ -7,6 +9,7 @@ public class Request {
     private String route;
     private String username;
     private JsonObject payload;
+    private UUID sessionToken;
 
     public Request() {}
 
@@ -31,5 +34,9 @@ public class Request {
 
     public JsonObject getPayload() {
         return payload == null ? new JsonObject() : payload;
+    }
+
+    public UUID getSessionToken() {
+        return sessionToken;
     }
 }
