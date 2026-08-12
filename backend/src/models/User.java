@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public class User {
     private String phone, email, username, password, fullname;
+    private String passwordHash = null;
     private final UUID uuid;
     private LocalDateTime accountAge;
     private UserType userType = UserType.NORMAL;
@@ -39,6 +40,7 @@ public class User {
     public User(String identifier, String password) {
         setIdentity(identifier);
         this.password = password;
+        passwordHash = PasswordHasher.hash(this.password);
         fullname = "";
         uuid = UUID.randomUUID();
     }
@@ -46,6 +48,7 @@ public class User {
     public User(String identifier, String password, String fullname) {
         setIdentity(identifier);
         this.password = password;
+        passwordHash = PasswordHasher.hash(this.password);
         this.fullname = fullname;
         uuid = UUID.randomUUID();
     }
@@ -137,6 +140,7 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+        passwordHash = PasswordHasher.hash(this.password);
     }
 
     public String getFullname() {
@@ -166,8 +170,18 @@ public class User {
     public void setBanned(boolean banned) {
         this.banned = banned;
     }
-    public String getProfileImagePath() { return profileImagePath; }
-    public void setProfileImagePath(String profileImagePath) { this.profileImagePath = profileImagePath; }
+
+    public String getProfileImagePath() {
+        return profileImagePath;
+    }
+
+    public void setProfileImagePath(String profileImagePath) {
+        this.profileImagePath = profileImagePath;
+    }
+
+    public String getPasswordHash(){
+        return this.passwordHash;
+    }
     /* getter setter end */
 
     @Override

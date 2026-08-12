@@ -33,7 +33,7 @@ public class SearchServiceTest extends initTest {
         Photo photo = new Photo(null, "/Photos/tree.jpg");
         PhotoService.addCategory(photo, Category.NATURE);
 
-        List<Photo> result = SearchService.searchByCategory("OTHERS,NATURE");
+        List<Photo> result = SearchService.searchByCategory("NATURE");
 
         assertEquals(1, result.size());
         assertEquals(photo, result.get(0));

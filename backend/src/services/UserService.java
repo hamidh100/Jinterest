@@ -101,22 +101,25 @@ public class UserService {
             if (!OurObjects.emailToUserID.containsKey(user.getEmail())) throw new exceptions.UserDoesNotExist(user.getEmail());
             User realUser = OurObjects.users.get(OurObjects.emailToUserID.get(user.getEmail()));
             if (realUser.isBanned()) throw new exceptions.UserBanned(user.getEmail());
-            String realPassword = realUser.getPassword();
-            if (!realPassword.equals(user.getPassword())) throw new exceptions.IncorrectPassword();
+            if (!PasswordHasher.verify(password, realUser.getPasswordHash())){
+                throw new exceptions.IncorrectPassword();
+            }
         }
         if (user.getPhone() != null){
             if (!OurObjects.phoneToUserID.containsKey(user.getPhone())) throw new exceptions.UserDoesNotExist(user.getPhone());
             User realUser = OurObjects.users.get(OurObjects.phoneToUserID.get(user.getPhone()));
             if (realUser.isBanned()) throw new exceptions.UserBanned(user.getPhone());
-            String realPassword = realUser.getPassword();
-            if (!realPassword.equals(user.getPassword())) throw new exceptions.IncorrectPassword();
+            if (!PasswordHasher.verify(password, realUser.getPasswordHash())){
+                throw new exceptions.IncorrectPassword();
+            }
         }
         if (user.getUsername() != null){
             if (!OurObjects.usersLowercase.containsKey(Helper.toLower(user.getUsername()))) throw new exceptions.UserDoesNotExist(user.getUsername());
             User realUser = OurObjects.users.get(OurObjects.usersLowercase.get(Helper.toLower(user.getUsername())));
             if (realUser.isBanned()) throw new exceptions.UserBanned(user.getUsername());
-            String realPassword = realUser.getPassword();
-            if (!realPassword.equals(user.getPassword())) throw new exceptions.IncorrectPassword();
+            if (!PasswordHasher.verify(password, realUser.getPasswordHash())){
+                throw new exceptions.IncorrectPassword();
+            }
         }
     }
 
