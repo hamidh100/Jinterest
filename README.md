@@ -13,12 +13,12 @@ Status: `[x]` complete ast; `[ ]` yani incomplete, partial, ya moredi ke az code
 | F-03 | Login / Signup | Signup-e user-e jadid vojood dashte bashad; username mitavanad email ya shomare mobile bashad. | Lazem | [x]    |
 | F-04 | Login / Signup | Password hadaghal 8 character, shamel horoof bozorg/koochak va adad bashad; username ra nadaste bashad; validation ba Regular Expression anjam shavad. | Lazem | [x]    |
 | F-05 | Login / Signup | Error haye server ba toast notification neshan dade shavand; field haye naghes ya format-e ghalat ham warning-e monaseb dashte bashand. | Lazem | [x]    |
-| F-06 | Login / Signup | Login ba fingerprint be jaye password. | ⭐ Emtiazi | [ ]    |
+| F-06 | Login / Signup | Login ba fingerprint be jaye password. | ⭐ Emtiazi | [x]    |
 | F-07 | Home | List-e ax haye hame user ha neshan dade shavad va ba entekhab har ax, Details screen baz shavad. | Lazem | [x]    |
 | F-08 | Home | Filter va sort bar asas tarikh-e ezafe shodan, name-e file, va like shodan vojood dashte bashad. | Lazem | [x]    |
 | F-09 | Home | Select-e chand ax, delete-e hamzaman, transfer be album, va share-e anha mojood bashad. | Lazem | [x]    |
 | F-10 | Home | Pagination-e monaseb baraye neshan dadan ax ha (pishnahad: Lazy Loading) estefade shavad. | Lazem | [x]    |
-| F-11 | Home | Download-e hame ax haye Home. | ⭐ Emtiazi | [ ]    |
+| F-11 | Home | Download-e hame ax haye Home. | ⭐ Emtiazi | [x]    |
 | F-12 | Home | Estefade az Shimmer hengam load shodan ax ha. | ⭐ Emtiazi | [x]    |
 | F-13 | Home | Share kardan ax ha va album ha beyn user haye mokhtalef. | ⭐ Emtiazi | [x]    |
 | F-14 | Upload | Upload-e ax az device va neshan dadan result-e movafagh/namovafagh ba payam-e monaseb. | Lazem | [x]    |
@@ -39,7 +39,7 @@ Status: `[x]` complete ast; `[ ]` yani incomplete, partial, ya moredi ke az code
 | F-29 | Profile | Taghir username/password, delete account, logout, va taghir permission/settings-e har ax va share-e an vojood dashte bashad. | Lazem | [x]    |
 | F-30 | Profile | Dark mode va light mode. | ⭐ Emtiazi | [x]    |
 | F-31 | Admin | Admin panel-e terminali dar Java: modiriat user ha, didan tedad album/ax har user, va ban kardan user az login. | Lazem | [x]    |
-| F-32 | Admin | Admin panel-e graphical dar Java. | ⭐ Emtiazi | [ ]    |
+| F-32 | Admin | Admin panel-e graphical dar Java. | ⭐ Emtiazi | [x]    |
 
 ## Backend, architecture, va data requirements
 
@@ -163,18 +163,8 @@ Sakht-e album va search:
 | D-08 | Quality, zibaie UI va creativity-e bishtar dar feature ha emtiaz-e ezafi darand. | ⭐ Emtiazi | [XXXX] |
 
 TODO:\
-stable MasonryGridView\
-hight and width and aspect ratio\
+CLEAN THE API CALLS: just send sessionToken and backend gets user from the session\
 album tumbnail\
-pfp\
-icon for app\
-change password\
-add to album and delete from home screen\
-save?\
-download button\
-prettier toast\
-cache\
-save password hash\
 likable comments\
 fix dark mode\
 use theme of context\
