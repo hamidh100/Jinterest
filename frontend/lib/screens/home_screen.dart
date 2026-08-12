@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../models/album.dart';
 import '../models/photo.dart';
@@ -154,8 +153,11 @@ class _FeedPageState extends State<_FeedPage> {
   int _searchRequest = 0;
   bool _isDownloadingAllPhotos = false;
   bool _isDownloadingAllAlbums = false;
+  String? _downloadingAlbumId; // single boolean : bug when multiple album cards
   int _downloadedPhotoCount = 0;
   int _downloadedAlbumCount = 0;
+  int _downloadedAlbumPhotos = 0;
+  int _totalAlbumPhotos = 0;
 
   @override
   void initState() {
@@ -273,13 +275,25 @@ class _FeedPageState extends State<_FeedPage> {
         children: [
           _buildSearchBar(),
           _buildViewToggle(),
-          if (isLoading || _isDownloadingAllPhotos || _isDownloadingAllAlbums)
+          if (isLoading ||
+              _isDownloadingAllPhotos ||
+              _isDownloadingAllAlbums ||
+              _downloadingAlbumId != null)
             LinearProgressIndicator(
               value: _isDownloadingAllPhotos && userPhotos.isNotEmpty
                   ? _downloadedPhotoCount / userPhotos.length
                   : _isDownloadingAllAlbums && userAlbums.isNotEmpty
                   ? _downloadedAlbumCount / userAlbums.length
+                  : _downloadingAlbumId != null && _totalAlbumPhotos > 0
+                  ? _downloadedAlbumPhotos / _totalAlbumPhotos
                   : null,
+            ),
+          if (_downloadingAlbumId != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Text(
+                'Downloading $_downloadedAlbumPhotos/$_totalAlbumPhotos',
+              ),
             ),
           if (_isDownloadingAllAlbums)
             Padding(
@@ -425,7 +439,30 @@ class _FeedPageState extends State<_FeedPage> {
           padding: const EdgeInsets.only(bottom: 210),
           itemCount: albums.length,
           itemBuilder: (context, index) {
-            return _AlbumCard(album: albums[index]);
+            return _AlbumCard(
+              album: albums[index],
+              isDownloading: _downloadingAlbumId == albums[index].uuid,
+              downloadedPhotos: _downloadedAlbumPhotos,
+              onDownloadStarted: (totalPhotos) {
+                setState(() {
+                  _downloadingAlbumId = albums[index].uuid;
+                  _downloadedAlbumPhotos = 0;
+                  _totalAlbumPhotos = totalPhotos;
+                });
+              },
+              onPhotoDownloaded: (downloaded) {
+                setState(() {
+                  _downloadedAlbumPhotos = downloaded;
+                });
+              },
+              onDownloadFinished: () {
+                setState(() {
+                  _downloadingAlbumId = null;
+                  _downloadedAlbumPhotos = 0;
+                  _totalAlbumPhotos = 0;
+                });
+              },
+            );
           },
         );
 
@@ -454,7 +491,30 @@ class _FeedPageState extends State<_FeedPage> {
               return _PhotoCard(photo: item.photo!);
             }
 
-            return _AlbumCard(album: item.album!);
+            return _AlbumCard(
+              album: item.album!,
+              isDownloading: _downloadingAlbumId == item.album!.uuid,
+              downloadedPhotos: _downloadedAlbumPhotos,
+              onDownloadStarted: (totalPhotos) {
+                setState(() {
+                  _downloadingAlbumId = item.album!.uuid;
+                  _downloadedAlbumPhotos = 0;
+                  _totalAlbumPhotos = totalPhotos;
+                });
+              },
+              onPhotoDownloaded: (downloaded) {
+                setState(() {
+                  _downloadedAlbumPhotos = downloaded;
+                });
+              },
+              onDownloadFinished: () {
+                setState(() {
+                  _downloadingAlbumId = null;
+                  _downloadedAlbumPhotos = 0;
+                  _totalAlbumPhotos = 0;
+                });
+              },
+            );
           },
         );
     }
@@ -879,7 +939,7 @@ class _PhotoCard extends StatelessWidget {
     }
   }
 
-  Future<void> _sharePhoto(BuildContext context) async {
+  /*Future<void> _sharePhoto(BuildContext context) async {
     final snackbarProvider = context.read<SnackbarFabProvider>();
 
     try {
@@ -942,10 +1002,10 @@ class _PhotoCard extends StatelessWidget {
       return 'image/webp';
     }
     return 'image/jpeg';
-  }
+  }*/
 }
 
-class _PhotoHeader extends StatelessWidget {
+/*class _PhotoHeader extends StatelessWidget {
   final Photo photo;
 
   const _PhotoHeader({required this.photo});
@@ -986,7 +1046,7 @@ class _PhotoHeader extends StatelessWidget {
       ),
     );
   }
-}
+}*/
 
 class _PhotoImage extends StatelessWidget {
   final Photo photo;
@@ -1010,13 +1070,31 @@ class _PhotoImage extends StatelessWidget {
   }
 }
 
-class _AlbumCard extends StatelessWidget {
-  final Album album;
+class _AlbumCard extends StatefulWidget {
+  const _AlbumCard({
+    required this.album,
+    required this.isDownloading,
+    required this.downloadedPhotos,
+    required this.onDownloadStarted,
+    required this.onPhotoDownloaded,
+    required this.onDownloadFinished,
+  });
 
-  const _AlbumCard({required this.album});
+  final Album album;
+  final bool isDownloading;
+  final int downloadedPhotos;
+  final void Function(int totalPhotos) onDownloadStarted;
+  final void Function(int downloaded) onPhotoDownloaded;
+  final VoidCallback onDownloadFinished;
 
   @override
+  State<_AlbumCard> createState() => _AlbumCardState();
+}
+
+class _AlbumCardState extends State<_AlbumCard> {
+  @override
   Widget build(BuildContext context) {
+    final album = widget.album;
     final authUser = context.read<AuthProvider>().currentUser;
     final photoProvider = context.watch<PhotoProvider>();
 
@@ -1085,14 +1163,34 @@ class _AlbumCard extends StatelessWidget {
                 ),
               ),
             ),
-            IconButton(
-              padding: EdgeInsets.zero,
-              icon: const Icon(Icons.download_outlined),
-              onPressed: () => _downloadAlbum(context, albumPhotos),
-            ),
+            _buildDownloadAlbumButton(context, albumPhotos),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDownloadAlbumButton(
+    BuildContext context,
+    List<Photo> albumPhotos,
+  ) {
+    return IconButton(
+      tooltip: 'Download album',
+      onPressed: widget.isDownloading || albumPhotos.isEmpty
+          ? null
+          : () => _downloadAlbum(context, albumPhotos),
+      icon: widget.isDownloading
+          ? SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                value: albumPhotos.isEmpty
+                    ? null
+                    : widget.downloadedPhotos / albumPhotos.length,
+              ),
+            )
+          : const Icon(Icons.download_outlined),
     );
   }
 
@@ -1100,41 +1198,50 @@ class _AlbumCard extends StatelessWidget {
     BuildContext context,
     List<Photo> albumPhotos,
   ) async {
+    if (widget.isDownloading || albumPhotos.isEmpty) {
+      return;
+    }
     final snackbarProvider = context.read<SnackbarFabProvider>();
+    widget.onDownloadStarted(albumPhotos.length);
+    int successful = 0;
+    int failed = 0;
     try {
-      await PhotoService.downloadAlbum(albumPhotos: albumPhotos);
-      if (!context.mounted) {
+      for (final photo in albumPhotos) {
+        try {
+          await PhotoService.downloadPhoto(
+            photoId: photo.uuid,
+            photoName: photo.name,
+          );
+          successful++;
+          if (mounted) {
+            widget.onPhotoDownloaded(successful);
+          }
+        } catch (e) {
+          failed++;
+          debugPrint('Failed to download photo ${photo.uuid}: $e');
+        }
+      }
+    } finally {
+      if (!mounted) {
         return;
       }
+      widget.onDownloadFinished();
+      final message = failed == 0
+          ? 'Downloaded $successful photo${successful == 1 ? '' : 's'}'
+          : 'Downloaded $successful photo${successful == 1 ? '' : 's'}, '
+                '$failed failed';
       snackbarProvider.showSnackBar(
         context,
         SnackBar(
-          content: Text(
-            'Album downloaded (${albumPhotos.length} '
-            'photo${albumPhotos.length == 1 ? '' : 's'})',
-          ),
+          content: Text(message),
+          backgroundColor: failed == 0
+              ? Colors.green.shade700
+              : Colors.orange.shade800,
           behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.green.shade700,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    } catch (e) {
-      if (!context.mounted) {
-        return;
-      }
-      snackbarProvider.showSnackBar(
-        context,
-        SnackBar(
-          content: Text('Album download failed: $e'),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.red,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          duration: const Duration(seconds: 2),
+          duration: const Duration(seconds: 3),
         ),
       );
     }
