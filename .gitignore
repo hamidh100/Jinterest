@@ -11,6 +11,7 @@ backend/database/
 backend/src/database/PhotoDimensionMigration.java
 backend/src/database/PhotoCommentsAllowedMigration.java
 backend/src/database/MigrateProfileImagePath.java
+backend/src/database/PasswordMigration.java
 
 frontend/.dart_tool/
 frontend/.idea/

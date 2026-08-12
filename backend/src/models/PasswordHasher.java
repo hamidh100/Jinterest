@@ -8,7 +8,7 @@ import java.util.Base64;
 public final class PasswordHasher {
     private static final int SALT_LENGTH = 16; // 128 bits
     private static final int KEY_LENGTH = 256; // 256 bits
-    private static final int ITERATIONS = 600_000;
+    private static final int ITERATIONS = 1_000_000;
 
     private PasswordHasher() {}
 

@@ -7,7 +7,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class User {
-    private String phone, email, username, password, fullname;
+    private String phone, email, username, fullname;
+    private transient String password;
     private String passwordHash = null;
     private final UUID uuid;
     private LocalDateTime accountAge;
