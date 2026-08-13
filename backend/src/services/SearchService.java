@@ -59,6 +59,20 @@ public class SearchService {
         return result;
     }
 
+    public static List<User> userSearch(String text) {
+        List<User> result = new ArrayList<>();
+        for (User user : OurObjects.users.values()) {
+            boolean flag = false;
+            if (matches(user.getFullname(), text)) flag = true;
+            if (matches(user.getUsername(), text)) flag = true;
+            /*if (matches(user.getUuid().toString(), text)) flag = true;
+            if (matches(user.getEmail(), text)) flag = true;
+            if (matches(user.getPhone(), text)) flag = true;*/
+            if (flag) result.add(user);
+        }
+        return result;
+    }
+
     private static boolean matches(String value, String text) {
         return value != null && text != null && value.toLowerCase().contains(text.toLowerCase());
     }

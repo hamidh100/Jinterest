@@ -251,8 +251,10 @@ public class Router {
                 return handleGetPhotos(request);
             case "/albums":
                 return handleGetAlbums(request);
+            case "/search/user":
+                return handleSearchUser(request);
             case "/search":
-                return handleSearch(request);
+                return handleSearchPhoto(request);
             default:
                 /*
                     /photos/{id}/image
@@ -296,8 +298,10 @@ public class Router {
                 return handleCreatePhoto(request);
             case "/albums":
                 return handleCreateAlbum(request);
+            case "/search/user":
+                return handleSearchUser(request);
             case "/search":
-                return handleSearch(request);
+                return handleSearchPhoto(request);
             default:
                 if (isPhotoLikesRoute(route)) {
                     String photoId = getPart(route, 2);
@@ -1254,7 +1258,7 @@ public class Router {
         }
     }
 
-    private Response handleSearch(Request request) {
+    private Response handleSearchPhoto(Request request) {
         try {
             JsonObject payload = request.getPayload();
             String type = Helper.toLower(getRequiredString(payload, "type"));
@@ -1288,6 +1292,27 @@ public class Router {
             }
             JsonObject responsePayload = new JsonObject();
             responsePayload.add("photos", photosJson);
+            return Response.ok("Search completed", responsePayload);
+        } catch (IllegalArgumentException e) {
+            return Response.badRequest(e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Unexpected search error:");
+            e.printStackTrace();
+            return Response.serverError("Internal server error");
+        }
+    }
+
+    private Response handleSearchUser(Request request) {
+        try {
+            JsonObject payload = request.getPayload();
+            String text = getRequiredString(payload, "text");
+            List<User> results = SearchService.userSearch(text);
+            JsonArray usersJson = new JsonArray();
+            for (User user : results) {
+                usersJson.add(userToJson(user));
+            }
+            JsonObject responsePayload = new JsonObject();
+            responsePayload.add("users", usersJson);
             return Response.ok("Search completed", responsePayload);
         } catch (IllegalArgumentException e) {
             return Response.badRequest(e.getMessage());
