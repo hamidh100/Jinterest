@@ -7,16 +7,15 @@ import com.google.gson.JsonObject;
 public class Request {
     private String method;
     private String route;
-    private String username;
     private JsonObject payload;
     private UUID sessionToken;
+    private UUID authUuid;
 
     public Request() {}
 
     public Request(String method, String route, String username, JsonObject payload) {
         this.method = method;
         this.route = route;
-        this.username = username;
         this.payload = payload;
     }
 
@@ -28,15 +27,19 @@ public class Request {
         return route;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
     public JsonObject getPayload() {
         return payload == null ? new JsonObject() : payload;
     }
 
     public UUID getSessionToken() {
         return sessionToken;
+    }
+
+    public UUID getAuthUuid() {
+        return authUuid;
+    }
+
+    public void setAuthUuid(UUID authUuid) { 
+        this.authUuid = authUuid;
     }
 }

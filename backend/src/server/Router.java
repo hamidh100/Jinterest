@@ -49,6 +49,7 @@ public class Router {
             if (request == null) return Response.badRequest("Request is required");
             if (request.getMethod() == null) return Response.badRequest("Method is required");
             if (request.getRoute() == null) return Response.badRequest("Route is required");
+            request.setAuthUuid(SessionService.getUserId(request.getSessionToken()));
             String method = Helper.toUpper(request.getMethod().trim());
             String route = normalizeRoute(request.getRoute());
             if (isAdminRoute(route)) {
@@ -73,26 +74,18 @@ public class Router {
         }
     }
 
-    private User getRequester(Request request) {
-        String username = request.getUsername();
-        if (username == null) return null;
-        UUID id = OurObjects.usersLowercase.get(username.toLowerCase());
-        if (id != null) return OurObjects.users.get(id);
-        id = OurObjects.emailToUserID.get(username.toLowerCase());
-        if (id != null) return OurObjects.users.get(id);
-        id = OurObjects.phoneToUserID.get(username);
-        if (id != null) return OurObjects.users.get(id);
-        return null;
+    private boolean isAdmin(UUID uuid) {
+        if (uuid == null) return false;
+        User user = OurObjects.users.get(uuid);
+        if (user == null) return false;
+        return user.getUserType().equals(UserType.ADMIN);
     }
 
 
     private Response handleAdmin(Request request, String route) {
-        User requester = getRequester(request);
-        if (requester == null || requester.getUserType() != UserType.ADMIN) {
+        if (request.getAuthUuid() == null) return Response.forbidden("Invalid Credentials");
+        if (!isAdmin(request.getAuthUuid())) {
             return Response.forbidden("Admin access required");
-        }
-        if (!requester.getUuid().equals(SessionService.getUserId(request.getSessionToken()))){
-            return Response.forbidden("Invalid Credentials");
         }
         switch (route) {
             case "/admin/users":
@@ -181,9 +174,9 @@ public class Router {
     }
 
     private Response handleAdminDeleteUser(Request request, String userId) {
-        Response response = handleDeleteUser(userId);
+        Response response = handleDeleteUser(request, userId);
         if (response.getStatusCode() == 200) {
-            AuditService.addLog(getRequester(request).getUuid().toString(), "Deleted user " + userId);
+            AuditService.addLog(request.getAuthUuid().toString(), "Deleted user " + userId);
             try {
                 DatabaseManager.save();
             } catch (Exception e) {
@@ -200,7 +193,7 @@ public class Router {
         user.setBanned(true);
         try {
             DatabaseManager.save();
-            AuditService.addLog(getRequester(request).getUuid().toString(), "Banned user " + userId);
+            AuditService.addLog(request.getAuthUuid().toString(), "Banned user " + userId);
             DatabaseManager.save();
             return Response.ok("User banned");
         } catch (Exception e) {
@@ -215,7 +208,7 @@ public class Router {
         user.setBanned(false);
         try {
             DatabaseManager.save();
-            AuditService.addLog(getRequester(request).getUuid().toString(), "Unbanned user " + userId);
+            AuditService.addLog(request.getAuthUuid().toString(), "Unbanned user " + userId);
             DatabaseManager.save();
             return Response.ok("User unbanned");
         } catch (Exception e) {
@@ -226,7 +219,7 @@ public class Router {
     private Response handleAdminDeletePhoto(Request request, String photoId) {
         Response response = handleDeletePhoto(request, photoId);
         if (response.getStatusCode() == 200) {
-            AuditService.addLog(getRequester(request).getUuid().toString(), "Deleted photo " + photoId);
+            AuditService.addLog(request.getAuthUuid().toString(), "Deleted photo " + photoId);
             try {
                 DatabaseManager.save();
             } catch (Exception e) {
@@ -239,7 +232,7 @@ public class Router {
     private Response handleAdminDeleteComment(Request request, String commentId) {
         Response response = handleDeleteComment(request, commentId);
         if (response.getStatusCode() == 200) {
-            AuditService.addLog(getRequester(request).getUuid().toString(), "Deleted comment " + commentId);
+            AuditService.addLog(request.getAuthUuid().toString(), "Deleted comment " + commentId);
             try {
                 DatabaseManager.save();
             } catch (Exception e) {
@@ -286,7 +279,7 @@ public class Router {
                     return handleGetUser(request, userId);
                 }
                 if (isUserImageRoute(route)) {
-                    return handleGetUserImage(request, getPart(route, 2));
+                    return handleGetUserImage(request);
                 }
                 return Response.notFound("Route not found: GET " + route);
         }
@@ -336,8 +329,7 @@ public class Router {
             return handleUpdateAlbum(request, albumId);
         }
         if (isUserRoute(route)) {
-            String userId = getPart(route, 2);
-            return handleUpdateUser(request, userId);
+            return handleUpdateUser(request);
         }
         if (pathExists(route)) {
             return Response.methodNotAllowed(
@@ -366,7 +358,7 @@ public class Router {
         }
         if (isUserRoute(route)) {
             String userId = getPart(route, 2);
-            return handleDeleteUser(userId);
+            return handleDeleteUser(request, userId);
         }
         if (isCommentRoute(route)) {
             String commentId = getPart(route, 2);
@@ -544,13 +536,10 @@ public class Router {
         }
     }
 
-    private Response handleUpdateUser(Request request, String userId) {
+    private Response handleUpdateUser(Request request) {
         try {
-            UUID uuid = parseUuid(userId);
-            if (!uuid.equals(SessionService.getUserId(request.getSessionToken()))){
-                return Response.forbidden("Invalid Credentials");
-            }
-            User user = OurObjects.users.get(uuid);
+            if (request.getAuthUuid() == null) return Response.forbidden("Invalid Credentials");
+            User user = OurObjects.users.get(request.getAuthUuid());
             if (user == null) return Response.notFound("User does not exist");
             JsonObject payload = request.getPayload();
             boolean updated = false;
@@ -604,12 +593,13 @@ public class Router {
         }
     }
 
-    private Response handleGetUserImage(Request request, String userId) {
+    private Response handleGetUserImage(Request request) {
         try {
-            User user = OurObjects.users.get(parseUuid(userId));
+            if (request.getAuthUuid() == null) return Response.forbidden("Invalid Credentials");
+            User user = OurObjects.users.get(request.getAuthUuid());
             if (user == null || user.getProfileImagePath() == null)
                 return Response.notFound("Profile image does not exist");
-            if (!user.getUuid().equals(SessionService.getUserId(request.getSessionToken()))){
+            if (!user.getUuid().equals(request.getAuthUuid())){
                 return Response.forbidden("Invalid Credentials");
             }
             Path path = Path.of(user.getProfileImagePath());
@@ -640,8 +630,9 @@ public class Router {
             UUID photoUuid = parseUuid(photoId);
             Photo photo = OurObjects.photos.get(photoUuid);
             if (photo == null) return Response.notFound("Photo does not exist");
-            //if (!photo.isPublic() && !photo.getOwnerID().equals())
-            // TODO
+            if (photo.getOwnerID() == null) return Response.notFound("Owner does not exist");
+            if (!photo.isPublic() && !photo.getOwnerID().equals(request.getAuthUuid()))
+                return Response.forbidden("You don't have access");
             String imagePath = photo.getPath();
             if (imagePath == null || imagePath.isBlank()) {
                 return Response.notFound("Photo image does not exist");
@@ -684,8 +675,9 @@ public class Router {
 
     private Response handleCreatePhoto(Request request) {
         try {
+            if (request.getAuthUuid() == null) return Response.forbidden("Invalid Credentials");
             JsonObject payload = request.getPayload();
-            UUID ownerId = parseUuid(getRequiredString(payload, "ownerId"));
+            UUID ownerId = request.getAuthUuid();
             User owner = OurObjects.users.get(ownerId);
             if (owner == null) return Response.notFound("Owner user does not exist");
             String imageBase64 = getOptionalString(payload, "imageBase64");
@@ -748,9 +740,12 @@ public class Router {
 
     private Response handleUpdatePhoto(Request request, String photoId) {
         try {
+            if (request.getAuthUuid() == null) return Response.forbidden("Invalid Credentials");
             UUID uuid = parseUuid(photoId);
             Photo photo = OurObjects.photos.get(uuid);
             if (photo == null) return Response.notFound("Photo does not exist");
+            if (!photo.getOwnerID().equals(request.getAuthUuid()))
+                return Response.forbidden("You don't have access");
             JsonObject payload = request.getPayload();
             boolean updated = false;
             if (payload.has("path") && !payload.get("path").isJsonNull()) {
@@ -805,11 +800,14 @@ public class Router {
         }
     }
 
-    private Response handleDeletePhoto(Request request, String photoId) {
+    private Response handleDeletePhoto(Request request, String photoId) { // + admin
         try {
+            if (request.getAuthUuid() == null) return Response.forbidden("Invalid Credentials");
             UUID uuid = parseUuid(photoId);
             Photo photo = OurObjects.photos.get(uuid);
             if (photo == null) return Response.notFound("Photo does not exist");
+            if (!photo.getOwnerID().equals(request.getAuthUuid()) && !isAdmin(request.getAuthUuid()))
+                return Response.forbidden("You don't have access");
             removePhoto(photo);
             DatabaseManager.save();
             return Response.ok("Photo deleted successfully");
@@ -826,11 +824,14 @@ public class Router {
         }
     }
 
-    private Response handleDeleteUser(String userId) {
+    private Response handleDeleteUser(Request request, String userId) { // + admin
         try {
+            if (request.getAuthUuid() == null) return Response.forbidden("Invalid Credentials");
             UUID uuid = parseUuid(userId);
             User user = OurObjects.users.get(uuid);
             if (user == null) return Response.notFound("User does not exist");
+            if (user.getUuid() != request.getAuthUuid() && !isAdmin(request.getAuthUuid()))
+                return Response.forbidden("You don't have access");
 
             for (Photo photo : new ArrayList<>(OurObjects.photos.values())) {
                 if (uuid.equals(photo.getOwnerID()) || user.getPhotoIDs().contains(photo.getUuid())) {
@@ -904,14 +905,11 @@ public class Router {
 
     private Response handleLikePhoto(Request request, String photoId) {
         try {
+            if (request.getAuthUuid() == null) return Response.forbidden("Invalid Credentials");
             UUID photoUuid = parseUuid(photoId);
             Photo photo = OurObjects.photos.get(photoUuid);
             if (photo == null) return Response.notFound("Photo does not exist");
-            String userIdText = getRequiredString(request.getPayload(), "userId");
-            UUID userUuid = parseUuid(userIdText);
-            if (!userUuid.equals(SessionService.getUserId(request.getSessionToken()))){
-                return Response.forbidden("Invalid Credentials");
-            }
+            UUID userUuid = request.getAuthUuid();
             User user = OurObjects.users.get(userUuid);
             if (user == null) return Response.notFound("User does not exist");
             if (PhotoService.isLikedBy(photo, user)) {
@@ -939,11 +937,11 @@ public class Router {
 
     private Response handleUnlikePhoto(Request request, String photoId) {
         try {
+            if (request.getAuthUuid() == null) return Response.forbidden("Invalid Credentials");
             UUID photoUuid = parseUuid(photoId);
             Photo photo = OurObjects.photos.get(photoUuid);
             if (photo == null) return Response.notFound("Photo does not exist");
-            String userIdText = getRequiredString(request.getPayload(), "userId");
-            UUID userUuid = parseUuid(userIdText);
+            UUID userUuid = request.getAuthUuid();
             User user = OurObjects.users.get(userUuid);
             if (user == null) return Response.notFound("User does not exist");
             UUID likeToRemove = null;
@@ -977,6 +975,7 @@ public class Router {
 
     private Response handleGetPhotoComments(Request request, String photoId) {
         try {
+            if (request.getAuthUuid() == null) return Response.forbidden("Invalid Credentials");
             UUID photoUuid = parseUuid(photoId);
             Photo photo = OurObjects.photos.get(photoUuid);
             if (photo == null) return Response.notFound("Photo does not exist");
@@ -998,11 +997,12 @@ public class Router {
 
     private Response handleCreateComment(Request request, String photoId) {
         try {
+            if (request.getAuthUuid() == null) return Response.forbidden("Invalid Credentials");
             UUID photoUuid = parseUuid(photoId);
             Photo photo = OurObjects.photos.get(photoUuid);
             if (photo == null) return Response.notFound("Photo does not exist");
             JsonObject payload = request.getPayload();
-            UUID userUuid = parseUuid(getRequiredString(payload, "userId"));
+            UUID userUuid = request.getAuthUuid();
             User user = OurObjects.users.get(userUuid);
             if (user == null) return Response.notFound("User does not exist");
             if (!photo.isCommentsAllowed() && !userUuid.equals(photo.getOwnerID())) {
@@ -1029,11 +1029,14 @@ public class Router {
     }
 
 
-    private Response handleDeleteComment(Request request, String commentId) {
+    private Response handleDeleteComment(Request request, String commentId) { // + admin
         try {
+            if (request.getAuthUuid() == null) return Response.forbidden("Invalid Credentials");
             UUID commentUuid = parseUuid(commentId);
             Comment comment = OurObjects.comments.get(commentUuid);
             if (comment == null) return Response.notFound("Comment does not exist");
+            if (!comment.getUserID().equals(request.getAuthUuid()) && !isAdmin(request.getAuthUuid()))
+                return Response.forbidden("You don't have access");
             if (comment.getPhotoID() != null) {
                 Photo photo = OurObjects.photos.get(comment.getPhotoID());
                 if (photo != null) {
@@ -1081,8 +1084,9 @@ public class Router {
 
     private Response handleCreateAlbum(Request request) {
         try {
+            if (request.getAuthUuid() == null) return Response.forbidden("Invalid Credentials");
             JsonObject payload = request.getPayload();
-            UUID ownerId = parseUuid(getRequiredString(payload, "ownerId"));
+            UUID ownerId = request.getAuthUuid();
             User owner = OurObjects.users.get(ownerId);
             if (owner == null) return Response.notFound("Owner user does not exist");
             List<UUID> photoIds = readPhotoIds(payload, "photoIds");
@@ -1120,9 +1124,12 @@ public class Router {
 
     private Response handleUpdateAlbum(Request request, String albumId) {
         try {
+            if (request.getAuthUuid() == null) return Response.forbidden("Invalid Credentials");
             UUID albumUuid = parseUuid(albumId);
             Album album = OurObjects.albums.get(albumUuid);
             if (album == null) return Response.notFound("Album does not exist");
+            if (!album.getOwnerID().equals(request.getAuthUuid()))
+                return Response.forbidden("You don't have access");
             JsonObject payload = request.getPayload();
             if (!payload.has("photoIds") || payload.get("photoIds").isJsonNull()) {
                 return Response.badRequest("Field 'photoIds' is required");
@@ -1162,9 +1169,12 @@ public class Router {
 
     private Response handleDeleteAlbum(Request request, String albumId) {
         try {
+            if (request.getAuthUuid() == null) return Response.forbidden("Invalid Credentials");
             UUID albumUuid = parseUuid(albumId);
             Album album = OurObjects.albums.get(albumUuid);
             if (album == null) return Response.notFound("Album does not exist");
+            if (!album.getOwnerID().equals(request.getAuthUuid()) && !isAdmin(request.getAuthUuid()))
+                return Response.forbidden("You don't have access");
             User owner = OurObjects.users.get(album.getOwnerID());
             if (owner != null) {
                 owner.getAlbumIDs().remove(album.getUuid());
@@ -1187,10 +1197,11 @@ public class Router {
 
     private Response handleFollowUser(Request request, String userId) {
         try {
+            if (request.getAuthUuid() == null) return Response.forbidden("Invalid Credentials");
             UUID followedId = parseUuid(userId);
             User followed = OurObjects.users.get(followedId);
             if (followed == null) return Response.notFound("User to follow does not exist");
-            UUID followerId = parseUuid(getRequiredString(request.getPayload(), "followerId"));
+            UUID followerId = request.getAuthUuid();
             User follower = OurObjects.users.get(followerId);
             if (follower == null) return Response.notFound("Follower user does not exist");
             if (follower.equals(followed)) return Response.badRequest("A user cannot follow themselves");
@@ -1217,10 +1228,11 @@ public class Router {
 
     private Response handleUnfollowUser(Request request, String userId) {
         try {
+            if (request.getAuthUuid() == null) return Response.forbidden("Invalid Credentials");
             UUID followedId = parseUuid(userId);
             User followed = OurObjects.users.get(followedId);
             if (followed == null) return Response.notFound("User does not exist");
-            UUID followerId = parseUuid(getRequiredString(request.getPayload(), "followerId"));
+            UUID followerId = request.getAuthUuid();
             User follower = OurObjects.users.get(followerId);
             if (follower == null) return Response.notFound("Follower user does not exist");
             if (follower.equals(followed)) return Response.badRequest("A user cannot unfollow themselves");
