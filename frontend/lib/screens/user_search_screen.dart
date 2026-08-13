@@ -61,7 +61,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
     });
 
     try {
-      final results = null; //await UserService.searchUsers(query);
+      final results = await UserService.searchUsers(query);
 
       if (!mounted || request != _searchRequest) return;
 

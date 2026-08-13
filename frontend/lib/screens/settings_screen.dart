@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../providers/auth_provider.dart';
-import '../providers/theme_provider.dart';
 import '../services/biometric_service.dart';
-import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -47,9 +44,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.read<AuthProvider>();
-    final theme = context.read<ThemeProvider>();
-
     return Scaffold(
       appBar: AppBar(title: const Text('Settings'), centerTitle: true),
       body: ListView(

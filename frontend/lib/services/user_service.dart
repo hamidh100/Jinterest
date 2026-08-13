@@ -174,10 +174,7 @@ class UserService {
     _profileImageCache.clear();
   }
 
-  static User _userFromResponse(
-    Map<String, dynamic> response, {
-    String password = '',
-  }) {
+  static User _userFromResponse(Map<String, dynamic> response) {
     final payload = response['payload'];
     if (payload is! Map<String, dynamic> ||
         payload['user'] is! Map<String, dynamic>) {
@@ -212,5 +209,50 @@ class UserService {
         'payload': {'user': json},
       });
     }).toList();
+  }
+
+  static Future<List<User>> searchUsers(String query) async {
+    final response = await ApiClient.instance.send(
+      method: 'POST',
+      route: '/search/user',
+      payload: {'text': query.trim()},
+    );
+    return _userListFromResponse(response);
+  }
+
+  static List<User> _userListFromResponse(Map<String, dynamic> response) {
+    final payload = response['payload'];
+    if (payload is! Map<String, dynamic> || payload['users'] is! List) {
+      throw StateError('Server returned an invalid photo list');
+    }
+    final x = payload['users'] as List;
+    return (payload['users'] as List)
+        .whereType<Map<String, dynamic>>()
+        .map(_userFromJson)
+        .toList();
+  }
+
+  static User _userFromJson(Map<String, dynamic> json) {
+    final user = json;
+    final userTypeText = user['userType']?.toString().toUpperCase();
+    final userType = switch (userTypeText) {
+      'ADMIN' => UserType.admin,
+      _ => UserType.normal,
+    };
+    return User(
+      uuid: user['id']?.toString() ?? '',
+      username: user['username']?.toString(),
+      email: user['email']?.toString(),
+      phone: user['phone']?.toString(),
+      fullname: user['fullname']?.toString() ?? '',
+      followerIDs: (user['followerIds'] as List? ?? const [])
+          .map((id) => id.toString())
+          .toList(),
+      followingIDs: (user['followingIds'] as List? ?? const [])
+          .map((id) => id.toString())
+          .toList(),
+      userType: userType,
+      banned: user['banned'] ?? false,
+    );
   }
 }

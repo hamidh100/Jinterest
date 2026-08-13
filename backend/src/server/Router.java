@@ -1306,10 +1306,12 @@ public class Router {
         try {
             JsonObject payload = request.getPayload();
             String text = getRequiredString(payload, "text");
+            System.out.println(text);
             List<User> results = SearchService.userSearch(text);
             JsonArray usersJson = new JsonArray();
             for (User user : results) {
                 usersJson.add(userToJson(user));
+                System.out.println("user found : " + user.getFullname());
             }
             JsonObject responsePayload = new JsonObject();
             responsePayload.add("users", usersJson);
