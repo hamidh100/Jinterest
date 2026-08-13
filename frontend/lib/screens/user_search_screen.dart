@@ -1,10 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../models/user.dart';
+import '../providers/auth_provider.dart';
 import '../services/user_service.dart';
 import '../widgets/user_list_tile.dart';
+import '../widgets/follow_button.dart';
 
 class UserSearchScreen extends StatefulWidget {
   const UserSearchScreen({super.key});
@@ -138,18 +141,67 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
     }
 
     return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
       itemCount: _users.length,
       itemBuilder: (context, index) {
         final user = _users[index];
 
+        final authUser = context.watch<AuthProvider>().currentUser;
+
+        final isCurrentUser = user.uuid == authUser?.uuid;
+
         return UserListTile(
           user: user,
-          trailing: const Icon(Icons.chevron_right),
+          trailing: isCurrentUser
+              ? null
+              : FollowButton(
+                  followerId: authUser!.uuid,
+                  followedId: user.uuid,
+                  isFollowing: authUser.followingIDs.contains(user.uuid),
+                  onChanged: (isFollowing) {
+                    return _onFollowChanged(user.uuid, isFollowing);
+                  },
+                ),
           onTap: () {
             Navigator.pushNamed(context, '/user-profile', arguments: user.uuid);
           },
         );
       },
+    );
+  }
+
+  Future<void> _onFollowChanged(String userId, bool isFollowing) async {
+    final authProvider = context.read<AuthProvider>();
+    final currentUser = authProvider.currentUser;
+    if (currentUser == null) return;
+    final followingIds = List<String>.from(currentUser.followingIDs);
+    if (isFollowing) {
+      if (!followingIds.contains(userId)) {
+        followingIds.add(userId);
+      }
+    } else {
+      followingIds.remove(userId);
+    }
+    final updatedUser = _copyUser(currentUser, followingIDs: followingIds);
+    await authProvider.updateCurrentUser(updatedUser);
+    if (!mounted) return;
+  }
+
+  User _copyUser(
+    User user, {
+    List<String>? followerIDs,
+    List<String>? followingIDs,
+  }) {
+    return User(
+      uuid: user.uuid,
+      username: user.username,
+      email: user.email,
+      phone: user.phone,
+      fullname: user.fullname,
+      banned: user.banned,
+      followerIDs: followerIDs ?? user.followerIDs,
+      followingIDs: followingIDs ?? user.followingIDs,
+      userType: user.userType,
     );
   }
 }

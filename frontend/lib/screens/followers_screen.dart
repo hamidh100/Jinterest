@@ -138,10 +138,9 @@ class _FollowersScreenState extends State<FollowersScreen> {
       );
     }
 
-    return ListView.separated(
+    return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: _users.length,
-      separatorBuilder: (_, __) => const Divider(height: 1),
       itemBuilder: (context, index) {
         final user = _users[index];
 
