@@ -279,7 +279,8 @@ public class Router {
                     return handleGetUser(request, userId);
                 }
                 if (isUserImageRoute(route)) {
-                    return handleGetUserImage(request);
+                    String userId = getPart(route, 2);
+                    return handleGetUserImage(request, userId);
                 }
                 return Response.notFound("Route not found: GET " + route);
         }
@@ -593,15 +594,11 @@ public class Router {
         }
     }
 
-    private Response handleGetUserImage(Request request) {
+    private Response handleGetUserImage(Request request, String userId) {
         try {
-            if (request.getAuthUuid() == null) return Response.forbidden("Invalid Credentials");
-            User user = OurObjects.users.get(request.getAuthUuid());
+            User user = OurObjects.users.get(parseUuid(userId));
             if (user == null || user.getProfileImagePath() == null)
                 return Response.notFound("Profile image does not exist");
-            if (!user.getUuid().equals(request.getAuthUuid())){
-                return Response.forbidden("Invalid Credentials");
-            }
             Path path = Path.of(user.getProfileImagePath());
             if (!Files.exists(path) || !Files.isRegularFile(path))
                 return Response.notFound("Profile image does not exist");
