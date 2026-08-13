@@ -95,7 +95,23 @@ class _ExploreScreenState extends State<ExploreScreen> {
     const double searchMaxHeight = 80;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Explore'), centerTitle: true),
+      appBar: AppBar(
+        title: const Text('Explore'),
+        centerTitle: true,
+        leading: AnimatedOpacity(
+          duration: const Duration(milliseconds: 220),
+          opacity: _searchVisible ? 1.0 : 0.0,
+          child: IgnorePointer(
+            ignoring: !_searchVisible,
+            child: IconButton(
+              onPressed: () => Navigator.pushNamed(context, '/user-search'),
+              icon: const Icon(Icons.person_search),
+              tooltip: 'Search users',
+            ),
+          ),
+        ),
+      ),
+
       body: Stack(
         children: [
           Positioned.fill(child: _buildContentWithController(photos, albums)),

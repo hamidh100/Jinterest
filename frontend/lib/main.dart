@@ -15,7 +15,8 @@ import 'screens/upload_screen.dart';
 import 'screens/photo_details_screen.dart';
 import 'screens/album_details_screen.dart';
 import 'screens/admin_screen.dart';
-import '/screens/settings_screen.dart';
+import 'screens/settings_screen.dart';
+import 'screens/user_search_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -88,6 +89,7 @@ class MyApp extends StatelessWidget {
             },
             '/admin': (_) => const AdminScreen(),
             '/settings': (_) => const SettingsScreen(),
+            '/user-search': (_) => const UserSearchScreen(),
           },
         ),
       ),
