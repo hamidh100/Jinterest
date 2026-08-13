@@ -891,7 +891,7 @@ class _PhotoCard extends StatelessWidget {
             ),
           if (photo.categoryList.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
               child: Wrap(
                 spacing: 8,
                 runSpacing: 8,

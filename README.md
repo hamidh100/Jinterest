@@ -57,8 +57,8 @@ Status: `[x]` complete ast; `[ ]` yani incomplete, partial, ya moredi ke az code
 | B-10 | Database | Yek module-e joda baraye negahdari state-e tamam object ha va CRUD vojood dashte bashad. | Lazem | [x] |
 | B-11 | Database | State belafasele ba har taghir to yek file JSON save shavad va dar startup-e backend restore shavad. | Lazem | [x] |
 | B-12 | Database | SQL va database haye amade mesle MySQL, MongoDB ya PostgreSQL mamnoo ast. | Lazem | [x] |
-| B-13 | Database | Access be database faghat az tarigh-e API Server bashad. | ⭐ Emtiazi | [ ] |
-| B-14 | File server | Module-e file server baraye create/search/browse va modiriat file ha vojood dashte bashad. | Lazem | [ ] |
+| B-13 | Database | Access be database faghat az tarigh-e API Server bashad. | ⭐ Emtiazi | [x] |
+| B-14 | File server | Module-e file server baraye create/search/browse va modiriat file ha vojood dashte bashad. | Lazem | [x] |
 | B-15 | File server | File ha to masir-e moshakhas ruye filesystem save va modiriat shavand. | Lazem | [x] |
 
 > Note: to chand jay-e PDF be "music/audio files" eshare shode, vali title va requirement haye UI project "modiriat tasavir va album ha" hastand. Dar in checklist, file server baraye ax ha dar nazar gerefte shode.
@@ -163,7 +163,7 @@ Sakht-e album va search:
 | D-08 | Quality, zibaie UI va creativity-e bishtar dar feature ha emtiaz-e ezafi darand. | ⭐ Emtiazi | [XXXX] |
 
 TODO:\
-CLEAN THE API CALLS: just send sessionToken and backend gets user from the session\
+album header for homescreen?\
 album tumbnail\
 likable comments\
 fix dark mode\
