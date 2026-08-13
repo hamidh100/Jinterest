@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:jinterest/services/user_service.dart';
+import 'package:jinterest/widgets/profile_avatar.dart';
 import 'package:provider/provider.dart';
 
 import '../models/album.dart';
@@ -423,7 +425,10 @@ class _FeedPageState extends State<_FeedPage> {
           padding: const EdgeInsets.only(bottom: 210),
           itemCount: photos.length,
           itemBuilder: (context, index) {
-            return _PhotoCard(photo: photos[index]);
+            return _PhotoCard(
+              photo: photos[index],
+              homeFeedSource: _feedSource,
+            );
           },
         );
 
@@ -488,7 +493,10 @@ class _FeedPageState extends State<_FeedPage> {
             final item = mixedItems[index];
 
             if (item.photo != null) {
-              return _PhotoCard(photo: item.photo!);
+              return _PhotoCard(
+                photo: item.photo!,
+                homeFeedSource: _feedSource,
+              );
             }
 
             return _AlbumCard(
@@ -796,8 +804,9 @@ class _MixedMediaItem {
 
 class _PhotoCard extends StatelessWidget {
   final Photo photo;
+  final HomeFeedSource homeFeedSource;
 
-  const _PhotoCard({required this.photo});
+  const _PhotoCard({required this.photo, required this.homeFeedSource});
 
   @override
   Widget build(BuildContext context) {
@@ -820,10 +829,17 @@ class _PhotoCard extends StatelessWidget {
                 arguments: photo.uuid,
               );
             },
-            child: _PhotoImage(photo: photo),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (homeFeedSource == HomeFeedSource.following)
+                  _PhotoHeader(photo: photo),
+                _PhotoImage(photo: photo),
+              ],
+            ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
             child: Row(
               children: [
                 IconButton(
@@ -867,7 +883,7 @@ class _PhotoCard extends StatelessWidget {
           ),
           if (photo.captionText != null && photo.captionText!.trim().isNotEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              padding: const EdgeInsets.fromLTRB(16, 2, 16, 16),
               child: Text(
                 photo.captionText!,
                 style: const TextStyle(fontSize: 14),
@@ -1005,48 +1021,58 @@ class _PhotoCard extends StatelessWidget {
   }*/
 }
 
-/*class _PhotoHeader extends StatelessWidget {
+class _PhotoHeader extends StatelessWidget {
   final Photo photo;
 
   const _PhotoHeader({required this.photo});
 
   @override
   Widget build(BuildContext context) {
-    final ownerLabel = photo.ownerID.isNotEmpty ? photo.ownerID[0] : '?';
-
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        children: [
-          CircleAvatar(
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            child: Text(
-              ownerLabel.toUpperCase(),
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return FutureBuilder<User?>(
+      future: UserService.getUserById(photo.ownerID),
+      builder: (context, snapshot) {
+        final user = snapshot.data;
+        final displayName = user?.fullname.trim().isNotEmpty == true
+            ? user!.fullname.trim()
+            : user?.username ?? photo.ownerID;
+        return InkWell(
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              '/user-profile',
+              arguments: photo.ownerID,
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
               children: [
-                Text(
-                  'User ${photo.ownerID}',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  timeAgo(photo.photoAge),
-                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                ProfileAvatar(userId: photo.ownerID, fullname: displayName),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        displayName,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        timeAgo(photo.photoAge),
+                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
-}*/
+}
 
 class _PhotoImage extends StatelessWidget {
   final Photo photo;

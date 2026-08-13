@@ -225,7 +225,6 @@ class UserService {
     if (payload is! Map<String, dynamic> || payload['users'] is! List) {
       throw StateError('Server returned an invalid photo list');
     }
-    final x = payload['users'] as List;
     return (payload['users'] as List)
         .whereType<Map<String, dynamic>>()
         .map(_userFromJson)
