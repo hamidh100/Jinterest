@@ -24,14 +24,14 @@ Jinterest is an academic social-media project for uploading, organising, discove
 ```text
 ┌───────────────────────────┐       UTF-8 JSON, one message per line       ┌─────────────────────────────┐
 │       Flutter client      │ ───────────────────────────────────────────▶ │       Java TCP server       │
-│  screens · providers      │ ◀─────────────────────────────────────────── │ router · services · sessions │
-│  services · local storage │                    port 8800                  │                             │
-└───────────────────────────┘                                               └──────────────┬──────────────┘
-                                                                                             │
-                                                                            ┌────────────────┴────────────────┐
-                                                                            │ database/jinterest.json          │
-                                                                            │ database/images/                 │
-                                                                            └─────────────────────────────────┘
+│  screens · providers      │ ◀─────────────────────────────────────────── │ router · services · sessions│
+│  services · local storage │                    port 8800                 │                             │
+└───────────────────────────┘                                              └──────────────┬──────────────┘
+                                                                                          │
+                                                                         ┌────────────────┴────────────────┐
+                                                                         │ database/jinterest.json         │
+                                                                         │ database/images/                │
+                                                                         └─────────────────────────────────┘
 ```
 
 The server restores its JSON snapshot at startup and saves after data-changing operations. Authenticated requests carry a session UUID in the request envelope; the backend resolves that token before handling protected operations.
