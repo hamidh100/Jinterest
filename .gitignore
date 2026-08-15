@@ -21,6 +21,8 @@ frontend/pubspec.lock
 frontend/TUTORIAL_FA.md
 frontend/TUTORIAL_SYNTAX_FA.md
 
+assets/ignore
+
 # idk
 # frontend/android/gradle.properties
 # frontend/android/settings.gradle.kts
