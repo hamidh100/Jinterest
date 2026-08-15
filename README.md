@@ -73,10 +73,26 @@ The server restores its JSON snapshot at startup and saves after data-changing o
 │   │   └── widgets/              reusable UI components
 │   ├── assets/icon/logo.png      application icon asset
 │   └── pubspec.yaml              Flutter packages and asset declarations
-└── database/                     runtime data; not source code
-    ├── jinterest.json            persisted application state
-    └── images/                   uploaded and profile images
 ```
+
+### Runtime data
+
+`database/` is not a source directory and is intentionally not tracked by Git.
+The backend creates and updates it relative to the directory from which the
+Java process starts:
+
+```text
+# Recommended: run Maven from the repository root
+Jinterest/database/
+├── jinterest.json                persisted application state
+└── images/                        uploaded and profile images
+
+# If the server is started from backend/ instead
+Jinterest/backend/database/
+```
+
+Use the repository-root command in the quick-start guide to keep all runtime
+data under `Jinterest/database/`.
 
 ## Prerequisites
 
@@ -293,8 +309,8 @@ normal application server on `8800`. Stop it with `Ctrl+C` after the response.
 
 - Passwords are stored as salted PBKDF2-HMAC-SHA256 hashes, never plaintext.
 - `database/jinterest.json` is saved after data-changing operations and restored when the server starts.
-- `database/images/` contains uploaded and profile image files.
-- Treat `database/` as runtime data: do not commit real user data, and back it up before deleting or editing it.
+- `database/images/` contains uploaded and profile image files when the server is run from the repository root.
+- The `database/` location is relative to the Java process working directory. Treat it as runtime data: do not commit real user data, and back it up before deleting or editing it.
 - Do not commit local SDK paths, IDE settings, or build output.
 
 ## Development
