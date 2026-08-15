@@ -72,7 +72,6 @@ The server restores its JSON snapshot at startup and saves after data-changing o
 │   │   ├── utils/                shared utility functions
 │   │   └── widgets/              reusable UI components
 │   ├── assets/icon/logo.png      application icon asset
-│   ├── test/                     Flutter tests
 │   └── pubspec.yaml              Flutter packages and asset declarations
 └── database/                     runtime data; not source code
     ├── jinterest.json            persisted application state
