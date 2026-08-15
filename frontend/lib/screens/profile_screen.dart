@@ -475,7 +475,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 context.read<SnackbarFabProvider>().showSnackBar(
                   context,
                   SnackBar(
-                    content: Text('Profile saved.'),
+                    content: Text('Profile saved'),
                     behavior: SnackBarBehavior.floating,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -928,8 +928,8 @@ class _EditProfileScreenState extends State<_EditProfileScreen> {
                     context.read<SnackbarFabProvider>().showSnackBar(
                       context,
                       SnackBar(
-                        content: Text('Password changed.'),
-                        backgroundColor: Colors.red,
+                        content: Text('Password changed'),
+                        backgroundColor: Colors.green,
                         behavior: SnackBarBehavior.floating,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -1019,6 +1019,8 @@ class _ChangePasswordScreenState extends State<_ChangePasswordScreen> {
     }
   }
 
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -1032,25 +1034,49 @@ class _ChangePasswordScreenState extends State<_ChangePasswordScreen> {
             children: [
               TextFormField(
                 controller: _passwordController,
-                obscureText: true,
+                obscureText: _obscurePassword,
                 textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'New Password',
-                  prefixIcon: Icon(Icons.lock_outline),
-                  border: OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                  ),
+                  border: const OutlineInputBorder(),
                 ),
                 validator: Validators.validatePassword,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _confirmPasswordController,
-                obscureText: true,
+                obscureText: _obscureConfirmPassword,
                 textInputAction: TextInputAction.done,
                 onFieldSubmitted: (_) => _save(),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Confirm New Password',
-                  prefixIcon: Icon(Icons.lock_outline),
-                  border: OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureConfirmPassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureConfirmPassword = !_obscureConfirmPassword;
+                      });
+                    },
+                  ),
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value != _passwordController.text) {
@@ -1066,7 +1092,10 @@ class _ChangePasswordScreenState extends State<_ChangePasswordScreen> {
                   minimumSize: const Size(double.infinity, 48),
                   backgroundColor: Theme.of(context).colorScheme.primary,
                 ),
-                child: Text(_isSaving ? 'Saving...' : 'Save Password'),
+                child: Text(
+                  _isSaving ? 'Saving...' : 'Save Password',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
           ),
