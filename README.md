@@ -1,178 +1,308 @@
 # Jinterest
 
-In document, checklist-e requiremenet haye `Proje AP Bahar 1405` ast. PDF baraye item haye emtiazi score-e adadi nagoofte; pas `⭐ Emtiazi` yani optional, va baghiye item ha `Lazem` hastand.
+> A full-stack photo-sharing and album-management application built with Flutter and Java.
 
-## Functional requirements
+Jinterest lets users upload, organise, discover, and share photos. The mobile
+client communicates with a custom, line-delimited JSON protocol over TCP—there
+is no REST framework or external database. Application state is persisted to
+JSON files and uploaded images are stored locally.
 
-Status: `[x]` complete ast; `[ ]` yani incomplete, partial, ya moredi ke az code ghabel-e verify nabood.
+## Highlights
 
-| ID | Bakhsh | Requirement | Noe | Status |
-| --- | --- | --- | --- |--------|
-| F-01 | Login / Signup | User ba username va password login konad va pas az login be safhehaye asli beravad. | Lazem | [x]    |
-| F-02 | Login / Signup | Session-e login save shavad ta dar execution haye badi Login screen neshan dade nashavad; Login faghat bad az install ya logout neshan dade shavad. | Lazem | [x]    |
-| F-03 | Login / Signup | Signup-e user-e jadid vojood dashte bashad; username mitavanad email ya shomare mobile bashad. | Lazem | [x]    |
-| F-04 | Login / Signup | Password hadaghal 8 character, shamel horoof bozorg/koochak va adad bashad; username ra nadaste bashad; validation ba Regular Expression anjam shavad. | Lazem | [x]    |
-| F-05 | Login / Signup | Error haye server ba toast notification neshan dade shavand; field haye naghes ya format-e ghalat ham warning-e monaseb dashte bashand. | Lazem | [x]    |
-| F-06 | Login / Signup | Login ba fingerprint be jaye password. | ⭐ Emtiazi | [x]    |
-| F-07 | Home | List-e ax haye hame user ha neshan dade shavad va ba entekhab har ax, Details screen baz shavad. | Lazem | [x]    |
-| F-08 | Home | Filter va sort bar asas tarikh-e ezafe shodan, name-e file, va like shodan vojood dashte bashad. | Lazem | [x]    |
-| F-09 | Home | Select-e chand ax, delete-e hamzaman, transfer be album, va share-e anha mojood bashad. | Lazem | [x]    |
-| F-10 | Home | Pagination-e monaseb baraye neshan dadan ax ha (pishnahad: Lazy Loading) estefade shavad. | Lazem | [x]    |
-| F-11 | Home | Download-e hame ax haye Home. | ⭐ Emtiazi | [x]    |
-| F-12 | Home | Estefade az Shimmer hengam load shodan ax ha. | ⭐ Emtiazi | [x]    |
-| F-13 | Home | Share kardan ax ha va album ha beyn user haye mokhtalef. | ⭐ Emtiazi | [x]    |
-| F-14 | Upload | Upload-e ax az device va neshan dadan result-e movafagh/namovafagh ba payam-e monaseb. | Lazem | [x]    |
-| F-15 | Upload | Daryaft metadata: name, album ha, tag ha, afrad/ashya-e mojood dar ax va ...; ax-e upload shode dar Home va bakhsh haye marboot neshan dade shavad. | Lazem | [x]    |
-| F-16 | Upload | Field haye name, date-e ezafe shodan, caption, tag va album baraye har ax vojood dashte bashand; value-e caption/tag/album mitavanad khali/null bashad. | Lazem | [x]    |
-| F-17 | Upload | Ax haye upload shode ya gerefte shode ba camera dar hesab-e user save shavand va az device haye digar ham ghabel-e moshahede bashand. | Lazem | [x]    |
-| F-18 | Upload | Gereftan ax ba camera. | ⭐ Emtiazi | [x]    |
-| F-19 | Details | Ba entekhab ax, joloyat va etelaat-e asli ax neshan dade shavad. | Lazem | [x]    |
-| F-20 | Details | Emkan-e neveshtan caption haye moteaddad va like kardan ax vojood dashte bashad. | Lazem | [x]    |
-| F-21 | Details | Sabt-e comment rooye ax haye share shode. | ⭐ Emtiazi | [x]    |
-| F-22 | Details | Owner betavanad tajhizat-e share ra taein konad; mesalan mojavez-e comment baraye digaran ra. | ⭐ Emtiazi | [x]    |
-| F-23 | Albums | Create, delete, va edit-e ax haye album ha vojood dashte bashad. | Lazem | [x]    |
-| F-24 | Albums | List-e album ha va ax haye dakhel har album neshan dade shavad. | Lazem | [x]    |
-| F-25 | Albums | Har ax betavanad dar album ha va category haye moteaddad gharar begirad. | Lazem | [x]    |
-| F-26 | Albums | Sort-e ax haye album va transfer-e ax az yek album be album-e digar vojood dashte bashad. | Lazem | [x]    |
-| F-27 | Search | Search-e ax bar asas name, tarikh-e ezafe shodan, category, comment ha va tag ha. | Lazem | [x]    |
-| F-28 | Profile | Username, tedad ax ha va tedad album haye user neshan dade shavad. | Lazem | [x]    |
-| F-29 | Profile | Taghir username/password, delete account, logout, va taghir permission/settings-e har ax va share-e an vojood dashte bashad. | Lazem | [x]    |
-| F-30 | Profile | Dark mode va light mode. | ⭐ Emtiazi | [x]    |
-| F-31 | Admin | Admin panel-e terminali dar Java: modiriat user ha, didan tedad album/ax har user, va ban kardan user az login. | Lazem | [x]    |
-| F-32 | Admin | Admin panel-e graphical dar Java. | ⭐ Emtiazi | [x]    |
+- Secure sign-up and login with email or phone number
+- PBKDF2-HMAC-SHA256 password hashing and persisted login sessions
+- Biometric login, light/dark themes, and responsive Flutter UI
+- Photo upload from gallery or camera, captions, categories, likes, comments,
+  sharing, downloading, and multi-select actions
+- Albums with creation, editing, sorting, and moving photos between albums
+- Search across photos, captions, categories, comments, dates, and users
+- Profiles, follows, followers, profile images, and account settings
+- Admin views for users, photos, albums, comments, and audit activity
+- Concurrent Java TCP server with JSON persistence and local image storage
 
-## Backend, architecture, va data requirements
+## Architecture
 
-| ID | Bakhsh | Requirement | Noe | Status |
-| --- | --- | --- | --- | --- |
-| B-01 | Stack | Project ba Java baraye backend va Flutter baraye mobile app piade sazi shavad. | Lazem | [x] |
-| B-02 | OOP | Class ha, property ha va method ha bar asas OOP design shavand; encapsulation, inheritance va polymorphism estefade shavand. | Lazem | [x] |
-| B-03 | Socket API | API Server ruye yek port listen konad, request-e client ra begirad va response-e monaseb bargardand. | Lazem | [x] |
-| B-04 | Socket API | Server stateless bashad; state-e client ha ra beyn request ha negah nadarad. | Lazem | [x] |
-| B-05 | Socket API | Server multi-threaded bashad va hamzaman be chand client response dahad. | Lazem | [x] |
-| B-06 | Socket API | Ertebat faghat ba Socket/TCP-e piade sazi shode tavasot-e khodetan bashad; library haye amade-ye REST mojaz nistand. | Lazem | [x] |
-| B-07 | Socket API | Protocol-e ekhtesasi request/response design shavad; JSON mojaz ast va GSON baraye JSON mojaz ast. | Lazem | [x] |
-| B-08 | Socket API | Server no-e request ra tashkhis dahad va be module-e marboot (database/file server) route konad. | Lazem | [x] |
-| B-09 | Socket API | Structure-e daghigh-e JSON request/response, field ha, format va example-e har operation to README/documentation mostanad shavad. | Lazem | [x] |
-| B-10 | Database | Yek module-e joda baraye negahdari state-e tamam object ha va CRUD vojood dashte bashad. | Lazem | [x] |
-| B-11 | Database | State belafasele ba har taghir to yek file JSON save shavad va dar startup-e backend restore shavad. | Lazem | [x] |
-| B-12 | Database | SQL va database haye amade mesle MySQL, MongoDB ya PostgreSQL mamnoo ast. | Lazem | [x] |
-| B-13 | Database | Access be database faghat az tarigh-e API Server bashad. | ⭐ Emtiazi | [x] |
-| B-14 | File server | Module-e file server baraye create/search/browse va modiriat file ha vojood dashte bashad. | Lazem | [x] |
-| B-15 | File server | File ha to masir-e moshakhas ruye filesystem save va modiriat shavand. | Lazem | [x] |
-
-> Note: to chand jay-e PDF be "music/audio files" eshare shode, vali title va requirement haye UI project "modiriat tasavir va album ha" hastand. Dar in checklist, file server baraye ax ha dar nazar gerefte shode.
-
-## Socket API documentation
-
-Server ruye TCP port `8800` listen mikonad. Har request yek line JSON UTF-8 ast va server ham yek line JSON response midahad. Client mitavanad baraye chand request az haman socket estefade konad. `id`, `userId`, `ownerId`, `photoId` va `albumId` hame UUID string hastand.
-
-### Envelope
-
-Request:
-
-```json
-{"method":"POST","route":"/auth/login","username":"optional","payload":{"identifier":"user@mail.com","password":"Password1"}}
+```text
+Flutter mobile app
+        │  JSON request/response over TCP (port 8800)
+        ▼
+Java socket server ──► Router / services / session management
+        │
+        ├── database/jinterest.json   persisted application state
+        └── database/images/          uploaded image files
 ```
 
-`username` dar protocol optional ast va router-e alan az an estefade nemikonad. `payload` agar vojood nadasht bashad object-e khali dar nazar gerefte mishavad.
+The backend is intentionally stateless between requests. Authentication is
+provided by a session token sent with each authenticated request; durable
+application data is restored from `database/jinterest.json` at startup.
 
-Response:
+## Tech stack
 
-```json
-{"statusCode":200,"message":"Login successful","payload":{"user":{"id":"<user-id>","username":"user@mail.com"}}}
-```
-
-Status haye mumkin: `200` successful, `201` created, `400` request/field ghalat, `401` login ghalat, `403` user ban shode, `404` object/route peyda nashod, `405` method mojaz nist, `409` conflict, `500` server error, `501` piade sazi nashode.
-
-### Object haye response
-
-| Object | Field ha |
+| Area | Technology |
 | --- | --- |
-| `user` | `id`, `username`, `email`, `phone`, `fullname`, `accountAge`, `userType`, `followerIds`, `followingIds` |
-| `photo` | `id`, `ownerId`, `ownerUsername`, `name`, `path`, `isPublic`, `commentsAllowed`, `photoAge`, `categories`, `caption`, `likedByUserIds`, `likeCount`, `commentCount` |
-| `album` | `id`, `name`, `description`, `isPublic`, `ownerId`, `ownerUsername`, `photos`, `photoCount`, `totalLikes`, `albumAge` |
-| `comment` | `id`, `photoId`, `userId`, `username`, `text`, `time` |
-| `caption` | `id`, `text`, `time` |
+| Mobile | Flutter / Dart, Provider |
+| Backend | Java 21, Maven, GSON |
+| Transport | Custom TCP socket protocol with JSON payloads |
+| Persistence | Local JSON file and filesystem image storage |
+| Android | Android Gradle Plugin, JDK 17 for Android builds |
 
-Field haye optional dar object ha faghat vaghti value dashte bashand bar migardand. `categories` array-i az enum haye `NATURE`, `PORTRAIT`, `LANDSCAPE`, `STREET`, `TRAVEL`, `FOOD`, `FASHION`, `SPORTS`, `WILDLIFE`, `ARCHITECTURE`, `CUTE`, `CAT`, `CAR`, `GAME`, `DAY`, `NIGHT`, `MEME`, `FUN`, `SAD`, `HAPPY`, `BOOK`, `COMPUTER`, `LINUX`, `PROGRAMMING`, `MATH`, `MOVIE`, `SPIDERMAN`, `COLOR`, `PAINTING`, `OTHERS` ast.
+## Repository layout
 
-### Operation ha
-
-`{id}` dar route yani UUID hamon object. Field haye `*` shode required hastand; baghi optional hastand.
-
-| Method | Route | Payload | Response payload / tozih |
-| --- | --- | --- | --- |
-| GET | `/ping` | `{}` | `{"pong":true}` |
-| POST | `/auth/signup` | `password*`, va daghighan yeki az `email*` ya `phone*`; `fullname` | `user` ba status `201` |
-| POST | `/auth/login` | `identifier*`, `password*` | `user` |
-| GET | `/users/{id}` | `{}` | `user` |
-| PUT | `/users/{id}` | hadaghal yeki az `username`, `password`, `fullname` | `user`; taghir `email`/`phone` fe'lan `501` ast |
-| POST | `/users/{id}/follow` | `followerId*` | `followerId`, `followedId` ba status `201` |
-| DELETE | `/users/{id}/follow` | `followerId*` | `followerId`, `followedId` |
-| GET | `/photos` | `{}` | `photos` array |
-| GET | `/photos/{id}` | `{}` | `photo` |
-| GET | `/photos/{id}/image` | `{}` | `fileName`, `imageBase64` |
-| POST | `/photos` | `ownerId*`, va ya `imageBase64*` + `fileName*` ya `path*`; `name`, `categories`, `caption`, `isPublic`, `commentsAllowed` | `photo` ba status `201`; comment ha default roshan hastand |
-| PUT | `/photos/{id}` | hadaghal yeki az `path`, `categories`, `caption`, `commentsAllowed` | `photo` |
-| DELETE | `/photos/{id}` | `{}` | response-e successful bedoon payload |
-| POST | `/photos/{id}/likes` | `userId*` | `photoId`, `likeCount` ba status `201` |
-| DELETE | `/photos/{id}/likes` | `userId*` | `photoId`, `likeCount` |
-| GET | `/photos/{id}/comments` | `{}` | `comments` array |
-| POST | `/photos/{id}/comments` | `userId*`, `text*` | `comment` ba status `201`; agar `commentsAllowed=false` bashad faghat owner mitavanad comment bezanad |
-| DELETE | `/comments/{id}` | `{}` | response-e successful bedoon payload |
-| GET | `/albums` | `{}` | `albums` array |
-| GET | `/albums/{id}` | `{}` | `album` |
-| POST | `/albums` | `ownerId*`, `photoIds*` (array); `name`, `description`, `isPublic` | `album` ba status `201` |
-| PUT | `/albums/{id}` | `photoIds*` (array); `name`, `description`, `isPublic` | `album` |
-| DELETE | `/albums/{id}` | `{}` | response-e successful bedoon payload |
-| GET / POST | `/search` | `type*`, `text*` | `photos` array; `type`: `global`, `name`, `caption`, `category`, `time`, `comments` |
-
-### Example haye amal-kardi
-
-Signup:
-
-```json
-{"method":"POST","route":"/auth/signup","payload":{"email":"sara@mail.com","password":"Sara1234","fullname":"Sara Ahmadi"}}
+```text
+.
+├── backend/
+│   ├── src/
+│   │   ├── server/        TCP server, protocol router, image storage
+│   │   ├── services/      business logic and session management
+│   │   ├── models/        domain models and password hashing
+│   │   └── database/      JSON snapshot persistence
+│   ├── test/              backend tests
+│   └── pom.xml
+├── frontend/
+│   ├── lib/
+│   │   ├── screens/       application screens
+│   │   ├── services/      TCP API client and feature services
+│   │   ├── providers/     UI and application state
+│   │   └── models/        client-side models
+│   └── pubspec.yaml
+└── database/
+    ├── jinterest.json     local application data
+    └── images/            locally stored uploads
 ```
 
-Upload-e ax:
+## Prerequisites
 
-```json
-{"method":"POST","route":"/photos","payload":{"ownerId":"<user-id>","fileName":"sunset.jpg","imageBase64":"<base64-data>","name":"Sunset","categories":["NATURE"],"caption":"Shab-e tabestoon","isPublic":true}}
+Install the following before running the project:
+
+| Requirement | Version / note |
+| --- | --- |
+| JDK | JDK 21 or newer to build the Java backend (`--release 21`) |
+| Maven | 3.9+ |
+| Flutter | Stable channel with Dart `>= 3.12.2` |
+| Android SDK | Platform tools plus Build Tools `35.0.0` and `36.1.0` |
+| Android build JDK | JDK 17 (configured for Flutter/Gradle) |
+
+On Manjaro/Arch, install Maven with:
+
+```bash
+sudo pacman -S maven
 ```
 
-Sakht-e album va search:
+Configure Flutter to use the Android-compatible JDK once:
 
-```json
-{"method":"POST","route":"/albums","payload":{"ownerId":"<user-id>","photoIds":["<photo-id>"],"name":"Travel","isPublic":true}}
-{"method":"POST","route":"/search","payload":{"type":"caption","text":"tabestoon"}}
+```bash
+flutter config --jdk-dir /usr/lib/jvm/java-17-openjdk
 ```
 
-## Delivery va evaluation requirements
+> The backend compiler target and the JDK used by Android Gradle are separate
+> concerns. Keeping Gradle on JDK 17 avoids Android toolchain incompatibilities.
 
-| ID | Requirement | Noe | Status |
-| --- | --- | --- |--------|
-| D-01 | Project ba group-e 2 nafari anjam shavad. | Lazem | [x]    |
-| D-02 | Repository ruye GitHub negahdari shavad va ta akhar Private bemanad. | Lazem | [x]    |
-| D-03 | Git/GitHub dorost estefade shavad va har do ozv commit haye ghabel-e barresi dashte bashand. | Lazem | [x]    |
-| D-04 | Server ba bastan nabayad hich data-i ra az dast bedahad. | Lazem | [x]    |
-| D-05 | README dar nahayat tozihat, report ha va screenshot haye project ra dashte bashad. | Lazem | [x]    |
-| D-06 | Har do ozv bayad be tamam bakhsh haye project mosallat bashand. | Lazem | [x]    |
-| D-07 | Output-e app bayad ruye device-e fiziki ya emulator run shavad. | Lazem | [x]    |
-| D-08 | Quality, zibaie UI va creativity-e bishtar dar feature ha emtiaz-e ezafi darand. | ⭐ Emtiazi | [XXXX] |
+## Quick start
 
-TODO:\
-album header for homescreen?\
-album tumbnail\
-likable comments\
-fix dark mode\
-use theme of context\
-notifications\
-some refactoring stuff\
-suggest\
-even more tests\
-times (server logs?)
+### 1. Start the backend
 
-TODON'T:\
-AI based photo finding
+From the repository root:
+
+```bash
+mvn -f backend/pom.xml compile exec:java
+```
+
+Expected output:
+
+```text
+Jinterest server listening on port 8800
+```
+
+The command must be run from the repository root so the backend can load
+`database/jinterest.json` and access the image directory correctly.
+
+### 2. Verify the server (optional)
+
+In another terminal:
+
+```bash
+printf '{"method":"GET","route":"/ping","payload":{}}\n' | nc 127.0.0.1 8800
+```
+
+The response includes `"statusCode":200` and `"pong":true`.
+
+### 3. Run the Flutter app
+
+```bash
+cd frontend
+flutter pub get
+flutter run
+```
+
+### Running on a physical Android device
+
+The default server host is `localhost`. On a physical phone, that address
+means the phone itself—not the development computer. Connect both devices to
+the same network and pass the computer's LAN IP:
+
+```bash
+flutter run --dart-define=JINTEREST_HOST=192.168.1.10
+```
+
+Find the address with:
+
+```bash
+ip -4 addr show
+```
+
+Use the `inet` address associated with your Wi-Fi adapter (for example,
+`192.168.1.10`), without the `/24` suffix. Allow TCP port `8800` through the
+computer firewall if one is enabled.
+
+The optional port override is also available:
+
+```bash
+flutter run \
+  --dart-define=JINTEREST_HOST=192.168.1.10 \
+  --dart-define=JINTEREST_PORT=8800
+```
+
+## TCP API
+
+Each request is one UTF-8 JSON line; the server returns exactly one JSON line.
+The connection can carry multiple requests. Object identifiers are UUID
+strings.
+
+```json
+{
+  "method": "POST",
+  "route": "/auth/login",
+  "sessionToken": "optional-session-uuid",
+  "payload": {
+    "identifier": "sara@example.com",
+    "password": "Password1"
+  }
+}
+```
+
+Responses use a consistent envelope:
+
+```json
+{
+  "statusCode": 200,
+  "message": "Login successful",
+  "payload": {}
+}
+```
+
+| Status | Meaning |
+| --- | --- |
+| `200` | Successful request |
+| `201` | Resource created |
+| `400` | Invalid request or validation failure |
+| `401` | Invalid credentials |
+| `403` | Forbidden or banned user |
+| `404` | Resource or route not found |
+| `405` | Unsupported method |
+| `409` | Conflicting resource |
+| `500` | Server error |
+| `501` | Feature not implemented |
+
+### Public and authenticated endpoints
+
+`{id}` represents the relevant UUID. Mutating and user-specific endpoints use
+`sessionToken` in the request envelope.
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/ping` | Connection health check |
+| `POST` | `/auth/signup` | Create an account with email **or** phone, password, and optional fullname |
+| `POST` | `/auth/login` | Authenticate and receive `sessionToken` |
+| `GET` / `PUT` / `DELETE` | `/users/{id}` | View, update, or delete a user |
+| `GET` | `/users/{id}/image` | Fetch a profile image as Base64 |
+| `POST` / `DELETE` | `/users/{id}/follow` | Follow or unfollow a user |
+| `GET` / `POST` | `/photos` | List photos or create an upload |
+| `GET` / `PUT` / `DELETE` | `/photos/{id}` | View, update, or remove a photo |
+| `GET` | `/photos/{id}/image` | Fetch a photo as Base64 |
+| `POST` / `DELETE` | `/photos/{id}/likes` | Like or unlike a photo |
+| `GET` / `POST` | `/photos/{id}/comments` | List or create comments |
+| `DELETE` | `/comments/{id}` | Delete a comment |
+| `GET` / `POST` | `/albums` | List or create albums |
+| `GET` / `PUT` / `DELETE` | `/albums/{id}` | View, update, or remove an album |
+| `GET` / `POST` | `/search` | Search photos by `global`, `name`, `caption`, `category`, `time`, or `comments` |
+| `GET` / `POST` | `/search/user` | Search users |
+
+### Example requests
+
+Create an account:
+
+```json
+{"method":"POST","route":"/auth/signup","payload":{"email":"sara@example.com","password":"Sara1234","fullname":"Sara Ahmadi"}}
+```
+
+Upload an image:
+
+```json
+{"method":"POST","route":"/photos","sessionToken":"<session-token>","payload":{"fileName":"sunset.jpg","imageBase64":"<base64-data>","name":"Sunset","categories":["NATURE"],"caption":"Summer evening","isPublic":true}}
+```
+
+Search captions:
+
+```json
+{"method":"POST","route":"/search","payload":{"type":"caption","text":"summer"}}
+```
+
+### Admin endpoints
+
+Admin routes require a valid session token belonging to an `ADMIN` user.
+
+| Route | Purpose |
+| --- | --- |
+| `/admin/users` | List users |
+| `/admin/photos` | List photos |
+| `/admin/albums` | List albums |
+| `/admin/comments` | List comments |
+| `/admin/audit` | View audit log |
+| `/admin/users/{id}/ban` | Ban a user |
+| `/admin/users/{id}/unban` | Unban a user |
+| `/admin/users/{id}` | Delete a user |
+| `/admin/photos/{id}` | Delete a photo |
+| `/admin/comments/{id}` | Delete a comment |
+
+## Data and security
+
+- Passwords are stored as salted PBKDF2-HMAC-SHA256 hashes; plaintext passwords
+  are not persisted.
+- `database/jinterest.json` is written after data-changing operations and
+  restored when the server starts.
+- Uploaded files are saved beneath `database/images/`.
+- Treat the `database/` directory as application data. Back it up before
+  deleting, editing, or migrating it.
+- Do not commit local SDK paths, IDE settings, build output, or production data
+  containing real user content.
+
+## Development commands
+
+```bash
+# Run backend tests
+mvn -f backend/pom.xml test
+
+# Check Flutter diagnostics
+cd frontend && flutter doctor
+
+# Run Flutter tests
+cd frontend && flutter test
+
+# Build a release APK
+cd frontend && flutter build apk --release
+```
+
+## Troubleshooting
+
+| Symptom | Resolution |
+| --- | --- |
+| Phone cannot connect to server | Start the server first, use `JINTEREST_HOST=<computer LAN IP>`, and confirm both devices use the same network. |
+| `Failed to find Build Tools revision 35.0.0` | Install that exact Build Tools version through Android Studio's SDK Manager. |
+| Gradle reports an invalid `JAVA_HOME` | Configure Flutter with the installed JDK 17 path and remove any stale `JAVA_HOME` value. |
+| Maven command is unavailable | Install Maven, then re-open the terminal. |
+| Server starts without existing users/photos | Run Maven from the repository root so relative `database/` paths resolve correctly. |
+
+## License
+
+This repository is a private academic project. All rights reserved unless a
+separate license is added.
