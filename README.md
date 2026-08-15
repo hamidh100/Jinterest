@@ -52,22 +52,31 @@ The server restores its JSON snapshot at startup and saves after data-changing o
 .
 ├── backend/
 │   ├── src/
-│   │   ├── database/       persistence and JSON snapshot handling
-│   │   ├── models/         domain models and password hashing
-│   │   ├── server/         TCP server, request handling, and router
-│   │   └── services/       application and session logic
-│   ├── test/               backend tests
-│   └── pom.xml
+│   │   ├── TestClient.java       raw-socket ping smoke test
+│   │   ├── database/             persistence and JSON snapshot handling
+│   │   ├── exceptions/           backend domain exceptions and validation enums
+│   │   ├── models/               domain models and password hashing
+│   │   ├── server/               TCP server, request handling, and router
+│   │   └── services/             application and session logic
+│   ├── test/                     backend tests
+│   ├── lib/                      local Java dependency jars, when used
+│   └── pom.xml                   Maven build and Gson/JUnit dependencies
 ├── frontend/
 │   ├── lib/
-│   │   ├── models/         client-side data models
-│   │   ├── providers/      app and UI state
-│   │   ├── screens/        feature screens
-│   │   ├── services/       TCP client and feature services
-│   │   ├── theme/          colour palettes and theme definitions
-│   │   └── widgets/        reusable UI components
-│   └── pubspec.yaml
-└── database/               runtime data; not source code
+│   │   ├── exceptions/           client-side exception helpers
+│   │   ├── models/               client-side data models
+│   │   ├── providers/            app and UI state
+│   │   ├── screens/              feature screens
+│   │   ├── services/             TCP client and feature services
+│   │   ├── theme/                colour palettes and theme definitions
+│   │   ├── utils/                shared utility functions
+│   │   └── widgets/              reusable UI components
+│   ├── assets/icon/logo.png      application icon asset
+│   ├── test/                     Flutter tests
+│   └── pubspec.yaml              Flutter packages and asset declarations
+└── database/                     runtime data; not source code
+    ├── jinterest.json            persisted application state
+    └── images/                   uploaded and profile images
 ```
 
 ## Prerequisites
@@ -76,6 +85,7 @@ The server restores its JSON snapshot at startup and saves after data-changing o
 | --- | --- |
 | JDK 21+ | Compiles and runs the backend (`--release 21`) |
 | Maven 3.9+ | Resolves backend dependencies and starts the server |
+| Gson 2.11.0 | JSON serialization; declared in `backend/pom.xml` and downloaded by Maven |
 | Flutter stable | Builds and runs the mobile application |
 | Android SDK + connected device/emulator | Runs the Flutter client on Android |
 
@@ -238,6 +248,47 @@ Admin routes require a valid session token belonging to an `ADMIN` user.
 | `/admin/users/{id}` | Delete a user |
 | `/admin/photos/{id}` | Delete a photo |
 | `/admin/comments/{id}` | Delete a comment |
+
+## Error handling
+
+The backend uses domain-specific Java exceptions instead of returning generic
+failures from service code. The router converts these failures to the response
+envelope and an appropriate status code, while the Flutter client can show the
+returned message to the user.
+
+| Category | Exception types | Typical outcome |
+| --- | --- | --- |
+| Signup and validation | `InvalidSignupMethod`, `InvalidUsername`, `WeakPassword`, `UserAlreadyExists` | `400` or `409` with a clear validation message |
+| Authentication | `InvalidLoginMethod`, `IncorrectPassword`, `UserDoesNotExist` | `400` or `401` |
+| Permissions | `UserBanned`, `AdminAccessRequired` | `403` |
+| Missing resources | `PhotoDoesNotExist`, `AlbumDoesNotExist` | `404` |
+
+`WeakPassword` and `InvalidUsername` also retain the specific validation reason
+(for example, length, allowed pattern, or password composition) so the UI can
+give useful feedback instead of a vague error.
+
+## Test client
+
+`backend/src/TestClient.java` is a small, standalone TCP smoke-test client. It
+starts a temporary Jinterest server on port `5599`, connects to it with a raw
+socket, sends a `GET /ping` JSON request, and prints the request and response.
+It is useful for verifying the custom protocol without running Flutter.
+
+Run it from the repository root:
+
+```bash
+mvn -f backend/pom.xml compile exec:java -Dexec.mainClass=TestClient
+```
+
+Expected output is similar to:
+
+```text
+-> {"method":"GET","route":"ping","payload":{}}
+<- {"statusCode":200,"message":"pong","payload":{"pong":true}}
+```
+
+The test client intentionally uses `5599`, so it does not conflict with the
+normal application server on `8800`. Stop it with `Ctrl+C` after the response.
 
 ## Data and privacy
 
