@@ -23,24 +23,24 @@ Jinterest is an academic social-media project for uploading, organising, discove
 ## Screenshots
 
 <p align="center">
-  <img src="assets/screenshots/login.jpg" alt="Login screen" width="30%" />
-  <img src="assets/screenshots/home-mine.jpg" alt="Home feed" width="30%" />
-  <img src="assets/screenshots/home-following.jpg" alt="Home following" width="30%" />
-  <img src="assets/screenshots/explore.jpg" alt="Explore screen" width="30%" />
+  <img src="assets/screenshots/login.jpg" alt="Login screen" width="20%" />
+  <img src="assets/screenshots/home-mine.jpg" alt="Home feed" width="20%" />
+  <img src="assets/screenshots/home-following.jpg" alt="Home following" width="20%" />
+  <img src="assets/screenshots/explore.jpg" alt="Explore screen" width="20%" />
 </p>
 <p align="center">
-  <img src="assets/screenshots/likes.jpg" alt="Liked photos screen" width="30%" />
-  <img src="assets/screenshots/upload.jpg" alt="Upload photo screen" width="30%" />
-  <img src="assets/screenshots/profile.jpg" alt="Profile screen" width="30%" />
-  <img src="assets/screenshots/photo-details.jpg" alt="Photo details screen" width="30%" />
+  <img src="assets/screenshots/likes.jpg" alt="Liked photos screen" width="20%" />
+  <img src="assets/screenshots/upload.jpg" alt="Upload photo screen" width="20%" />
+  <img src="assets/screenshots/profile.jpg" alt="Profile screen" width="20%" />
+  <img src="assets/screenshots/photo-details.jpg" alt="Photo details screen" width="20%" />
 </p>
 
 ### Dark mode
 
 <p align="center">
-  <img src="assets/screenshots/dark_explore.jpg" alt="Explore screen in dark mode" width="30%" />
-  <img src="assets/screenshots/dark_profile.jpg" alt="Profile screen in dark mode" width="30%" />
-  <img src="assets/screenshots/dark_photo-details.jpg" alt="Photo details screen in dark mode" width="30%" />
+  <img src="assets/screenshots/dark_explore.jpg" alt="Explore screen in dark mode" width="20%" />
+  <img src="assets/screenshots/dark_profile.jpg" alt="Profile screen in dark mode" width="20%" />
+  <img src="assets/screenshots/dark_photo-details.jpg" alt="Photo details screen in dark mode" width="20%" />
 </p>
 
 ## Demo
