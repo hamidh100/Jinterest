@@ -117,7 +117,7 @@ The server restores its JSON snapshot at startup and saves after data-changing o
 Run this from the repository root:
 
 ```bash
-cd backend   &&  javac -cp "lib/gson-2.11.0.jar" -d out $(find src -name "*.java") && java -cp "out:lib/gson-2.11.0.jar" server.Server
+cd backend  &&  javac -cp "lib/gson-2.11.0.jar" -d out $(find src -name "*.java") && java -cp "out:lib/gson-2.11.0.jar" server.Server
 ```
 
 The server listens on TCP port `8800`. Keep this terminal open while using the mobile app.
@@ -128,7 +128,7 @@ You can confirm it is reachable with:
 printf '{"method":"GET","route":"/ping","payload":{}}\n' | socat - TCP:127.0.0.1:8800
 ```
 ```bash
-printf '{"method":"GET","route":"/ping","payload":{}}\n' | nc 127.0.0.1 8800
+echo '{"method":"GET","route":"/ping"}' | nc localhost 8800
 ```
 
 ### 2. Fetch Flutter packages
