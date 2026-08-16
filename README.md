@@ -52,7 +52,7 @@ The server restores its JSON snapshot at startup and saves after data-changing o
 ### Dark mode
 
 <p align="center">
-  <img src="assets/screenshots/photo_19_2026-08-16_04-51-32.jpg" alt="Explore screen in dark mode" width="30%" />
+  <img src="assets/screenshots/pasted%20file.jpg" alt="Explore screen in dark mode" width="30%" />
   <img src="assets/screenshots/photo_20_2026-08-16_04-51-32.jpg" alt="Profile screen in dark mode" width="30%" />
   <img src="assets/screenshots/photo_1_2026-08-16_04-51-32.jpg" alt="Photo details screen in dark mode" width="30%" />
 </p>
