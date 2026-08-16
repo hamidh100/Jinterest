@@ -105,7 +105,7 @@ The server listens on TCP port `8800`. Keep this terminal open while using the m
 You can confirm it is reachable with:
 
 ```bash
-printf '{"method":"GET","route":"/ping","payload":{}}\n' | nc 127.0.0.1 8800
+printf '{"method":"GET","route":"/ping","payload":{}}\n' | socat - TCP:127.0.0.1:8800
 ```
 
 ### 2. Fetch Flutter packages
