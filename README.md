@@ -60,6 +60,9 @@ The server restores its JSON snapshot at startup and saves after data-changing o
 │   │   └── services/             application and session logic
 │   ├── test/                     backend tests
 │   ├── lib/                      local Java dependency jars, when used
+│   ├── database/                 runtime data (ignored by Git)
+│   │   ├── jinterest.json        persisted application state
+│   │   └── images/               uploaded and profile images
 │   └── pom.xml                   Maven build and Gson/JUnit dependencies
 ├── frontend/
 │   ├── lib/
@@ -73,9 +76,6 @@ The server restores its JSON snapshot at startup and saves after data-changing o
 │   │   └── widgets/              reusable UI components
 │   ├── assets/icon/logo.png      application icon asset
 │   └── pubspec.yaml              Flutter packages and asset declarations
-└── database/                     runtime data; not source code
-    ├── jinterest.json            persisted application state
-    └── images/                   uploaded and profile images
 ```
 
 ## Prerequisites
@@ -292,9 +292,9 @@ normal application server on `8800`. Stop it with `Ctrl+C` after the response.
 ## Data and privacy
 
 - Passwords are stored as salted PBKDF2-HMAC-SHA256 hashes, never plaintext.
-- `database/jinterest.json` is saved after data-changing operations and restored when the server starts.
-- `database/images/` contains uploaded and profile image files.
-- Treat `database/` as runtime data: do not commit real user data, and back it up before deleting or editing it.
+- `backend/database/jinterest.json` is saved after data-changing operations and restored when the server starts.
+- `backend/database/images/` contains uploaded and profile image files.
+- Treat `backend/database/` as runtime data: do not commit real user data, and back it up before deleting or editing it.
 - Do not commit local SDK paths, IDE settings, or build output.
 
 ## Development
@@ -324,7 +324,7 @@ cd frontend && flutter build apk --release
 | Phone shows a server connection error | Start the Java server first and use the computer's LAN IP through `JINTEREST_HOST`. |
 | Emulator cannot reach the server | Use `10.0.2.2` for the standard Android emulator. |
 | `flutter pub get` cannot download packages | Check internet/proxy access to `https://pub.dev` and retry. |
-| Backend data appears empty | Start Maven from the repository root so the relative `database/` location resolves correctly. |
+| Backend data appears empty | Start Maven from the repository root so `backend/database/` resolves correctly. |
 
 ## License
 
