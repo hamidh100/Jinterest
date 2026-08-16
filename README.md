@@ -1,5 +1,6 @@
 # Jinterest
 > A ~~Jingooli~~ Java-Based Pinterest.
+>
 > A full-stack, mobile-first photo-sharing platform built with Flutter and a custom Java TCP server.
 
 Jinterest is an academic social-media project for uploading, organising, discovering, and sharing photos. It pairs a polished Flutter Android client with a Java 21 backend that speaks a lightweight, line-delimited JSON protocol over TCP. No web framework or external database is required: application data is persisted locally as JSON and uploaded images are stored on disk.
@@ -18,23 +19,6 @@ Jinterest is an academic social-media project for uploading, organising, discove
 - Search for photos and people using text and metadata
 - Light and dark themes with a responsive mobile UI
 - Administrative views for users, photos, albums, comments, and audit activity
-
-## Architecture
-
-```text
-┌───────────────────────────┐       UTF-8 JSON, one message per line       ┌─────────────────────────────┐
-│       Flutter client      │ ───────────────────────────────────────────▶ │       Java TCP server       │
-│  screens · providers      │ ◀─────────────────────────────────────────── │ router · services · sessions│
-│  services · local storage │                    port 8800                 │                             │
-└───────────────────────────┘                                              └──────────────┬──────────────┘
-                                                                                          │
-                                                                           ┌──────────────┴──────────────┐
-                                                                           │    database/jinterest.json  │
-                                                                           │    database/images/         │
-                                                                           └─────────────────────────────┘
-```
-
-The server restores its JSON snapshot at startup and saves after data-changing operations. Authenticated requests carry a session UUID in the request envelope; the backend resolves that token before handling protected operations.
 
 ## Screenshots
 
@@ -56,6 +40,29 @@ The server restores its JSON snapshot at startup and saves after data-changing o
   <img src="assets/screenshots/photo_20_2026-08-16_04-51-32.jpg" alt="Profile screen in dark mode" width="30%" />
   <img src="assets/screenshots/photo_1_2026-08-16_04-51-32.jpg" alt="Photo details screen in dark mode" width="30%" />
 </p>
+
+## Demo
+
+A short screen recording demonstrating the main features and user flows of Jinterest:
+
+[▶️ Watch the Jinterest demo](assets/Jinterest.mp4)
+
+## Architecture
+
+```text
+┌───────────────────────────┐       UTF-8 JSON, one message per line       ┌─────────────────────────────┐
+│       Flutter client      │ ───────────────────────────────────────────▶ │       Java TCP server       │
+│  screens · providers      │ ◀─────────────────────────────────────────── │ router · services · sessions│
+│  services · local storage │                    port 8800                 │                             │
+└───────────────────────────┘                                              └──────────────┬──────────────┘
+                                                                                          │
+                                                                           ┌──────────────┴──────────────┐
+                                                                           │    database/jinterest.json  │
+                                                                           │    database/images/         │
+                                                                           └─────────────────────────────┘
+```
+
+The server restores its JSON snapshot at startup and saves after data-changing operations. Authenticated requests carry a session UUID in the request envelope; the backend resolves that token before handling protected operations.
 
 ## Tech stack
 
