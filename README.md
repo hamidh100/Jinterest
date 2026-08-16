@@ -159,11 +159,27 @@ flutter pub get
 
 ### 3. Run the mobile app
 
+The Flutter client reads the backend connection settings from Dart environment variables:
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `JINTEREST_HOST` | `localhost` | Hostname or IP address of the Java backend |
+| `JINTEREST_PORT` | `8800` | TCP port used by the backend |
+
+If no values are provided, the app uses:
+
+```dart
+JINTEREST_HOST = localhost
+JINTEREST_PORT = 8800
+```
+
 For an Android emulator:
 
 ```bash
 flutter run --dart-define=JINTEREST_HOST=10.0.2.2 --dart-define=JINTEREST_PORT=8800
 ```
+
+`10.0.2.2` is the Android emulator's special address for reaching the host computer's `localhost`.
 
 For a physical phone, connect the phone and computer to the same Wi-Fi network, then replace the example IP with the computer's LAN address:
 
@@ -334,10 +350,9 @@ normal application server on `8800`. Stop it with `Ctrl+C` after the response.
 ## Data and privacy
 
 - Passwords are stored as salted PBKDF2-HMAC-SHA256 hashes, never plaintext.
+- Treat `backend/database/` as runtime data
 - `backend/database/jinterest.json` is saved after data-changing operations and restored when the server starts.
 - `backend/database/images/` contains uploaded and profile image files.
-- Treat `backend/database/` as runtime data: do not commit real user data, and back it up before deleting or editing it.
-- Do not commit local SDK paths, IDE settings, or build output.
 
 ## Development
 
