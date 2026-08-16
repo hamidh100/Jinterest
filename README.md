@@ -1,5 +1,5 @@
 # Jinterest
-
+> A ~~Jingooli~~ Java-Based Pinterest.
 > A full-stack, mobile-first photo-sharing platform built with Flutter and a custom Java TCP server.
 
 Jinterest is an academic social-media project for uploading, organising, discovering, and sharing photos. It pairs a polished Flutter Android client with a Java 21 backend that speaks a lightweight, line-delimited JSON protocol over TCP. No web framework or external database is required: application data is persisted locally as JSON and uploaded images are stored on disk.
