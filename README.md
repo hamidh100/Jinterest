@@ -39,21 +39,21 @@ The server restores its JSON snapshot at startup and saves after data-changing o
 ## Screenshots
 
 <p align="center">
-  <img src="aks/photo_16_2026-08-16_04-51-32.jpg" alt="Login screen" width="30%" />
-  <img src="aks/photo_14_2026-08-16_04-51-32.jpg" alt="Home feed" width="30%" />
-  <img src="aks/photo_10_2026-08-16_04-51-32.jpg" alt="Explore screen" width="30%" />
+  <img src="assets/screenshots/photo_16_2026-08-16_04-51-32.jpg" alt="Login screen" width="30%" />
+  <img src="assets/screenshots/photo_14_2026-08-16_04-51-32.jpg" alt="Home feed" width="30%" />
+  <img src="assets/screenshots/photo_10_2026-08-16_04-51-32.jpg" alt="Explore screen" width="30%" />
 </p>
 <p align="center">
-  <img src="aks/photo_18_2026-08-16_04-51-32.jpg" alt="Upload photo screen" width="30%" />
-  <img src="aks/photo_4_2026-08-16_04-51-32.jpg" alt="Profile screen" width="30%" />
-  <img src="aks/photo_8_2026-08-16_04-51-32.jpg" alt="Photo details screen" width="30%" />
+  <img src="assets/screenshots/photo_18_2026-08-16_04-51-32.jpg" alt="Upload photo screen" width="30%" />
+  <img src="assets/screenshots/photo_4_2026-08-16_04-51-32.jpg" alt="Profile screen" width="30%" />
+  <img src="assets/screenshots/photo_8_2026-08-16_04-51-32.jpg" alt="Photo details screen" width="30%" />
 </p>
 
 
 <p align="center">
-  <img src="aks/photo_19_2026-08-16_04-51-32.jpg" alt="Explore screen in dark mode" width="30%" />
-  <img src="aks/photo_20_2026-08-16_04-51-32.jpg" alt="Profile screen in dark mode" width="30%" />
-  <img src="aks/photo_1_2026-08-16_04-51-32.jpg" alt="Photo details screen in dark mode" width="30%" />
+  <img src="assets/screenshots/photo_19_2026-08-16_04-51-32.jpg" alt="Explore screen in dark mode" width="30%" />
+  <img src="assets/screenshots/photo_20_2026-08-16_04-51-32.jpg" alt="Profile screen in dark mode" width="30%" />
+  <img src="assets/screenshots/photo_1_2026-08-16_04-51-32.jpg" alt="Photo details screen in dark mode" width="30%" />
 </p>
 
 ## Tech stack
