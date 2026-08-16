@@ -71,32 +71,39 @@ The server restores its JSON snapshot at startup and saves after data-changing o
 
 ```text
 .
+├── assets/
+│   ├── screenshots/              screenshots of the application
+│   └── Jinterest.mp4             application screen recording
+│
 ├── backend/
 │   ├── src/
-│   │   ├── TestClient.java       raw-socket ping smoke test
+│   │   ├── TestClient.java       raw TCP socket ping smoke test
 │   │   ├── database/             persistence and JSON snapshot handling
-│   │   ├── exceptions/           backend domain exceptions and validation enums
+│   │   ├── exceptions/           domain exceptions and validation enums
 │   │   ├── models/               domain models and password hashing
-│   │   ├── server/               TCP server, request handling, and router
+│   │   ├── server/               TCP server, request handling, and routing
 │   │   └── services/             application and session logic
 │   ├── test/                     backend tests
-│   ├── lib/                      local Java dependency jars, when used
-│   ├── database/                 runtime data (ignored by Git)
+│   ├── lib/                      local Java dependencies, when required
+│   ├── database/                 runtime application data (Git-ignored)
 │   │   ├── jinterest.json        persisted application state
 │   │   └── images/               uploaded and profile images
-│   └── pom.xml                   Maven build and Gson/JUnit dependencies
+│   └── pom.xml                   Maven configuration and dependencies
+│
 ├── frontend/
 │   ├── lib/
-│   │   ├── exceptions/           client-side exception helpers
+│   │   ├── exceptions/           client-side exception handling
 │   │   ├── models/               client-side data models
-│   │   ├── providers/            app and UI state
-│   │   ├── screens/              feature screens
+│   │   ├── providers/            application and UI state management
+│   │   ├── screens/              application screens and features
 │   │   ├── services/             TCP client and feature services
-│   │   ├── theme/                colour palettes and theme definitions
+│   │   ├── theme/                colors, typography, and theme definitions
 │   │   ├── utils/                shared utility functions
 │   │   └── widgets/              reusable UI components
 │   ├── assets/icon/logo.png      application icon asset
-│   └── pubspec.yaml              Flutter packages and asset declarations
+│   └── pubspec.yaml              Flutter dependencies and asset declarations
+│
+└── README.md                     project documentation
 ```
 
 ## Prerequisites
@@ -118,7 +125,9 @@ The server restores its JSON snapshot at startup and saves after data-changing o
 Run this from the repository root:
 
 ```bash
-cd backend  &&  javac -cp "lib/gson-2.11.0.jar" -d out $(find src -name "*.java") && java -cp "out:lib/gson-2.11.0.jar" server.Server
+cd backend
+javac -cp "lib/gson-2.11.0.jar" -d out $(find src -name "*.java")
+java -cp "out:lib/gson-2.11.0.jar" server.Server
 ```
 
 The server listens on TCP port `8800`. Keep this terminal open while using the mobile app.
@@ -167,8 +176,8 @@ Each request and response is one UTF-8 JSON line. A socket connection can carry 
   "route": "/auth/login",
   "sessionToken": "optional-session-uuid",
   "payload": {
-    "identifier": "sara@example.com",
-    "password": "Password1"
+    "identifier": "someone@gmail.com",
+    "password": "P4ssword"
   }
 }
 ```
@@ -240,7 +249,7 @@ The backend supports the appropriate `GET`, `POST`, `PUT`, and `DELETE` operatio
 Create an account:
 
 ```json
-{"method":"POST","route":"/auth/signup","payload":{"email":"sara@example.com","password":"Sara1234","fullname":"Sara Ahmadi"}}
+{"method":"POST","route":"/auth/signup","payload":{"email":"someone@example.com","password":"P4ssword","fullname":"Some One"}}
 ```
 
 Upload an image:
