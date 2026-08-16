@@ -97,8 +97,7 @@ The server restores its JSON snapshot at startup and saves after data-changing o
 Run this from the repository root:
 
 ```bash
-/Jinterest/backend (main) $ javac -cp "lib/gson-2.11.0.jar" -d out $(find src -name "*.java") && java -cp "out:lib/gson-2.11.0.jar" server.Server
-```
+cd backend   &&  javac -cp "lib/gson-2.11.0.jar" -d out $(find src -name "*.java") && java -cp "out:lib/gson-2.11.0.jar" server.Server```
 
 The server listens on TCP port `8800`. Keep this terminal open while using the mobile app.
 
